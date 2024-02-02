@@ -1,0 +1,29 @@
+{
+	"name": "pricing-app",
+	"version": "0.0.1",
+	"description": "A pricing app for Mardens Inc.",
+	"main": "index.js",
+	"scripts": {
+		"start": "electron .",
+		"pack": "electron-builder --dir",
+		"dist": "electron-builder"
+	},
+	"keywords": [],
+	"author": "Drew Chase",
+	"license": "GNU General Public License v3.0",
+	"devDependencies": {
+		"electron": "^28.2.1"
+	},
+	"build": {
+		"appId": "com.example.yourappid",
+		"win": {
+			"icon": "build/icons/icon.ico"
+		},
+		"mac": {
+			"icon": "build/icons/icon.icns"
+		},
+		"linux": {
+			"icon": "build/icons/png"
+		}
+	}
+}
