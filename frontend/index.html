@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Pricing App</title>
+
+    <link rel="stylesheet" href="assets/css/main.css">
+
 </head>
-<body>
-<nav>
+<body class="col">
+<nav class="row">
     <div id="hero" class="row">
         <img src="assets/images/icon.svg" alt="">
         <h1>Pricing<br>Database</h1>
@@ -18,6 +21,27 @@
         <button title="Search"><img src="assets/images/icons/search.svg" alt=""></button>
         <button title="Show filters"><img src="assets/images/icons/filters.svg" alt=""></button>
     </div>
+    <div id="actions-area" class="row">
+        <button id="new-button" title="Add new product" class="primary"><img src="assets/images/icons/add.svg" alt=""></button>
+        <button id="edit-button" title="Edit product"><img src="assets/images/icons/edit.svg" alt=""></button>
+        <button id="login-button" title="Login"><img src="assets/images/icons/login.svg" alt=""></button>
+    </div>
 </nav>
+
+<main>
+    <div class="pagination"></div>
+
+    <div class="list">
+        <div class="list-item">
+            <img src="" alt="">
+            <span class="title">Database Name</span>
+            <button class="edit-list-button" title="Edit product"><img src="assets/images/icons/edit.svg" alt=""></button>
+            <button class="more-button" title="More Options"><img src="assets/images/icons/more.svg" alt=""></button>
+        </div>
+    </div>
+
+    <div class="pagination"></div>
+</main>
+
 </body>
 </html>
