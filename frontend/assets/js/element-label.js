@@ -1,18 +1,25 @@
 // Create a new <div> with the class "label"
 const label = $(`<div class="label"></div>`)
 
+$(`[title]`).each((i, element) => {
+    const el = $(element)
+    el.attr('data-title', el.attr('title'))
+    el.attr('title', null)
+});
+
 // Select all elements that have a "title" attribute
-const elementsWithTitles = $(`[title]`)
+const elementsWithTitles = $(`[data-title]`)
 
 // Append the create "label" <div> to the <body> of the document
 $('body').append(label)
 
 // Add a "mouseover" event listener to all elements with a "title" attribute
 elementsWithTitles.on('mouseover', e => {
+    e.preventDefault();
     // Get the current target of the event, in this case the element with a title.
     const element = $(e.currentTarget)
     // Get the "title" attribute of the element which is moused over.
-    const title = element.attr('title')
+    const title = element.attr('data-title')
     // Set the text of the "label" to the "title" of the element
     label.text(title)
 
