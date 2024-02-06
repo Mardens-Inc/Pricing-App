@@ -133,3 +133,6 @@ dist
 .lock
 /.idea/
 /package-lock.json
+
+
+fontawesome/
