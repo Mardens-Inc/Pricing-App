@@ -132,3 +132,4 @@ dist
 # Custom Rules
 .lock
 /.idea/
+/package-lock.json
