@@ -1,8 +1,9 @@
 /* This the styling for all button elements and any element with a class of .button */
 button, .button {
     /* These are CSS variables for the default button states */
-    --default-bg-color: white; /* default background color */
-    --default-color: var(--background); /* default text color */
+    --default-bg-color: #4d4d4d; /* default background color */
+    --default-color: #ccc; /* default text color */
+    --hover-color: var(--background); /* background color upon hover */
     --hover-bg-color: #e8e8e8; /* background color upon hover */
 
     /* These are CSS variables for the disabled button state */
@@ -11,6 +12,7 @@ button, .button {
 
     /* CSS variables for the primary button */
     --primary-bg-color: var(--primary); /* Background color for primary buttons */
+    --primary-color: var(--background); /* primary text color */
     --primary-hover-color: #3de03d; /* Hover color for primary buttons */
     --primary-disabled-bg-color: #218621; /* Background color for primary buttons when disabled */
     --primary-disabled-color: #000000; /* Text color for primary buttons when disabled */
@@ -33,6 +35,11 @@ button, .button {
 
     &:hover {
         background-color: var(--hover-bg-color);
+        color: var(--background);
+
+        img {
+            filter: invert(0);
+        }
     }
 
     /* Styles for disabled buttons */
@@ -43,10 +50,20 @@ button, .button {
         cursor: not-allowed;
     }
 
+
+    img {
+        filter: invert(1);
+    }
+
     /* Styles exclusive to primary buttons */
 
     &.primary {
+        color: var(--primary-color);
         background-color: var(--primary-bg-color);
+
+        img {
+            filter: invert(0);
+        }
 
         /* Styles when hovering over a primary button */
 
@@ -62,6 +79,7 @@ button, .button {
             color: var(--primary-disabled-color);
         }
     }
+
 }
 
 /* This is the styling for all input elements and any element with a class of .input */
@@ -164,4 +182,10 @@ input, .input {
             background-color: #555;
         }
     }
+}
+
+.pagination button, .pagination .button{
+    aspect-ratio: 1;
+    height: 3rem;
+
 }
