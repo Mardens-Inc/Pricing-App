@@ -1,6 +1,8 @@
 // Create a new <div> with the class "label"
 const label = $(`<div class="label"></div>`)
 
+// Remove the "title" attribute from all elements and store the value in a "data-title" attribute
+// This is done to prevent the default browser tooltip from showing.
 $(`[title]`).each((i, element) => {
     const el = $(element)
     el.attr('data-title', el.attr('title'))
