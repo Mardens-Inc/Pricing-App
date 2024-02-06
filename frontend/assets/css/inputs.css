@@ -1,0 +1,122 @@
+/* This the styling for all button elements and any element with a class of .button */
+button, .button {
+    /* These are CSS variables for the default button states */
+    --default-bg-color: white; /* default background color */
+    --default-color: var(--background); /* default text color */
+    --hover-bg-color: #e8e8e8; /* background color upon hover */
+
+    /* These are CSS variables for the disabled button state */
+    --disabled-bg-color: #ccc; /* background color when disabled */
+    --disabled-color: #a8a8a8; /* text color when disabled */
+
+    /* CSS variables for the primary button */
+    --primary-bg-color: var(--primary); /* Background color for primary buttons */
+    --primary-hover-color: #3de03d; /* Hover color for primary buttons */
+    --primary-disabled-bg-color: #218621; /* Background color for primary buttons when disabled */
+    --primary-disabled-color: #000000; /* Text color for primary buttons when disabled */
+
+    /* Common styles to all buttons */
+    background-color: var(--default-bg-color);
+    border: none;
+    color: var(--default-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    font-size: 1rem;
+    margin: 4px 5px;
+    cursor: pointer;
+    border-radius: 100px;
+    transition: background-color .2s;
+
+    /* Styles when hovering over the button */
+    &:hover {
+        background-color: var(--hover-bg-color);
+    }
+
+    /* Styles for disabled buttons */
+    &:disabled, &.disabled {
+        background-color: var(--disabled-bg-color);
+        color: var(--disabled-color);
+        cursor: not-allowed;
+    }
+
+    /* Styles exclusive to primary buttons */
+    &.primary {
+        background-color: var(--primary-bg-color);
+
+        /* Styles when hovering over a primary button */
+        &:hover {
+            background-color: var(--primary-hover-color);
+        }
+        /* Styles for a disabled primary button */
+        &:disabled,
+        &.disabled {
+            background-color: var(--primary-disabled-bg-color);
+            color: var(--primary-disabled-color);
+        }
+    }
+}
+
+/* This is the styling for all input elements and any element with a class of .input */
+input, .input {
+    --default-bg-color: #3D3D3D; /* background color */
+    --default-color: white; /* text color */
+    background-color: var(--default-bg-color);
+    color: var(--default-color);
+    border: none;
+    outline: none;
+    border-radius: 100px;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    font-family: inherit
+}
+
+/* Styles for the floating input effect */
+.floating-input {
+    position: relative;
+    margin: 1rem 0;
+    /* Styles for the input box */
+    input {
+        width: 100%;
+        padding-block: 1rem;
+        &::placeholder {
+            opacity: 0;
+        }
+    }
+    /* Styles for the label */
+    label {
+        position: absolute;
+        transform: translateY(-20%);
+        top: 0;
+        font-size: .7rem;
+        left: 0;
+        padding: 0.5rem 1rem;
+        transition: top, left, padding, transform, font-size;
+        transition-duration: .2s;
+        color: var(--default-color);
+        background-color: var(--default-bg-color);
+        opacity: .7;
+        cursor: text;
+        font-weight: 700;
+    }
+    /* Styles for the label when the input is not empty */
+    input:placeholder-shown ~ label {
+        top: 50%;
+        transform: translateY(calc(-100% + .5rem));
+        opacity: .5;
+        font-size: 1rem;
+        font-weight: normal;
+    }
+}
+
+.label{
+    position: fixed;
+    color: var(--default-color);
+    background-color: #3D3D3D;
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    opacity: 0;
+    transition: opacity .2s;
+    pointer-events: none;
+}
