@@ -4,11 +4,11 @@
     margin: 1rem auto;
     width: 90%;
     min-width: 500px;
-    max-height: calc(100vh - 100px - 2rem);
+    max-height: calc(100vh - 100px - 4rem);
     min-height: 100px;
     overflow-y: auto;
 
-    .list-item {
+    list-item {
         border-radius: 100px;
         background-color: #131313;
         display: flex;
@@ -16,8 +16,11 @@
         height: 50px;
         padding: 10px;
         font-size: 1rem;
+        margin: 5px 0;
 
-        .title{
+        transition: background-color .1s;
+
+        .title {
             margin-inline: 1rem;
             display: flex;
             align-items: center;
@@ -31,13 +34,19 @@
             object-fit: contain;
             object-position: center;
         }
-        button{
+
+        button {
             height: 100%;
             aspect-ratio: 1;
 
-            img{
+            img {
                 height: 1rem;
             }
+        }
+
+        &:hover {
+            background-color: #1E1E1E;
+            cursor: pointer;
         }
 
 
