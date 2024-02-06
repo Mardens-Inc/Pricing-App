@@ -5,17 +5,18 @@ nav {
     & #search-area {
         background-color: #1E1E1E;
         border-radius: 100px;
-        width: fit-content;
         margin: auto;
         height: 50px;
+
+        min-width: 300px;
+        width: 50vw;
+        max-width: 900px;
 
 
         & .floating-input {
             margin-top: 0;
             margin-right: 1rem;
-            min-width: 300px;
-            width: 100vw;
-            max-width: 900px;
+            width: 100%;
 
             & input:placeholder-shown ~ label {
                 transform: translateY(calc(-100% + 1.5rem));
@@ -27,7 +28,7 @@ nav {
         }
     }
 
-    & #actions-area{
+    & #actions-area {
         background-color: #1E1E1E;
         border-radius: 100px;
         width: fit-content;
