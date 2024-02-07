@@ -3,9 +3,9 @@ import List from './element-list.js';
 const list = $(".list");
 loadList();
 
-function loadList(id = "") {
+async function loadList(id = "") {
     if (!id) {
-        loadDatabaseList();
+        await loadDatabaseList();
     } else {
 
     }
@@ -16,23 +16,32 @@ function loadList(id = "") {
 }
 
 
-function loadDatabaseList() {
+async function loadDatabaseList() {
     list.html("");
-    for(let i = 0; i < 10; i++) {
-        let item = new List("https://pricing.mardens.com/icons/fd.png", "Database " + (i + 1), true, [
-            {
-                name: "Edit",
-                action: () => {
-                    console.log("Edit");
+
+    const url = "https://pricing-new.mardens.com/api/locations/";
+    try {
+        const json = await $.ajax({url: url, method: "GET"});
+        console.log(json)
+        const items = json.items;
+        for (let i = 0; i < items.length; i++) {
+            let item = new List(`https://pricing.mardens.com/icons/${items[i].image}`, items[i].name, true, [
+                {
+                    name: "Edit",
+                    action: () => {
+                        console.log("Edit");
+                    }
+                },
+                {
+                    name: "Delete",
+                    action: () => {
+                        console.log("Delete");
+                    }
                 }
-            },
-            {
-                name: "Delete",
-                action: () => {
-                    console.log("Delete");
-                }
-            }
-        ]);
-        list.append(item);
+            ]);
+            list.append(item);
+        }
+    } catch (e) {
+        console.error("Unable to fetch data from the server\n", url, e);
     }
 }
