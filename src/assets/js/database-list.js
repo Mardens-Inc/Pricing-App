@@ -19,7 +19,7 @@ async function loadList(id = "") {
 async function loadDatabaseList() {
     list.html("");
 
-    const url = "https://pricing-new.mardens.com/api/locations/";
+    const url = "http://pricing.local/api/locations/";
     try {
         const json = await $.ajax({url: url, method: "GET"});
         console.log(json)
