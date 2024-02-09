@@ -1,5 +1,5 @@
 /* This the styling for all button elements and any element with a class of .button */
-button, .button {
+button, .button, .pagination li {
     /* These are CSS variables for the default button states */
     --default-bg-color: #4d4d4d; /* default background color */
     --default-color: #ccc; /* default text color */
@@ -57,7 +57,7 @@ button, .button {
 
     /* Styles exclusive to primary buttons */
 
-    &.primary {
+    &.primary, &.active {
         color: var(--primary-color);
         background-color: var(--primary-bg-color);
 
@@ -184,8 +184,24 @@ input, .input {
     }
 }
 
-.pagination button, .pagination .button{
-    aspect-ratio: 1;
-    height: 3rem;
-
+ul {
+    list-style: none;
 }
+
+
+.pagination {
+    text-wrap: nowrap;
+    flex-wrap: nowrap;
+
+    .paginationjs-page {
+        aspect-ratio: 1;
+        height: 1rem;
+    }
+
+    li.paginationjs-ellipsis.disabled {
+        opacity: .5;
+        color: white;
+        background-color: black;
+    }
+}
+
