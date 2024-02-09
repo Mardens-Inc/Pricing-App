@@ -1,8 +1,12 @@
+// Create a new <div> with the class "label"
+const label = $(`<div class="label"></div>`)
+if ($('.label').length == 0) {
+    // Append the create "label" <div> to the <body> of the document
+    $('body').append(label)
+}
+
 function loadLabels() {
 
-
-    // Create a new <div> with the class "label"
-    const label = $(`<div class="label"></div>`)
 
 // Remove the "title" attribute from all elements and store the value in a "data-title" attribute
 // This is done to prevent the default browser tooltip from showing.
@@ -15,10 +19,6 @@ function loadLabels() {
 // Select all elements that have a "title" attribute
     const elementsWithTitles = $(`[data-title]`)
 
-    if ($('.label').length == 0) {
-        // Append the create "label" <div> to the <body> of the document
-        $('body').append(label)
-    }
 // Add a "mouseover" event listener to all elements with a "title" attribute
     elementsWithTitles.on('mouseover', e => {
         e.preventDefault();
