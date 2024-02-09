@@ -8,7 +8,7 @@
     min-height: 100px;
     overflow-y: auto;
 
-    list-item {
+    .list-item {
         border-radius: 100px;
         background-color: #131313;
         display: flex;
