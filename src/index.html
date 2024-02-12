@@ -22,7 +22,11 @@
 <nav class="row center vertical">
     <div id="hero" class="row">
         <img src="assets/images/icon.svg" alt="">
-        <h1>Pricing<br>Database</h1>
+        <div class="title col">
+            <h1></h1>
+            <h3 style="display: none;"></h3>
+            <button style="display: none;">Back</button>
+        </div>
     </div>
     <div id="search-area" class="row">
         <div class="floating-input">
@@ -51,7 +55,14 @@
 <script src="assets/js/element-label.js"></script>
 <script src="assets/js/element-dropdown.js"></script>
 <script src="assets/js/pagination.js"></script>
-<script src="assets/js/database-list.js" type="module"></script>
+<script src="assets/js/page-navigation.js" type="module"></script>
+
+<script>
+    const img = $("#hero img");
+    const title = $("#hero .title h1");
+    const subtitle = $("#hero .title h3");
+    const backButton = $("#hero button");
+</script>
 
 <script>
 
