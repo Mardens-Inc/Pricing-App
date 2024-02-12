@@ -3,7 +3,7 @@ export default class DatabaseList {
         this.list = $(".list");
         this.items = [];
         this.id = id;
-        this.getListHeader().then((name, location, po, image, options, posted) => {
+        this.getListHeader().then(({name, location, po, image, options, posted}) => {
             if (image !== "") {
                 img.attr('src', image);
                 img.css("border-radius", "12px");
