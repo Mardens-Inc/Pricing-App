@@ -11,6 +11,9 @@ export default class DirectoryList {
         this.items = [];
 
         this.loadView("", true);
+        $("#hero button").on('click', () => {
+            this.loadView("", true);
+        })
     }
 
 
@@ -133,7 +136,10 @@ export default class DirectoryList {
             const list = $(`<div class="list-item"></div>`);
             const img = $(`<img src="${item["image"] === "" ? "/assets/images/icon.png" : item["image"]}" alt="">`);
             const title = $(`<span class="title">${item["name"]}</span>`);
-            const extra = $(`<span class="extra">${item["location"] === "" ? "Unknown" : item["location"]} - ${item["po"] === "" ? "No PO Found" : item["po"]}</span>`);
+            const location = item["location"] === "" ? "Unknown" : item["location"];
+            const po = item["po"] === "" ? "No PO Found" : item["po"];
+            const date = item["post_date"] === "" ? "No Date" : new Date(item["post_date"]).toLocaleDateString("en-US", {month: "short", day: "numeric", year: "numeric"});
+            const extra = $(`<span class="extra">${location} / ${po} / <i><b>${date}</b></i></span>`);
 
             // Create buttons for editing and additional options
             const editButton = $(`<button class="edit-list-button" title="Edit product"><img src="assets/images/icons/edit.svg" alt=""></button>`);
