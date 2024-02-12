@@ -80,6 +80,17 @@ button, .button, .pagination li {
         }
     }
 
+    &#voice-search-button {
+        transition: outline .2s;
+
+        &.primary {
+            animation-name: ripple;
+            animation-duration: 2s;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
+    }
+
 }
 
 /* This is the styling for all input elements and any element with a class of .input */
@@ -93,7 +104,15 @@ input, .input {
     border-radius: 100px;
     padding: 0.5rem 1rem;
     font-size: 1rem;
-    font-family: inherit
+    font-family: inherit;
+
+
+    &::-webkit-search-decoration,
+    &::-webkit-search-cancel-button,
+    &::-webkit-search-results-button,
+    &::-webkit-search-results-decoration {
+        -webkit-appearance: none;
+    }
 }
 
 /* Styles for the floating input effect */
@@ -205,3 +224,15 @@ ul {
     }
 }
 
+@keyframes ripple {
+    0% {
+        outline: 0 solid transparent;
+    }
+
+    50% {
+        outline: 10px solid #25b13e;
+    }
+    100% {
+        outline: 0 solid transparent;
+    }
+}
