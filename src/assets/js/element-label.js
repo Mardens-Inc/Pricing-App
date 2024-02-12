@@ -40,8 +40,9 @@ function loadLabels() {
         }
 
         // Check if the "label" would exceed the bottom boundary of the window, if so adjust the y position.
-        if (y + label.height() > window.innerHeight) {
-            y = window.innerHeight - label.height() - 10
+        if (y + label.height() + 16 >= window.innerHeight) {
+            // place above the element
+            y = element.offset().top - label.height() - 20
         }
 
         // Apply the calculated x and y as well as set the "label" to visible.
