@@ -10,9 +10,9 @@ export default class DirectoryList {
         this.list = $(".list");
         this.items = [];
 
-        this.loadView("", true);
         $("#hero button").on('click', () => {
             this.loadView("", true);
+            $(this).trigger("unloadExternalView");
         })
     }
 
@@ -30,6 +30,11 @@ export default class DirectoryList {
             this.items = newList;
             this.buildPagination();
         }
+    }
+
+    async search(query) {
+        await this.loadView(query, true);
+        return this.items;
     }
 
 
@@ -54,7 +59,7 @@ export default class DirectoryList {
         backButton.css("display", "none");
 
         // Define the API endpoint for fetching all locations
-        const url = "https://pricing-new.mardens.com/api/locations/all";
+        const url = `${baseURL}/api/locations/all`;
 
         try {
             // Attempt to fetch data from the API using a GET request
@@ -97,7 +102,6 @@ export default class DirectoryList {
 
         // Try to build pagination using the loaded list items
         try {
-
             // Initialize pagination for a HTML element with 'pagination' class
             $(".pagination").pagination({
 
@@ -127,13 +131,14 @@ export default class DirectoryList {
      *
      * @param {Array} items - An array of items to be displayed in the list.
      */
-    buildListHTML() {
+    buildListHTML(items) {
         // Start with a clean list
         this.list.html("");
 
-        this.items.forEach((item) => {
+        items.forEach((item) => {
             // Create elements for each part of a list item
             const list = $(`<div class="list-item"></div>`);
+            const clickableArea = $(`<div class="fill"></div>`);
             const img = $(`<img src="${item["image"] === "" ? "/assets/images/icon.png" : item["image"]}" alt="">`);
             const title = $(`<span class="title">${item["name"]}</span>`);
             const location = item["location"] === "" ? "Unknown" : item["location"];
@@ -158,12 +163,13 @@ export default class DirectoryList {
             });
 
             // Attach an event listener to the list item itself that transitions to a new view when clicked
-            list.on('click', async () => $(this).trigger("loadExternalView", [item["id"]]));
+            clickableArea.on('click', async () => $(this).trigger("loadExternalView", [item["id"]]));
 
             // Attach the created elements to the list item
-            list.append(img);
+            clickableArea.append(img);
             title.append(extra);
-            list.append(title);
+            clickableArea.append(title);
+            list.append(clickableArea);
             list.append(editButton);
             list.append(moreButton);
 
