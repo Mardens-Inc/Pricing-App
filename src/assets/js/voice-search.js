@@ -2,8 +2,7 @@ import Voice from "./Voice.js";
 
 const searchInput = $("#search");
 
-searchInput.on('keypress', async (event) => {
-});
+searchInput.on('keypress', async (event) => search(searchInput.val()));
 $("#voice-search-button").on('click', () => {
     let voice = new Voice();
     if (voice.unsupported) {
@@ -19,10 +18,13 @@ $("#voice-search-button").on('click', () => {
     button.addClass("primary");
     $(voice).on("interim", async (event, transcript) => {
         console.log("Interim: " + transcript);
-        searchInput.val(transcript);
-        searchInput(transcript);
+        search(transcript)
     });
     $(voice).on("result", async (event, transcript) => {
+        button.removeClass("primary");
+        voice.stop();
+    });
+    $(voice).on("end", async (event) => {
         button.removeClass("primary");
         voice.stop();
     });
