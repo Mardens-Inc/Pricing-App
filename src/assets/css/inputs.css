@@ -236,3 +236,7 @@ ul {
         outline: 0 solid transparent;
     }
 }
+
+[data-title] * {
+    pointer-events: none;
+}
