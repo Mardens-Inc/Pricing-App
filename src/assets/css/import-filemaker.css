@@ -1,0 +1,36 @@
+#import-form {
+    width: 75%;
+    margin: auto;
+
+    .floating-input {
+        max-width: calc(100% - 2rem);
+    }
+
+    button {
+        width: 300px;
+        margin: auto;
+    }
+
+    .list {
+        max-width: 100%;
+        max-height: 300px;
+        height: 300px;
+
+        input[type="radio"] {
+            visibility: hidden;
+            position: absolute;
+
+            & + label {
+                padding-block: 1rem;
+            }
+
+            &:checked + label {
+                background: var(--primary);
+                color: var(--background);
+                font-weight: 700;
+            }
+        }
+    }
+
+}
+
