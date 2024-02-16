@@ -5,9 +5,17 @@ if ($('.label').length == 0) {
     $('body').append(label)
 }
 
+$(document).on("mousemove", (e) => {
+    const hoverElement = $(e.target)
+    if (hoverElement.attr('data-title')) {
+        show(hoverElement)
+        label.text(hoverElement.attr('data-title'))
+    } else {
+        hide()
+    }
+})
+
 function loadLabels() {
-
-
 // Remove the "title" attribute from all elements and store the value in a "data-title" attribute
 // This is done to prevent the default browser tooltip from showing.
     $(`[title]`).each((i, element) => {
@@ -15,49 +23,40 @@ function loadLabels() {
         el.attr('data-title', el.attr('title'))
         el.attr('title', null)
     });
+}
 
-// Select all elements that have a "title" attribute
-    const elementsWithTitles = $(`[data-title]`)
+function show(element) {
+    // Get the "title" attribute of the element which is moused over.
+    const title = element.attr('data-title')
+    // Set the text of the "label" to the "title" of the element
+    label.text(title)
 
-// Add a "mouseover" event listener to all elements with a "title" attribute
-    elementsWithTitles.on('mouseover', e => {
-        e.preventDefault();
-        // Get the current target of the event, in this case the element with a title.
-        const element = $(e.currentTarget)
-        // Get the "title" attribute of the element which is moused over.
-        const title = element.attr('data-title')
-        // Set the text of the "label" to the "title" of the element
-        label.text(title)
+    // Calculate the initial x and y coordinates for the "label",
+    // the location is calculated to be just below the element.
+    let x = element.offset().left + element.width() / 2 - label.width() / 2
+    let y = element.offset().top + element.height() + 44
 
-        // Calculate the initial x and y coordinates for the "label",
-        // the location is calculated to be just below the element.
-        let x = element.offset().left + element.width() / 2 - label.width() / 2
-        let y = element.offset().top + element.height() + 44
+    // Check if the "label" would exceed the right boundary of the window, if so adjust the x position.
+    if (x + label.width() > window.innerWidth) {
+        x = window.innerWidth - label.width() - 10
+    }
 
-        // Check if the "label" would exceed the right boundary of the window, if so adjust the x position.
-        if (x + label.width() > window.innerWidth) {
-            x = window.innerWidth - label.width() - 10
-        }
+    // Check if the "label" would exceed the bottom boundary of the window, if so adjust the y position.
+    if (y + label.height() + 16 >= window.innerHeight) {
+        // place above the element
+        y = element.offset().top - label.height() - 20
+    }
 
-        // Check if the "label" would exceed the bottom boundary of the window, if so adjust the y position.
-        if (y + label.height() + 16 >= window.innerHeight) {
-            // place above the element
-            y = element.offset().top - label.height() - 20
-        }
-
-        // Apply the calculated x and y as well as set the "label" to visible.
-        label.css({
-            top: y,
-            left: x,
-            opacity: 1
-        })
+    // Apply the calculated x and y as well as set the "label" to visible.
+    label.css({
+        top: y,
+        left: x,
+        opacity: 1
     })
+}
 
-// Add a "mouseout" event listener to all elements with a "title" attribute
-    elementsWithTitles.on('mouseout', e => {
-        // Set the "label" to be invisible when the mouse is no longer over the element.
-        label.css({
-            opacity: 0
-        });
+function hide() {
+    label.css({
+        opacity: 0
     });
 }
