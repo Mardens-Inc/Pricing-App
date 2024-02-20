@@ -99,6 +99,7 @@ export default class DirectoryList {
     buildPagination() {
         // Check if list items are loaded. If list is empty, end the function (Don't build pagination)
         if (this.items.length === 0) return;
+        console.log(this.items)
 
         // Try to build pagination using the loaded list items
         try {
