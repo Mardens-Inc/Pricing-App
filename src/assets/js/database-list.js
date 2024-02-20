@@ -1,4 +1,4 @@
-import Filemaker from "https://cdn.jsdelivr.net/gh/Mardens-Inc/Filemaker-API/js/Filemaker.js";
+import {buildImportFilemakerForm} from "./import-filemaker.js";
 
 export default class DatabaseList {
     constructor(id) {
@@ -44,9 +44,9 @@ export default class DatabaseList {
         return newList;
     }
 
-    buildList() {
+    async buildList() {
         if (this.items.length === 0) {
-            this.buildImportFilemakerForm()
+            this.list.html(await buildImportFilemakerForm());
             return;
         }
         this.list.html("");
@@ -59,36 +59,6 @@ export default class DatabaseList {
         });
     }
 
-    async buildImportFilemakerForm() {
-        const html = $(await $.ajax({url: "assets/html/import-filemaker-form.html", method: "GET"}));
-        const filemaker = new Filemaker("https://lib.mardens.com/fmutil", "admin", "19MRCC77!");
-        const databases = await filemaker.getDatabases();
-        for (const database of databases) {
-            const item = $(`
-                <input type="radio" id="filemaker-database-${database}" name="filemaker-database" value="${database}">
-                <label for="filemaker-database-${database}" class="list-item">${database.replace(/-/g, " ")}</label>
-            `)
-            html.find("#filemaker-databases .list").append(item);
-        }
-        html.find("#filemaker-databases input").on('change', async (e) => {
-            html.find("#filemaker-databases button[type='submit']").prop("disabled", false);
-        });
-        html.find("#filemaker-databases").on('submit', async (e) => {
-            const database = html.find('input[name="filemaker-database"]:checked').val();
-            if (database === undefined) {
-                console.error("No database selected");
-                return;
-            }
-        });
-
-        html.find("#filemaker-credentials").on("submit", async (e) => {
-            const username = html.find("#filemaker-username").val();
-            const password = html.find("#filemaker-password").val();
-        });
-
-
-        this.list.html(html);
-    }
 
     buildItemizedList() {
     }
