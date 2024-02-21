@@ -1,8 +1,10 @@
 import Voice from "./Voice.js";
 
+let searchDebouncingTimeout = null;
+
 const searchInput = $("#search");
 
-searchInput.on('keypress', async (event) => search(searchInput.val()));
+searchInput.on('keyup', async (event) => search(searchInput.val()));
 $("#voice-search-button").on('click', () => {
     let voice = new Voice();
     if (voice.unsupported) {
@@ -33,6 +35,12 @@ $("#voice-search-button").on('click', () => {
 })
 
 export function search(query) {
-    searchInput.val(query);
-    $(document).trigger("search", [query]);
+    if (searchDebouncingTimeout !== null) {
+        clearTimeout(searchDebouncingTimeout);
+    }
+    searchDebouncingTimeout = setTimeout(() => {
+        searchDebouncingTimeout = null;
+        searchInput.val(query);
+        $(document).trigger("search", [query]);
+    }, 500);
 }
