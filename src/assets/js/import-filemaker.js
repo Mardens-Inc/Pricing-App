@@ -1,5 +1,5 @@
 import Filemaker from "https://cdn.jsdelivr.net/gh/Mardens-Inc/Filemaker-API@e451a622f14ac3e5b7ff390be93e35f3377caafd/js/Filemaker.js";
-import {startLoading, stopLoading} from "./loading.js";
+import {startLoading, startLoadingForDuration, stopLoading, updateLoadingOptions} from "./loading.js";
 
 const filemaker = new Filemaker("https://lib.mardens.com/fmutil", "admin", "19MRCC77!");
 
@@ -112,9 +112,16 @@ async function navigateToDatabaseLayoutList(html) {
                 username: filemaker.username,
                 password: filemaker.password
             });
-            startLoading("Importing data from filemaker, this can take multiple hours.  Please come back later!");
-            $.ajax({url: `${baseURL}/api/locations/import`, method: "POST", data: json, contentType: "application/json", headers: {accept: "application/json"}});
-            setTimeout(() => stopLoading(), 10000);
+            startLoadingForDuration({
+                message: "Importing data from filemaker, this can take multiple hours.<br>Please come back later!<br>You will be redirected to the home page in %duration% seconds.",
+                fullscreen: true,
+                color: "var(--primary)",
+                speed: '500ms',
+            }, 30, () => {
+                window.localStorage.removeItem("loadedDatabase");
+                window.location.reload();
+            })
+            $.ajax({url: `${baseURL}/api/location/${window.localStorage.getItem("loadedDatabase")}/add/filemaker`, method: "POST", data: json, contentType: "application/json", headers: {accept: "application/json"}});
         }
     });
 }
