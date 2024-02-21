@@ -17,7 +17,7 @@ export default class DatabaseList {
             this.list.html("");
             $(".pagination").html("");
             $("#search").val("");
-            if (options.length === 0) {
+            if (options.length === 0 || options.layout === null || options.layout === "") {
                 this.list.html(await buildOptionsForm(id));
             } else {
                 await this.loadView("", true);
@@ -30,7 +30,7 @@ export default class DatabaseList {
         const newList = await this.getListItems(query);
         if (force || newList !== this.items) {
             this.items = newList;
-            this.buildList()
+            await this.buildList()
         }
     }
 
