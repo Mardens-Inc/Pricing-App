@@ -152,7 +152,7 @@ input, .input {
 
     input:placeholder-shown ~ label {
         top: 50%;
-        transform: translateY(calc(-100% + .5rem));
+        transform: translateY(calc(-100% + 1rem));
         opacity: .5;
         font-size: 1rem;
         font-weight: normal;
