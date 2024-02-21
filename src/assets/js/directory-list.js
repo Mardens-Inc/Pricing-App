@@ -98,7 +98,11 @@ export default class DirectoryList {
      */
     buildPagination() {
         // Check if list items are loaded. If list is empty, end the function (Don't build pagination)
-        if (this.items.length === 0) return;
+        if (this.items.length === 0) {
+            this.list.html(`<h1 class="center vertical horizontal">No items found</h1>`);
+            $(".pagination").html("");
+            return;
+        }
         console.log(this.items)
 
         // Try to build pagination using the loaded list items
