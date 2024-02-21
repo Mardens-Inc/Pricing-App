@@ -1,11 +1,12 @@
 import {buildImportFilemakerForm} from "./import-filemaker.js";
+import {buildOptionsForm} from "./database-options-manager.js";
 
 export default class DatabaseList {
     constructor(id) {
         this.list = $(".list");
         this.items = [];
         this.id = id;
-        this.getListHeader().then(({name, location, po, image, options, posted}) => {
+        this.getListHeader().then(async ({name, location, po, image, options, posted}) => {
             if (image !== "") {
                 img.attr('src', image);
                 img.css("border-radius", "12px");
@@ -16,8 +17,12 @@ export default class DatabaseList {
             this.list.html("");
             $(".pagination").html("");
             $("#search").val("");
+            if (options.length === 0) {
+                this.list.html(await buildOptionsForm(id));
+            } else {
+                await this.loadView("", true);
+            }
         });
-        this.loadView("", true);
     }
 
     async loadView(query, force = false) {
@@ -50,6 +55,7 @@ export default class DatabaseList {
             return;
         }
         this.list.html("");
+        console.log(this.items)
         this.items.forEach((item) => {
             const listItem = $("<div>").addClass("list-item");
             const name = $("<h3>").html(item["name"]);
@@ -67,7 +73,7 @@ export default class DatabaseList {
     async getListHeader() {
         const url = `${baseURL}/api/location/${this.id}/?headings=true`;
         const json = await $.ajax({url: url, method: "GET"});
-        return {name: json["name"], location: json["location"], po: json["po"], image: json["image"], options: json["options"], posted: json["posted_date"]};
+        return {name: json["name"], location: json["location"], po: json["po"], image: json["image"], options: json["options"], posted: new Date(json["post_date"])};
     }
 }
 
