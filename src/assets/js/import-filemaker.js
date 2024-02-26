@@ -3,12 +3,23 @@ import {startLoading, startLoadingForDuration, stopLoading, updateLoadingOptions
 
 const filemaker = new Filemaker("https://lib.mardens.com/fmutil", "admin", "19MRCC77!");
 
+/**
+ * Builds the import filemaker form.
+ * @returns {Promise<JQuery>} The HTML element containing the form.
+ */
 async function buildImportFilemakerForm() {
     const html = $(await $.ajax({url: "assets/html/import-filemaker-form.html", method: "GET"}));
     await navigateToDatabaseList(html);
     return html;
 }
 
+/**
+ * Navigates to the database list in the given HTML.
+ *
+ * @param {JQuery} html - The HTML object to navigate.
+ *
+ * @return {Promise<void>} - A promise that resolves once the navigation is complete.
+ */
 async function navigateToDatabaseList(html) {
     $(html).find("form").css("display", "none");
     $(html).find("#filemaker-databases").css("display", "");
