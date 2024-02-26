@@ -46,4 +46,8 @@
             }
         }
     }
+
+    #action-button-row > button{
+        width: 300px;
+    }
 }
