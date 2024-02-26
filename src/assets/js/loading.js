@@ -9,11 +9,11 @@
  * @property {string} speed - The default speed of the loading animation. Can be any valid CSS animation duration value.
  */
 let defaultOptions = {
-    message: "Loading...",
+    message: "",
     fullscreen: false,
     size: '100px',
     font: '2rem',
-    color: "white",
+    color: "var(--primary)",
     speed: '1s',
 };
 
@@ -37,7 +37,7 @@ function startLoading(options = defaultOptions) {
 
     if ($("link[href='assets/css/loading.css']").length === 0) $("head").append($("<link rel='stylesheet' href='assets/css/loading.css'>"));
     if ($(".loading").length > 0) return;
-    const loading = $(`<div class="loading"><p class="message"></p></div>`);
+    const loading = $(`<div class="loading"><p class="message">${options.message}</p></div>`);
     if (options.fullscreen) loading.addClass("fullscreen");
     loading.prop({style: `--size: ${options.size}; --color: ${options.color}; --speed: ${options.speed}; --font: ${options.font}`});
 
@@ -81,7 +81,7 @@ function updateLoadingOptions(options) {
 function startLoadingForDuration(options, duration, callback = null) {
     startLoading(options);
     const originalMessage = options.message;
-    const update = ()=>{
+    const update = () => {
         options.message = originalMessage.replace(/%duration%/g, duration.toString());
         updateLoadingOptions(options);
         if (duration <= 0) {
