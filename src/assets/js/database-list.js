@@ -1,8 +1,10 @@
 import {buildImportFilemakerForm} from "./import-filemaker.js";
 import {buildOptionsForm} from "./database-options-manager.js";
+import {startLoading, stopLoading} from "./loading.js";
 
 export default class DatabaseList {
     constructor(id) {
+        startLoading({fullscreen: true});
         this.list = $(".list");
         this.items = [];
         this.id = id;
@@ -22,7 +24,7 @@ export default class DatabaseList {
             } else {
                 await this.loadView("", true);
             }
-        });
+        }).then(() => stopLoading());
     }
 
     async loadView(query, force = false) {
