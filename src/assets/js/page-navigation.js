@@ -1,15 +1,17 @@
 import DatabaseList from "./database-list.js";
 import DirectoryList from "./directory-list.js";
+import {startLoading, stopLoading} from "./loading.js";
 
 
 $("#edit-button").css('display', 'none');
 const directory = new DirectoryList();
 let database = null;
-if(window.localStorage.getItem("loadedDatabase") !== null){
+if (window.localStorage.getItem("loadedDatabase") !== null) {
     database = new DatabaseList(window.localStorage.getItem("loadedDatabase"));
     $("#edit-button").css('display', "");
-}else{
-    directory.loadView("", true);
+} else {
+    startLoading({fullscreen: true})
+    directory.loadView("", true).then(() => stopLoading());
 }
 $(directory).on("loadExternalView", (event, id) => {
     database = new DatabaseList(id);
