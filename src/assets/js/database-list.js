@@ -1,8 +1,23 @@
-import {buildImportFilemakerForm} from "./import-filemaker.js";
 import {buildOptionsForm} from "./database-options-manager.js";
 import {startLoading, stopLoading} from "./loading.js";
+import {buildImportFilemakerForm} from "./import-filemaker.js";
+import {download} from "./filesystem.js";
 
+/**
+ * Represents a list of items in a database.
+ *
+ * @class
+ */
 export default class DatabaseList {
+    function
+
+    /**
+     * Constructor for creating a new instance of the class.
+     *
+     * @param {string} id - The ID of the instance.
+     *
+     * @return {void}
+     */
     constructor(id) {
         startLoading({fullscreen: true});
         this.list = $(".list");
@@ -19,14 +34,28 @@ export default class DatabaseList {
             this.list.html("");
             $(".pagination").html("");
             $("#search").val("");
-            if (options.length === 0 || options.layout === null || options.layout === "") {
-                this.list.html(await buildOptionsForm(id));
+            await this.loadView("", true);
+            this.list.empty();
+            if (this.items.length === 0) {
+                this.list.append(await buildImportFilemakerForm())
             } else {
-                await this.loadView("", true);
+                if (options.length === 0 || options.layout === null || options.layout === "") {
+                    this.list.append(await buildOptionsForm(id));
+                }
             }
+
+            $(document).trigger("load")
         }).then(() => stopLoading());
     }
 
+    /**
+     * Loads and displays a view based on the given query.
+     *
+     * @param {string} query - The query to fetch data and build the view.
+     * @param {boolean} [force=false] - Flag that determines whether to force fetching the data and rebuilding the view, even if the data hasn't changed.
+     *
+     * @return {Promise<void>} - A promise that resolves once the view is loaded and displayed.
+     */
     async loadView(query, force = false) {
 
         const newList = await this.getListItems(query);
@@ -36,11 +65,31 @@ export default class DatabaseList {
         }
     }
 
+    /**
+     * Performs a search using the given query.
+     *
+     * @param {string} query - The search query.
+     * @return {Promise<Array>} - A promise that resolves to an array of items matching the search query.
+     */
     async search(query) {
         await this.loadView(query, true);
         return this.items;
     }
 
+    /**
+     * Retrieves a list of items for the location.
+     *
+     * @param {string} [query=""] - The optional query string to filter the list of items.
+     * @returns {Promise<Array>} - A promise that resolves with an array of items.
+     *
+     * @example
+     * getListItems("book");
+     * // Returns a promise that resolves with an array of book items.
+     *
+     * @example
+     * getListItems();
+     * // Returns a promise that resolves with the complete list of items.
+     */
     async getListItems(query = "") {
         const url = `${baseURL}/api/location/${this.id}/`;
         let newList = await $.ajax({url: url, method: "GET"});
@@ -51,11 +100,17 @@ export default class DatabaseList {
         return newList;
     }
 
+    /**
+     * Builds a list of items.
+     *
+     * If the list of items is empty, it calls the `buildImportFilemakerForm` function
+     * and sets the HTML content of `this.list` to the result of the function call.
+     * If the list of items is not empty, it clears the HTML content of `this.list` and
+     * adds HTML elements for each item in `this.items`.
+     *
+     * @returns {Promise<void>} A promise that resolves when the list is built.
+     */
     async buildList() {
-        if (this.items.length === 0) {
-            this.list.html(await buildImportFilemakerForm());
-            return;
-        }
         this.list.html("");
         console.log(this.items)
         this.items.forEach((item) => {
@@ -67,15 +122,27 @@ export default class DatabaseList {
         });
     }
 
-
     buildItemizedList() {
     }
 
-
+    /**
+     * Retrieves the header information for the specified location.
+     *
+     * @return {Promise<Object>} - A promise that resolves to an object containing the header information.
+     */
     async getListHeader() {
         const url = `${baseURL}/api/location/${this.id}/?headings=true`;
         const json = await $.ajax({url: url, method: "GET"});
         return {name: json["name"], location: json["location"], po: json["po"], image: json["image"], options: json["options"], posted: new Date(json["post_date"])};
+    }
+
+    exportCSV() {
+        const items = this.items;
+        const csv = items.map(item => {
+            return Object.values(item).join(",");
+        }).join("\n");
+        download("export.csv", csv);
+
     }
 }
 
