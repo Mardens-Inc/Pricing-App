@@ -136,6 +136,11 @@ export default class DatabaseList {
         return {name: json["name"], location: json["location"], po: json["po"], image: json["image"], options: json["options"], posted: new Date(json["post_date"])};
     }
 
+    /**
+     * Export the items data to a CSV file and initiate the download of the file.
+     *
+     * @return {void}
+     */
     exportCSV() {
         const items = this.items;
         const csv = items.map(item => {
