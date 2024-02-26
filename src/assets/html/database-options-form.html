@@ -1,10 +1,20 @@
 <link rel="stylesheet" href="assets/css/database-options-form.css">
 <h1>Options</h1>
 <form id="options-form" class="col">
-    <div class="list" id="icons"></div>
-    <div class="floating-input">
-        <input type="text" id="database-name" name="database-name" placeholder="">
-        <label for="database-name">Database Name</label>
+    <div class="list grid fill" id="icons"></div>
+    <div class="floating-input fill">
+        <input type="text" id="database-name" name="name" placeholder="">
+        <label for="database-name">Name</label>
+    </div>
+    <div class="row fill" style="gap: 1rem;">
+        <div class="floating-input fill">
+            <input type="text" id="database-location" name="loc" placeholder="">
+            <label for="database-location">Location</label>
+        </div>
+        <div class="floating-input fill">
+            <input type="text" id="database-po" name="po" placeholder="">
+            <label for="database-po">PO#</label>
+        </div>
     </div>
 
 </form>
