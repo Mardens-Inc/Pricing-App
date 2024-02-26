@@ -1,0 +1,49 @@
+#options-form {
+    max-width: calc(100% - 2rem);
+
+    .list {
+        background-color: #3D3D3D;
+        justify-content: start;
+        max-height: 300px;
+        overflow: scroll;
+        width: 100%;
+        border-radius: 12px;
+
+        label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            margin: 0;
+
+            img {
+                object-fit: contain;
+                object-position: center;
+                box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+                --size: 128px;
+                width: var(--size);
+                height: var(--size);
+                aspect-ratio: 1;
+                margin-right: 10px;
+            }
+
+            &:hover {
+                background: #a19797;
+                color: var(--background);
+                font-weight: 700;
+            }
+        }
+
+        input[type="radio"] {
+            visibility: hidden;
+            position: absolute;
+
+            &:checked + label {
+                background: var(--primary);
+                color: var(--background);
+                font-weight: 700;
+            }
+        }
+    }
+}
