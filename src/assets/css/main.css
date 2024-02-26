@@ -12,8 +12,12 @@ body {
     font-size: 1rem;
 }
 
-.row, .col, .center, .fill {
+.row, .col, .center, .fill, .grid {
     display: flex;
+}
+
+.grid {
+    flex-wrap: wrap;
 }
 
 .row {
