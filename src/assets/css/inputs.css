@@ -240,3 +240,68 @@ ul {
 [data-title] * {
     pointer-events: none;
 }
+
+
+toggle {
+    position: relative;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    flex-direction: row-reverse;
+    width: 100%;
+    margin-block: 1rem;
+    cursor: pointer;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    min-width: calc(5rem + 70px);
+    max-width: calc(100% - 2rem);
+    padding: 1rem;
+    border-radius: 105px;
+
+    &::before {
+        content: '';
+        position: absolute;
+        right: 1rem;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 25px;
+        border-radius: 100px;
+        background-color: hsla(0, 0%, 60%, 0.5);
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        right: calc(3px + 1rem);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 100px;
+        background-color: var(--primary);
+        transform: translateX(calc(-100% - 3px));
+        transition: transform;
+        transition-duration: 200ms;
+    }
+
+    &[value=true]::after {
+        transform: translateX(0);
+    }
+
+    &:hover {
+        background-color: hsla(0, 0%, 45%, 0.5);
+    }
+}
+
+
+[toggle-hidden] {
+    background-color: #272727;
+    padding: 1rem;
+}
