@@ -9,23 +9,18 @@
  */
 /**
  * @typedef {Object} ListOptions
- * @property {boolean} print
  * @property {Object} print-form
+ * @property {boolean} print-form.enabled
  * @property {string} print-form.print-label
  * @property {string} print-form.print-year
  * @property {string} print-form.print-price-column
  * @property {string} print-form.print-retail-price-column
  * @property {boolean} print-form.print-show-retail
  * @property {boolean} show-date
- * @property {boolean} voice-search
  * @property {Object} voice-form
+ * @property {boolean} voice-form.enabled
  * @property {string} voice-form.voice-description-column
  * @property {string} voice-form.voice-price-column
- * @property {string} voice-form.voice-retail-price-column
- * @property {boolean} voice-form.voice-show-retail
- * @property {boolean} voice-form.voice-show-date
- * @property {boolean} voice-form.voice-show-location
- * @property {boolean} voice-form.voice-show-po
  */
 
 /**
@@ -35,8 +30,6 @@
  * @property {string} file
  */
 
-
-import {download} from "./filesystem.js";
 
 /**+
  * @type {ListHeading}
@@ -54,6 +47,13 @@ async function buildOptionsForm(id) {
     currentOptions = await getCurrentOptions(id);
     await buildIconList(html);
     setDefaultOptionValues(html);
+    html.each((_, element) => {
+        if (element.tagName === "FORM") {
+            element.addEventListener("submit", () => {
+                save();
+            });
+        }
+    })
 
     return html;
 }
@@ -106,9 +106,37 @@ function setDefaultOptionValues(html) {
     html.find("input#database-name").val(currentOptions.name);
     html.find("input#database-location").val(currentOptions.location);
     html.find("input#database-po").val(currentOptions.po);
-    html.find("toggle#show-date").prop("checked", currentOptions.options["show-date"]);
-    html.find("toggle#voice-search").prop("checked", currentOptions.options["voice-search"]);
-    html.find("toggle#print").prop("checked", currentOptions.options["print"]);
+    html.find("toggle#show-date").attr("value", currentOptions.options["show-date"]);
+    html.find("toggle#voice-search").attr("value", currentOptions.options["voice-search"]);
+    html.find("toggle#print").attr("value", currentOptions.options["print"]);
+}
+
+async function save() {
+    // build new options object
+    const newOptions = {
+        name: $("input#database-name").val(),
+        location: $("input#database-location").val(),
+        po: $("input#database-po").val(),
+        image: $("input[name='icon']:checked").val(),
+        options: {
+            "show-date": $("toggle#show-date").attr("value") ?? false,
+            "voice-search-form": {
+                "enabled": $("toggle#voice-search").attr("value") ?? false,
+                "voice-description-column": $("input#voice-description-column").val() ?? "",
+                "voice-price-column": $("input#voice-price-column").val() ?? ""
+            },
+            "print-form": {
+                "enabled": $("toggle#print").attr("value") ?? false,
+                "print-label": $("input#print-label").val() ?? "",
+                "print-year": $("input#print-year").val() ?? "",
+                "print-price-column": $("input#print-price-column").val() ?? "",
+                "print-retail-price-column": $("input#print-retail-price-column").val() ?? "",
+                "print-show-retail": $("toggle#print-show-retail").attr("value") ?? false
+            }
+        }
+    };
+
+    console.log(JSON.stringify(newOptions));
 
 }
 
