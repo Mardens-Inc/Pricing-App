@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="assets/css/database-options-form.css">
 <h1>Options</h1>
-<form id="options-form" class="col">
+<form id="options-form" class="col" action="javascript:void(0);">
     <div class="list grid fill" id="icons"></div>
     <div class="floating-input fill">
         <input type="text" id="database-name" name="name" placeholder="">
@@ -17,7 +17,7 @@
         </div>
     </div>
 
-    <toggle id="print" name="print" value="true">Can print label?</toggle>
+    <toggle id="print" name="print" value="false">Can print label?</toggle>
     <div class="print-form fill extra-section col" toggle-hidden="print">
         <div class="row fill">
             <div class="col fill" style="margin-right: 5px">
@@ -60,8 +60,8 @@
     <toggle id="show-date" name="show-date" value="false">Show Date Column?</toggle>
 
     <div id="action-button-row" class="row fill center horizontal">
-        <button class="primary">Save</button>
-        <button>Cancel</button>
+        <button class="primary" type="submit">Save</button>
+        <button type="button">Cancel</button>
     </div>
 
 </form>
