@@ -60,3 +60,7 @@ function hide() {
         opacity: 0
     });
 }
+
+$("*").on('scroll', e => {
+    hide()
+})
