@@ -25,7 +25,6 @@ function openDropdown(element, items) {
 
     // Clear the dropdown
     dropdown.html("");
-
     // Populate the dropdown with the items
     Object.keys(items).forEach(item => {
         const itemElement = $(`<div class="dropdown-item">${item}</div>`);
@@ -42,7 +41,8 @@ function openDropdown(element, items) {
     dropdown[0].scrollTo({top: 0, behavior: 'auto'});
     // Logic for positioning the dropdown menu.
     let x = element.offset().left + element.width() / 2 - (dropdown.width() / 2)
-    let y = element.offset().top + element.height() + 40
+    const scrollYOffset = window.scrollY || window.pageYOffset
+    let y = element.offset().top + element.height() + 40 + scrollYOffset
     if (y + dropdown.height() > window.innerHeight) {
         y = window.innerHeight - dropdown.height() - 10
     }
@@ -59,9 +59,19 @@ function openDropdown(element, items) {
     dropdown.focus();
 }
 
-dropdown.on("blur", () => {
+function closeDropdown() {
     dropdown.css({
         opacity: 0,
         "pointer-events": "none"
     })
+}
+
+dropdown.on("blur", () => {
+    closeDropdown()
 });
+
+$("*").on('scroll', e => {
+    if (e.currentTarget !== dropdown[0]) {
+        closeDropdown()
+    }
+})
