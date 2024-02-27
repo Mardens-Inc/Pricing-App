@@ -1,3 +1,5 @@
+import {startLoading, stopLoading} from "./loading.js";
+
 /**
  * Represents a directory list.
  */
@@ -10,9 +12,12 @@ export default class DirectoryList {
         this.list = $(".list");
         this.items = [];
 
-        $("#hero button").on('click', () => {
-            this.loadView("", true);
+        $("#hero button").on('click', async () => {
+            startLoading({fullscreen: true})
+            this.list.empty();
+            await this.loadView("", true);
             $(this).trigger("unloadExternalView");
+            stopLoading();
         })
     }
 
@@ -63,7 +68,7 @@ export default class DirectoryList {
 
         try {
             // Attempt to fetch data from the API using a GET request
-            let newList = await $.ajax({url: url, method: "GET"});
+            let newList = await $.ajax({url: url, method: "GET", headers: {"Accept": "application/json"}});
 
             // If a query parameter is provided, filter the list items
             if (query !== "") {
