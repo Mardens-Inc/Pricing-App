@@ -45,9 +45,86 @@
                 font-weight: 700;
             }
         }
+
     }
 
-    #action-button-row > button{
+    #column-list {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
+        padding: 10px;
+        gap: 1rem;
+
+        .column-item {
+            cursor: grab;
+            background-color: #3d3d3d;
+            padding: 1rem;
+            border-radius: 5px;
+            transition: background-color .2s;
+            flex-grow: 1;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            display: flex;
+            align-items: center;
+
+            &.hidden{
+                opacity: .5;
+                cursor: default;
+                transition: opacity .2s;
+
+                i.fa-grip-vertical{
+                    display: none;
+                }
+
+                &:hover {
+                    opacity: .8 !important;
+                }
+
+            }
+
+            i {
+                cursor: pointer;
+                transition: opacity .2s;
+                opacity: .5;
+                padding: 5px 1rem;
+                border-radius: 100px;
+
+                &.fa-grip-vertical {
+                    cursor: grab;
+                }
+
+                &:hover {
+                    opacity: 1;
+                    &.fa-ellipsis-vertical {
+                        background-color: #1E1E1E;
+                    }
+                }
+            }
+
+            .name {
+                padding-inline: 1rem;
+                text-align: center;
+            }
+
+            input.name {
+                cursor: text;
+                padding-block: 0;
+                text-align: start;
+                min-width: 1rem;
+                margin: 0;
+                background: transparent;
+            }
+
+            &:not(.hidden):hover {
+                background-color: #2f2f2f;
+            }
+        }
+    }
+
+    #action-button-row > button {
         width: 300px;
     }
 }
