@@ -177,6 +177,8 @@ input, .input {
     width: fit-content;
     max-height: 200px;
     overflow-y: auto;
+    outline: none;
+    border:none;
 
     background-color: #373737;
     color: white;
