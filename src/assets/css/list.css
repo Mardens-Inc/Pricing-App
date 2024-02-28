@@ -8,6 +8,33 @@
     min-height: 100px;
     overflow-y: auto;
 
+    thead {
+        display: flex;
+        justify-content: space-between;
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            font-size: 1.2rem;
+            font-weight: 400;
+            width: 100%;
+            flex-grow: 1;
+        }
+    }
+    tbody{
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        td{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            flex-grow: 1;
+            margin-left: 1rem;
+        }
+    }
+
     .list-item {
         border-radius: 100px;
         background-color: #131313;
