@@ -168,6 +168,7 @@ input, .input {
     opacity: 0;
     transition: opacity .2s;
     pointer-events: none;
+    box-shadow: 0 5px 10px 0 rgba(0, 0, 0, .5);
 }
 
 
@@ -178,7 +179,7 @@ input, .input {
     max-height: 200px;
     overflow-y: auto;
     outline: none;
-    border:none;
+    border: none;
 
     background-color: #373737;
     color: white;
