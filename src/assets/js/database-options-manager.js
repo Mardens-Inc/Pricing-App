@@ -46,7 +46,6 @@ let originalOptions = {};
  * @type {string[]}
  */
 let originalColumns = [];
-let id = ""
 
 /**
  * Builds the options form for a given id.
@@ -55,7 +54,6 @@ let id = ""
  * @return {Promise<JQuery>} - A Promise that resolves to the HTML form representing the options.
  */
 async function buildOptionsForm(id) {
-    self.id = id;
     const html = $(await $.ajax({url: "assets/html/database-options-form.html", method: "GET"}));
     currentOptions = await getCurrentOptions(id);
     originalOptions = {...currentOptions};
@@ -63,7 +61,7 @@ async function buildOptionsForm(id) {
     await buildIconList(html);
     createColumnList(html);
     setDefaultOptionValues(html);
-    html.find("#save").on("click", save);
+    html.find("#save").on("click", ()=>save(id));
     return html;
 }
 
@@ -90,7 +88,7 @@ async function buildIconList(html) {
     for (const icon of icons) {
         const name = icon.name.replace(/[^a-zA-Z]/g, "-");
         const iconHTML = $(`
-                        <input type="radio" class="icon-item" id="${name}" name="icon" value="${icon.name}">
+                        <input type="radio" class="icon-item" id="${name}" name="icon" value="${icon.file}">
                         <label for="${name}" class="col">
                         <img src="${icon.url}" alt="${icon.name}">
                         <p>${icon.name}</p>
@@ -182,12 +180,10 @@ function createColumnList(html) {
             const clone = $(".column-item.dragging");
             const item = $(`.column-item[name="${clone.attr("column")}"]`);
             const listPosition = $("main > .list").offset();
-            // const listPosition = list.offset();
             const closestColumnItemToMousePosition = $(document.elementFromPoint(e.clientX, e.clientY + listPosition.top - (clone.height() * 4))).closest(".column-item:not(.dragging)");
             if (closestColumnItemToMousePosition.length > 0) {
                 // move original item to the new position
                 const index = closestColumnItemToMousePosition.index();
-                const parent = closestColumnItemToMousePosition.parent();
                 const originalIndex = clone.index();
                 if (originalIndex < index) {
                     closestColumnItemToMousePosition.after(clone);
@@ -196,11 +192,11 @@ function createColumnList(html) {
                     closestColumnItemToMousePosition.before(clone);
                     closestColumnItemToMousePosition.before(item);
                 }
-                clone.attr("index", index);
+                // update the index attribute of the clone to the current position of the item
+                clone.attr("index", item.index());
 
             }
             clone.css("top", e.clientY - (clone.height() / 2));
-            // clone.css("top", e.clientY - (clone.height() / 2) - listPosition.top);
             clone.css("left", e.clientX - (clone.width() / 2));
         });
 
@@ -282,7 +278,7 @@ function createColumnList(html) {
 }
 
 
-async function save() {
+async function save(id) {
     const shouldUpdateColumns = currentOptions.columns !== originalColumns;
     // build new options object
     const newOptions = {
@@ -291,7 +287,6 @@ async function save() {
         po: $("input#database-po").val(),
         image: $("input[name='icon']:checked").val(),
         options: {
-            "show-date": $("toggle#show-date").attr("value") === "true" ?? false,
             "voice-search-form": {
                 "enabled": $("toggle#voice-search").attr("value") === "true" ?? false,
                 "voice-description-column": $("input#voice-description-column").val() ?? "",
@@ -304,12 +299,36 @@ async function save() {
                 "print-price-column": $("input#print-price-column").val() ?? "",
                 "print-retail-price-column": $("input#print-retail-price-column").val() ?? "",
                 "print-show-retail": $("toggle#print-show-retail").attr("value") ?? false
-            }
-        },
-        columns: currentOptions.columns
+            },
+            "columns": currentOptions.options.columns
+        }
     };
 
     console.log(newOptions);
+    try {
+        const response = await $.ajax({
+            url: `${baseURL}/api/location/${id}/`,
+            method: "PATCH",
+            data: JSON.stringify(newOptions),
+            contentType: "application/json",
+            headers: {"Accept": "application/json"},
+        })
+        console.log(response);
+    } catch (e) {
+        console.log(e);
+    }
+
+    if(shouldUpdateColumns) {
+        const response = await $.ajax({
+            url: `${baseURL}/api/location/${id}/columns`,
+            method: "PATCH",
+            data: JSON.stringify(currentOptions.columns),
+            contentType: "application/json",
+            headers: {"Accept": "application/json"},
+        });
+        console.log(response);
+    }
+
 }
 
 async function reset() {
