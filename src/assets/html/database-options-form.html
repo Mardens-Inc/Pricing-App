@@ -1,5 +1,5 @@
 <link rel="stylesheet" href="assets/css/database-options-form.css">
-<h1>Options</h1>
+<h1>Database Settings</h1>
 <div id="options-form" class="col" action="javascript:void(0);">
     <div class="list grid fill" id="icons"></div>
     <div class="floating-input fill">
@@ -16,10 +16,12 @@
             <label for="database-po">PO#</label>
         </div>
     </div>
-
+    <h2>Columns</h2>
+    <p>Drag columns around to order them or click the <i class="fa-solid fa-ellipsis-vertical"></i> for more information.</p>
     <div class="row fill" id="column-list">
     </div>
 
+    <h2>Extra Options</h2>
     <toggle id="print" name="print" value="false">Can print label?</toggle>
     <div class="print-form fill extra-section col" toggle-hidden="print">
         <div class="row fill">
@@ -60,6 +62,7 @@
             </select>
         </div>
     </div>
+
 
     <div id="action-button-row" class="row fill center horizontal">
         <button id="save" class="primary" type="submit">Save</button>
