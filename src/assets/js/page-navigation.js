@@ -2,25 +2,37 @@ import DatabaseList from "./database-list.js";
 import DirectoryList from "./directory-list.js";
 import {startLoading, stopLoading} from "./loading.js";
 
-
-$("#edit-button").css('display', 'none');
+const editButton = $("#edit-button");
+editButton.css('display', 'none');
 const directory = new DirectoryList();
+/**
+ * @type {DatabaseList|null}
+ */
 let database = null;
 if (window.localStorage.getItem("loadedDatabase") !== null) {
     database = new DatabaseList(window.localStorage.getItem("loadedDatabase"));
-    $("#edit-button").css('display', "");
+    await database.load();
+    editButton.css('display', "");
 } else {
     startLoading({fullscreen: true})
     directory.loadView("", true).then(() => stopLoading());
 }
-$(directory).on("loadExternalView", (event, id) => {
+$(directory).on("loadExternalView", async (event, id) => {
     database = new DatabaseList(id);
+    await database.load();
     window.localStorage.setItem("loadedDatabase", id);
-    $("#edit-button").css('display', "");
+    editButton.css('display', "");
+});
+$(directory).on('loadEdit', async (event, id) => {
+    database = new DatabaseList(id);
+    await database.load();
+    window.localStorage.setItem("loadedDatabase", id);
+    editButton.css('display', "");
+    await database.edit();
 });
 $(directory).on("unloadExternalView", (event, id) => {
     database = null;
-    $("#edit-button").css('display', 'none');
+    editButton.css('display', 'none');
     window.localStorage.removeItem("loadedDatabase");
 });
 $(document).on("search", async (event, data) => {
@@ -29,5 +41,11 @@ $(document).on("search", async (event, data) => {
         results = await database.search(data);
     } else {
         results = await directory.search(data);
+    }
+});
+
+editButton.on("click", async () => {
+    if (database !== null) {
+        await database.edit();
     }
 });
