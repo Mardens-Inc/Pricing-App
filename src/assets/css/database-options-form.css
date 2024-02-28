@@ -55,6 +55,7 @@
         justify-content: space-between;
         padding: 10px;
         gap: 1rem;
+        flex-wrap: wrap;
 
         .column-item {
             cursor: grab;
@@ -120,6 +121,11 @@
 
             &:not(.hidden):hover {
                 background-color: #2f2f2f;
+            }
+
+
+            &.dragging:hover {
+                background-color: #6a7b68;
             }
         }
     }
