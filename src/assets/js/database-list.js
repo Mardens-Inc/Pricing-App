@@ -19,33 +19,41 @@ export default class DatabaseList {
      * @return {void}
      */
     constructor(id) {
-        startLoading({fullscreen: true});
         this.list = $(".list");
         this.items = [];
         this.id = id;
-        this.getListHeader().then(async ({name, location, po, image, options, posted}) => {
-            if (image !== "") {
-                img.attr('src', image);
-                img.css("border-radius", "12px");
-            }
-            title.html(name);
-            subtitle.html(`${location} - ${po}`).css("display", "");
-            backButton.css("display", "");
-            this.list.html("");
-            $(".pagination").html("");
-            $("#search").val("");
-            await this.loadView("", true);
-            this.list.empty();
-            if (this.items.length === 0) {
-                this.list.append(await buildImportFilemakerForm())
-            } else {
-                if (options.length === 0 || options.layout === null || options.layout === "") {
-                    this.list.append(await buildOptionsForm(id));
-                }
-            }
+    }
 
-            $(document).trigger("load")
-        }).then(() => stopLoading());
+    async load() {
+        startLoading({fullscreen: true});
+        const {name, location, po, image, options, posted} = await this.getListHeader();
+        if (image !== "") {
+            img.attr('src', image);
+            img.css("border-radius", "12px");
+        }
+        this.options = options;
+        title.html(name);
+        subtitle.html(`${location} - ${po}`).css("display", "");
+        backButton.css("display", "");
+        this.list.html("");
+        $(".pagination").html("");
+        $("#search").val("");
+        try {
+            await this.loadView("", true);
+        } catch (e) {
+            console.error(e)
+        }
+
+        if (this.items.length === 0) {
+            this.list.append(await buildImportFilemakerForm())
+        } else {
+            if (options.length === 0 || options.layout === null || options.layout === "") {
+                await this.edit();
+            }
+        }
+
+        $(document).trigger("load")
+        stopLoading()
     }
 
     /**
@@ -57,8 +65,9 @@ export default class DatabaseList {
      * @return {Promise<void>} - A promise that resolves once the view is loaded and displayed.
      */
     async loadView(query, force = false) {
-
         const newList = await this.getListItems(query);
+        console.log(newList)
+
         if (force || newList !== this.items) {
             this.items = newList;
             await this.buildList()
@@ -111,14 +120,66 @@ export default class DatabaseList {
      * @returns {Promise<void>} A promise that resolves when the list is built.
      */
     async buildList() {
-        this.list.html("");
+        const table = this.buildColumns();
+        const tbody = $("<tbody>");
         this.items.forEach((item) => {
-            const listItem = $("<div>").addClass("list-item");
-            const name = $("<h3>").html(item["name"]);
-            const location = $("<p>").html(item["location"]);
-            listItem.append(name, location);
-            this.list.append(listItem);
+            const tr = $("<tr class='list-item'>");
+            for (const column of this.options.columns) {
+                if (column.visible) {
+                    const attributes = column.attributes ?? [];
+                    let text = item[column.name];
+                    if (attributes.includes("price")) {
+                        try {
+                            text = parseFloat(text).toFixed(2);
+                            text = text.toString().toLocaleString("en-US", {style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2, currencyDisplay: "symbol"});
+                            text = `$${text}`;
+                        } catch (e) {
+                            console.error(e)
+                        }
+                    }
+                    const td = $("<td>").html(text === "" ? "-" : text);
+                    tr.append(td);
+                }
+            }
+            const extra = $("<td></td>")
+            extra.css("justify-content", "end")
+            const extraButton = $(`<button><i class='fa fa-ellipsis-vertical'></i></button>`);
+            extraButton.on("click", () => {
+                openDropdown(extraButton, {
+                    "Print": () => {
+                        console.log("Print")
+                    },
+                    "Edit": () => {
+                        console.log("Edit")
+                    },
+                    "Delete": () => {
+                        console.log("Delete")
+                    }
+                })
+            });
+            extra.append(extraButton);
+            tr.append(extra);
+            tbody.append(tr);
         });
+        this.list.empty();
+        table.append(tbody);
+        this.list.append(table);
+    }
+
+    buildColumns() {
+        const table = $("<table></table>");
+        const columns = this.options.columns.filter(c => c.visible);
+        const thead = $("<thead>");
+
+        for (const column of columns) {
+            const th = $("<th>").html(column.name);
+            thead.append(th);
+        }
+
+        thead.append($("<th>"));
+
+        table.append(thead);
+        return table;
     }
 
     buildItemizedList() {
@@ -147,6 +208,17 @@ export default class DatabaseList {
         }).join("\n");
         download("export.csv", csv);
 
+    }
+
+    async edit() {
+        this.list.empty();
+        this.list.append(await buildOptionsForm(this.id, async () => {
+            window.location.reload();
+            // await this.loadView("", true);
+            // console.log("Reloaded")
+        }));
+
+        $(document).trigger("load")
     }
 }
 
