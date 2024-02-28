@@ -112,7 +112,6 @@ export default class DatabaseList {
      */
     async buildList() {
         this.list.html("");
-        console.log(this.items)
         this.items.forEach((item) => {
             const listItem = $("<div>").addClass("list-item");
             const name = $("<h3>").html(item["name"]);
