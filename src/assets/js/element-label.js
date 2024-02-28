@@ -1,5 +1,7 @@
 // Create a new <div> with the class "label"
 const label = $(`<div class="label"></div>`)
+$(document).on("load", loadLabels);
+
 if ($('.label').length == 0) {
     // Append the create "label" <div> to the <body> of the document
     $('body').append(label)
