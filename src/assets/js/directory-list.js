@@ -160,11 +160,15 @@ export default class DirectoryList {
             const editButton = $(`<button class="edit-list-button" title="Edit product"><img src="assets/images/icons/edit.svg" alt=""></button>`);
             const moreButton = $(`<button class="more-options" data-title="More Options" tabindex="0"><img src="assets/images/icons/more.svg" alt=""></button>`);
 
+            editButton.on('click', ()=>{
+                $(this).trigger("loadEdit", [item["id"]]);
+            })
+
             // Attach an event listener to the more options button that opens a dropdown menu
             moreButton.on('click', (e) => {
                 openDropdown(moreButton, {
                     "Edit": () => {
-                        console.log("Edit")
+                        $(this).trigger("loadEdit", [item["id"]]);
                     },
                     "Delete": () => {
                         console.log("Delete")
