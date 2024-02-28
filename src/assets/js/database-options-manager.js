@@ -24,6 +24,7 @@
  * @property {Object[]} columns
  * @property {string} columns.name
  * @property {boolean} columns.visible
+ * @property {string[]} columns.attributes
  */
 
 /**
@@ -33,6 +34,8 @@
  * @property {string} file
  */
 
+
+import {startLoading, stopLoading} from "./loading.js";
 
 /**+
  * @type {ListHeading}
@@ -46,14 +49,17 @@ let originalOptions = {};
  * @type {string[]}
  */
 let originalColumns = [];
+let renamedColumns = [];
 
 /**
  * Builds the options form for a given id.
  *
  * @param {string} id - The id to retrieve the options for.
+ * @param {function} onclose - The function to call when the form is closed.
  * @return {Promise<JQuery>} - A Promise that resolves to the HTML form representing the options.
  */
-async function buildOptionsForm(id) {
+async function buildOptionsForm(id, onclose) {
+    startLoading({fullscreen: true})
     const html = $(await $.ajax({url: "assets/html/database-options-form.html", method: "GET"}));
     currentOptions = await getCurrentOptions(id);
     originalOptions = {...currentOptions};
@@ -61,7 +67,12 @@ async function buildOptionsForm(id) {
     await buildIconList(html);
     createColumnList(html);
     setDefaultOptionValues(html);
-    html.find("#save").on("click", ()=>save(id));
+    html.find("#save").on("click", async () => {
+        await save(id);
+        onclose();
+    });
+    html.find("#cancel").on("click", onclose);
+    stopLoading();
     return html;
 }
 
@@ -128,7 +139,6 @@ function createColumnList(html) {
         });
     }
     currentOptions.options.columns.sort((a, b) => a.visible === b.visible ? 0 : a.visible ? -1 : 1);
-    console.log(currentOptions.options.columns);
     for (const columnItem of currentOptions.options.columns) {
         if (columnItem.name === "id") continue; // skip the id column
 
@@ -139,11 +149,41 @@ function createColumnList(html) {
         <div class="row fill column-item${(visible ? "" : " hidden")}" name="${column}">
             <i class="fa-solid fa-grip-vertical"></i>
             <div class="name fill">${column}</div>
-            <i class="fa-solid fa-ellipsis-vertical"></i>
+            <div class="attributes row"></div>
+            <i class="fa-solid fa-ellipsis-vertical" title="More Options..."></i>
         </div>`);
+
+        // add attributes
+        const attributes = [
+            {name: "price", icon: "fa fa-dollar-sign", "description": "Mark this item as a price column, which will be used to format it as currency."},
+            {name: "search", icon: "fa-solid fa-magnifying-glass", "description": "Mark this item as a search column, which will be used to search for items."},
+            {name: "quantity", icon: "fa-solid fa-1", "description": "Mark this item as a quantity column, which will be used to calculate the total price of an item and incrementing and decrementing inventory."},
+        ];
+        for (const attribute of attributes) {
+            let column = currentOptions.options.columns.find(c => c.name === listItem.attr("name"));
+            if (column.attributes === undefined) column.attributes = [];
+            const attributeHTML = $(`<i class="${attribute.icon} ${column.attributes.includes(attribute.name) ? "active" : ""}" title="${attribute.description}"></i>`);
+            attributeHTML.on("click", (e) => {
+                // toggle the attribute
+                const attributes = column.attributes ?? [];
+                if (attributes.includes(attribute.name)) {
+                    attributes.splice(attributes.indexOf(attribute.name), 1);
+                    $(e.currentTarget).removeClass("active");
+                } else {
+                    attributes.push(attribute.name);
+                    $(e.currentTarget).addClass("active");
+                }
+                currentOptions.options.columns = currentOptions.options.columns.map(c => c.name === column.name ? {...c, attributes: attributes} : c);
+                console.log(currentOptions.options.columns)
+            });
+
+            listItem.find(".attributes").append(attributeHTML);
+        }
+
         let isDragging = false;
         listItem.on("mousedown", (e) => {
-            if (e.target.classList.contains("fa-ellipsis-vertical")) return;
+            if (e.target.classList.contains("fa-ellipsis-vertical") || e.target.tagName === "I") return;
+            console.log(e.target)
             const item = $(e.currentTarget);
             if (item.hasClass("hidden") || item.find(".name")[0].tagName === "INPUT") return; // don't drag if rename input is open or if the item is hidden
 
@@ -160,7 +200,6 @@ function createColumnList(html) {
             }
 
             item.css("opacity", 0);
-            // item.css('display', 'none');
 
             clone.addClass("dragging");
             clone.css("position", "absolute");
@@ -228,7 +267,13 @@ function createColumnList(html) {
                         currentOptions.options.columns = currentOptions.options.columns.map(c => c.name === column ? {...c, name: input.val()} : c);
                         listItem.find(".name").replaceWith(`<div class="name fill">${input.val()}</div>`);
                         listItem.attr("name", input.val());
-                        console.log(currentOptions.options.columns);
+                        // check if renamed column already contains the old column name and update it
+                        if (renamedColumns.filter(c => c.old === column).length > 0) {
+                            renamedColumns = renamedColumns.map(c => c.old === column ? {old: column, new: input.val()} : c);
+                        } else {
+                            renamedColumns.push({old: column, new: input.val()});
+                        }
+                        console.log(renamedColumns);
                     });
 
                     input.on("keyup", (e) => {
@@ -279,7 +324,6 @@ function createColumnList(html) {
 
 
 async function save(id) {
-    const shouldUpdateColumns = currentOptions.columns !== originalColumns;
     // build new options object
     const newOptions = {
         name: $("input#database-name").val(),
@@ -304,7 +348,23 @@ async function save(id) {
         }
     };
 
-    console.log(newOptions);
+    for (const column of renamedColumns) {
+        try {
+            console.log(`${baseURL}/api/location/${id}/columns/${column.old}`)
+            const response = await $.ajax({
+                url: `${baseURL}/api/location/${id}/columns/${column.old}`,
+                method: "PATCH",
+                data: JSON.stringify({name: column.new}),
+                contentType: "application/json",
+                headers: {"Accept": "application/json"},
+            });
+            console.log(response)
+        } catch (e) {
+            console.error(e);
+            return;
+        }
+    }
+
     try {
         const response = await $.ajax({
             url: `${baseURL}/api/location/${id}/`,
@@ -318,16 +378,6 @@ async function save(id) {
         console.log(e);
     }
 
-    if(shouldUpdateColumns) {
-        const response = await $.ajax({
-            url: `${baseURL}/api/location/${id}/columns`,
-            method: "PATCH",
-            data: JSON.stringify(currentOptions.columns),
-            contentType: "application/json",
-            headers: {"Accept": "application/json"},
-        });
-        console.log(response);
-    }
 
 }
 
