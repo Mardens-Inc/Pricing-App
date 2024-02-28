@@ -151,9 +151,6 @@ function createColumnList(html) {
 
             isDragging = true;
 
-            const index = item.index();
-            const parent = item.parent();
-            const offset = item.offset();
             const height = item.height();
             const width = item.width();
             const clone = item.clone();
@@ -165,57 +162,64 @@ function createColumnList(html) {
             }
 
             item.css("opacity", 0);
-            clone.find('i').remove();
+            // item.css('display', 'none');
 
             clone.addClass("dragging");
             clone.css("position", "absolute");
-            clone.css("top", offset.top);
-            clone.css("left", offset.left);
-            clone.css("width", width);
+            clone.css('background-color', '#6a7b68')
+
+            clone.css("width", 'auto');
             clone.css("height", height);
             clone.css("z-index", 100);
             clone.css("box-shadow", "2px 2px 5px 0px rgba(0, 0, 0, 0.5)");
             clone.attr('column', column);
-            clone.appendTo("body");
-            const originalIndex = index;
-            clone.data("originalIndex", originalIndex);
+            list.append(clone);
+            $("body").trigger('mousemove', e);
         });
 
         $("body").on("mousemove", (e) => {
-            if (!isDragging) return;
+            if (!isDragging || !Number.isFinite(e.clientX) || !Number.isFinite(e.clientY)) return;
             const clone = $(".column-item.dragging");
-            const closestColumnItemToMousePosition = $(document.elementFromPoint(e.clientX, e.clientY)).closest(".column-item");
+            const item = $(`.column-item[name="${clone.attr("column")}"]`);
+            const listPosition = $("main > .list").offset();
+            // const listPosition = list.offset();
+            const closestColumnItemToMousePosition = $(document.elementFromPoint(e.clientX, e.clientY + listPosition.top - (clone.height() * 4))).closest(".column-item:not(.dragging)");
             if (closestColumnItemToMousePosition.length > 0) {
                 // move original item to the new position
                 const index = closestColumnItemToMousePosition.index();
                 const parent = closestColumnItemToMousePosition.parent();
                 const originalIndex = clone.index();
-                console.log("originalIndex", originalIndex);
-                closestColumnItemToMousePosition.before(clone);
+                if (originalIndex < index) {
+                    closestColumnItemToMousePosition.after(clone);
+                    closestColumnItemToMousePosition.after(item);
+                } else {
+                    closestColumnItemToMousePosition.before(clone);
+                    closestColumnItemToMousePosition.before(item);
+                }
+                clone.attr("index", index);
+
             }
             clone.css("top", e.clientY - (clone.height() / 2));
+            // clone.css("top", e.clientY - (clone.height() / 2) - listPosition.top);
             clone.css("left", e.clientX - (clone.width() / 2));
         });
 
         $("body").on("mouseup", (e) => {
             if (!isDragging) return;
             console.log("mouseup")
-            $(".column-item.dragging").remove();
+            const clone = $(".column-item.dragging");
+            let newIndex = Number.parseInt(clone.attr("index")) - 1;
+            newIndex = newIndex < 0 ? 0 : newIndex > currentOptions.options.columns.length - 1 ? currentOptions.options.columns.length - 1 : newIndex;
+            const column = clone.attr("column");
+            clone.remove();
             isDragging = false;
-            const item = $(e.target).parent();
-            const index = item.index();
-            const parent = item.parent();
-            const originalIndex = item.data("originalIndex");
-            item.removeData("originalIndex");
-            item.remove();
-            parent.children().eq(index).before(item);
-            const columns = currentOptions.options.columns;
-            const column = columns.splice(originalIndex, 1);
-            listItem.css("opacity", 1);
-            columns.splice(index, 0, column[0]);
-
-            item.css("opacity", 1);
-
+            const item = $(`.column-item[name="${column}"]`);
+            item.css("opacity", '');
+            item.css('display', '');
+            let columns = currentOptions.options.columns.filter(c => c.name !== column);
+            columns.splice(newIndex, 0, currentOptions.options.columns.find(c => c.name === column));
+            currentOptions.options.columns = columns;
+            createColumnList(html);
         });
 
         listItem.find("i.fa-ellipsis-vertical").on("click", (e) => {
