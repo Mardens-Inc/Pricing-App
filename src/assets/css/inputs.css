@@ -310,4 +310,5 @@ toggle {
 [toggle-hidden] {
     background-color: #272727;
     padding: 1rem;
+    border-radius: 5px;
 }
