@@ -1,10 +1,19 @@
 import DatabaseList from "./database-list.js";
 import DirectoryList from "./directory-list.js";
 import {startLoading, stopLoading} from "./loading.js";
+import {loadSettings, openSettings} from "./settings.js";
+
+loadSettings();
 
 const list = $("main > .list")
 resetListElement()
 const editButton = $("#edit-button");
+
+$("#settings-button").on("click", async () => {
+    await openSettings();
+});
+
+
 editButton.css('display', 'none');
 const directory = new DirectoryList();
 /**
@@ -17,7 +26,10 @@ if (window.localStorage.getItem("loadedDatabase") !== null) {
     editButton.css('display', "");
 } else {
     startLoading({fullscreen: true})
-    directory.loadView("", true).then(() => stopLoading());
+    directory.loadView("", true).then(() => stopLoading())
+        // .then(async()=>{
+        //     await openSettings();
+        // });
 }
 $(directory).on("loadExternalView", async (event, id) => {
     resetListElement()
@@ -42,11 +54,10 @@ $(directory).on("unloadExternalView", (event, id) => {
 });
 $(document).on("search", async (event, data) => {
     resetListElement()
-    let results = [];
     if (database !== null) {
-        results = await database.search(data);
+        await database.search(data);
     } else {
-        results = await directory.search(data);
+        await directory.search(data);
     }
 });
 
