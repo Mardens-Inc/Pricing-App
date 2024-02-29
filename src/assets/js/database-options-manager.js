@@ -10,6 +10,8 @@
  */
 /**
  * @typedef {Object} ListOptions
+ * @property {bool} allow-inventorying
+ * @property {bool} allow-additions
  * @property {Object} print-form
  * @property {boolean} print-form.enabled
  * @property {string} print-form.print-label
@@ -155,26 +157,44 @@ function createColumnList(html) {
 
         // add attributes
         const attributes = [
-            {name: "price", icon: "fa fa-dollar-sign", "description": "Mark this item as a price column, which will be used to format it as currency."},
-            {name: "search", icon: "fa-solid fa-magnifying-glass", "description": "Mark this item as a search column, which will be used to search for items."},
-            {name: "quantity", icon: "fa-solid fa-1", "description": "Mark this item as a quantity column, which will be used to calculate the total price of an item and incrementing and decrementing inventory."},
+            {name: "primary", icon: "fa-solid fa-key", unique: true, "description": "Mark this item as the primary key, which will be used to uniquely identify each item.<br><b>There can only be one primary key.</b>"},
+            {name: "price", icon: "fa fa-dollar-sign", unique: false, "description": "Mark this item as a price column, which will be used to format it as currency."},
+            {name: "search", icon: "fa-solid fa-magnifying-glass", unique: false, "description": "Mark this item as a search column, which will be used to search for items."},
+            {name: "quantity", icon: "fa-solid fa-1", unique: true, "description": "Mark this item as a quantity column, which will be used to calculate the total price of an item and incrementing and decrementing inventory.<br><b>There can only be one quantity column.</b>"},
         ];
         for (const attribute of attributes) {
             let column = currentOptions.options.columns.find(c => c.name === listItem.attr("name"));
             if (column.attributes === undefined) column.attributes = [];
-            const attributeHTML = $(`<i class="${attribute.icon} ${column.attributes.includes(attribute.name) ? "active" : ""}" title="${attribute.description}"></i>`);
+            const attributeHTML = $(`<i class="attribute ${attribute.icon} ${attribute.name} ${column.attributes.includes(attribute.name) ? "active" : ""}" title="${attribute.description}"></i>`);
             attributeHTML.on("click", (e) => {
                 // toggle the attribute
+                let column = currentOptions.options.columns.find(c => c.name === listItem.attr("name"));
                 const attributes = column.attributes ?? [];
                 if (attributes.includes(attribute.name)) {
+                    console.log(`removing ${attribute.name} from ${column.name}`)
                     attributes.splice(attributes.indexOf(attribute.name), 1);
                     $(e.currentTarget).removeClass("active");
                 } else {
+                    console.log(`adding ${attribute.name} to ${column.name}`)
+                    if (attribute.unique) {
+                        console.log(`removing ${attribute.name} from all other columns`)
+                        $(`i.attribute.active.${attribute.name}`).removeClass("active");
+                        // remove the attribute from all other columns
+                        for (const c of currentOptions.options.columns) {
+                            if(c.name === column.name) continue;
+                            if (c.attributes !== undefined && c.attributes.includes(attribute.name))
+                                console.log(`removing ${attribute.name} from ${c.name}`)
+                            c.attributes = c.attributes.filter(a => a !== attribute.name);
+                        }
+                    }
+
                     attributes.push(attribute.name);
                     $(e.currentTarget).addClass("active");
                 }
                 currentOptions.options.columns = currentOptions.options.columns.map(c => c.name === column.name ? {...c, attributes: attributes} : c);
-                console.log(currentOptions.options.columns)
+                console.log(currentOptions.options.columns.map(i => {
+                    return {name: i.name, attribute: i.attributes}
+                }))
             });
 
             listItem.find(".attributes").append(attributeHTML);
@@ -204,6 +224,7 @@ function createColumnList(html) {
             clone.addClass("dragging");
             clone.css("position", "absolute");
             clone.css('background-color', '#6a7b68')
+            clone.find('.attributes').remove();
 
             clone.css("width", 'auto');
             clone.css("height", height);
@@ -319,11 +340,13 @@ function createColumnList(html) {
             });
         });
         list.append(listItem);
+        loadLabels();
     }
 }
 
 
 async function save(id) {
+    startLoading({fullscreen: true});
     // build new options object
     const newOptions = {
         name: $("input#database-name").val(),
@@ -377,6 +400,8 @@ async function save(id) {
     } catch (e) {
         console.log(e);
     }
+
+    stopLoading();
 
 
 }
