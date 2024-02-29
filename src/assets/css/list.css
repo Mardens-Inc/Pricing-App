@@ -84,6 +84,13 @@
             cursor: pointer;
         }
 
+        &.selected{
+            background-color: #6a7b68;
+            &:hover{
+                background-color: #778d75;
+            }
+        }
+
 
     }
 
