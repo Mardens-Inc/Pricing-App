@@ -64,6 +64,7 @@ async function buildOptionsForm(id, onclose) {
     startLoading({fullscreen: true})
     const html = $(await $.ajax({url: "assets/html/database-options-form.html", method: "GET"}));
     currentOptions = await getCurrentOptions(id);
+    console.log(currentOptions)
     originalOptions = {...currentOptions};
     originalColumns = currentOptions.columns;
     await buildIconList(html);
@@ -129,6 +130,8 @@ function setDefaultOptionValues(html) {
     html.find("toggle#show-date").attr("value", currentOptions.options["show-date"]);
     html.find("toggle#voice-search").attr("value", currentOptions.options["voice-search"]);
     html.find("toggle#print").attr("value", currentOptions.options["print"]);
+    html.find("toggle#allow-inventorying").attr("value", currentOptions.options["allow-inventorying"] ?? false);
+    html.find("toggle#allow-additions").attr("value", currentOptions.options["allow-additions"] ?? false);
 }
 
 function createColumnList(html) {
@@ -354,6 +357,8 @@ async function save(id) {
         po: $("input#database-po").val(),
         image: $("input[name='icon']:checked").val(),
         options: {
+            "allow-inventorying": $("toggle#allow-inventorying").attr("value") === "true" ?? false,
+            "allow-additions": $("toggle#allow-additions").attr("value") === "true" ?? false,
             "voice-search-form": {
                 "enabled": $("toggle#voice-search").attr("value") === "true" ?? false,
                 "voice-description-column": $("input#voice-description-column").val() ?? "",
