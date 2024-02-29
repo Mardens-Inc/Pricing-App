@@ -2,7 +2,7 @@
 const label = $(`<div class="label"></div>`)
 $(document).on("load", loadLabels);
 
-if ($('.label').length == 0) {
+if ($('.label').length === 0) {
     // Append the create "label" <div> to the <body> of the document
     $('body').append(label)
 }
@@ -11,7 +11,6 @@ $(document).on("mousemove", (e) => {
     const hoverElement = $(e.target)
     if (hoverElement.attr('data-title')) {
         show(hoverElement)
-        label.text(hoverElement.attr('data-title'))
     } else {
         hide()
     }
@@ -31,7 +30,7 @@ function show(element) {
     // Get the "title" attribute of the element which is moused over.
     const title = element.attr('data-title')
     // Set the text of the "label" to the "title" of the element
-    label.text(title)
+    label.html(title)
 
     // Calculate the initial x and y coordinates for the "label",
     // the location is calculated to be just below the element.
