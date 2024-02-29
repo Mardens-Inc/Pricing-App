@@ -3,9 +3,6 @@ async function buildInventoryingForm(allowAdditions, columns) {
         $("main > .list").addClass('row')
         $("main > .list").removeClass('col')
 
-
-        console.log(columns)
-
         const inventoryingForm = $(`<form id="inventorying-form" class="col fill" action="javascript:void(0);"></form>`);
 
         inventoryingForm.append(`<h1>Inventorying</h1>`);
@@ -25,17 +22,16 @@ async function buildInventoryingForm(allowAdditions, columns) {
         const primaryKey = primaryKeyColumn[0].name;
         const quantity = quantityColumn[0].name;
 
-        console.log(primaryKey, quantity)
 
         const primaryInput = $(`
             <div class="floating-input">
-                <input type="text" id="primary-key" name="primary-key" required placeholder="">
+                <input type="text" id="primary-key" name="primary-key" required placeholder="" autocomplete="off">
                 <label for="primary-key">${primaryKey} <i class="fa-solid fa-key"></i></label>
             </div>`)
 
         const quantityInput = $(`
             <div class="floating-input">
-                <input type="text" id="quantity" name="quantity" required placeholder="">
+                <input type="text" id="quantity" name="quantity" required placeholder="" autocomplete="off">
                 <label for="primary-key">${quantity}</label>
             </div>`)
 
@@ -46,7 +42,7 @@ async function buildInventoryingForm(allowAdditions, columns) {
             if (column.attributes.includes('primary') || column.attributes.includes('quantity') || column.attributes.includes('readonly')) continue;
             const input = $(`
                 <div class="floating-input">
-                    <input type="text" id="${column.name}" name="${column.name}" placeholder="">
+                    <input type="text" id="${column.name}" name="${column.name}" placeholder="" autocomplete="off">
                     <label for="${column.name}">${column.name}</label>
                 </div>`);
             additionSection.append(input);
@@ -62,10 +58,22 @@ async function buildInventoryingForm(allowAdditions, columns) {
 
         addToggle.on("toggle", (e, data) => {
             const value = data.value;
-            if (value && addToggle.text() === "Add?") {
-                submitButton.text("Add")
+            if (value) {
+                if (addToggle.text() === "Add?")
+                    submitButton.text("Add")
+                const inputs = additionSection.find("input");
+                for (const input of inputs) {
+                    $(input).prop('required', true);
+                }
+                inputs.val('');
+
             } else {
                 submitButton.text("Update")
+                const inputs = additionSection.find("input");
+                for (const input of inputs) {
+                    $(input).prop('required', false);
+                }
+                inputs.val('');
             }
         });
 
@@ -107,6 +115,11 @@ async function buildInventoryingForm(allowAdditions, columns) {
         console.error(error);
         return $("<p>Failed to load inventorying form</p>");
     }
+}
+
+function addItem() {
+    const form = $('#inventorying-form');
+
 }
 
 
