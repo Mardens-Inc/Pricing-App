@@ -123,6 +123,9 @@ input, .input {
 
     input {
         width: 100%;
+        max-width: -webkit-fill-available;
+        max-width: -moz-available;
+        max-width: fill-available;
         padding-block: 1rem;
 
         &::placeholder {
