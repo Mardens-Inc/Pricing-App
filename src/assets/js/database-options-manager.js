@@ -164,6 +164,7 @@ function createColumnList(html) {
             {name: "price", icon: "fa fa-dollar-sign", unique: false, "description": "Mark this item as a price column, which will be used to format it as currency."},
             {name: "search", icon: "fa-solid fa-magnifying-glass", unique: false, "description": "Mark this item as a search column, which will be used to search for items."},
             {name: "quantity", icon: "fa-solid fa-1", unique: true, "description": "Mark this item as a quantity column, which will be used to calculate the total price of an item and incrementing and decrementing inventory.<br><b>There can only be one quantity column.</b>"},
+            {name: "readonly", icon: "fa-solid fa-lock", unique: false, "description": "Mark this item as readonly, which will prevent it from being edited and remove it from the addition form."},
         ];
         for (const attribute of attributes) {
             let column = currentOptions.options.columns.find(c => c.name === listItem.attr("name"));
