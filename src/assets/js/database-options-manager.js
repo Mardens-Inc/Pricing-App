@@ -161,9 +161,11 @@ function createColumnList(html) {
         // add attributes
         const attributes = [
             {name: "primary", icon: "fa-solid fa-key", unique: true, "description": "Mark this item as the primary key, which will be used to uniquely identify each item.<br><b>There can only be one primary key.</b>"},
-            {name: "price", icon: "fa fa-dollar-sign", unique: false, "description": "Mark this item as a price column, which will be used to format it as currency."},
+            {name: "price", icon: "fa fa-tag", unique: false, "description": "Mark this item as a price column, which will be used to format it as currency."},
             {name: "search", icon: "fa-solid fa-magnifying-glass", unique: false, "description": "Mark this item as a search column, which will be used to search for items."},
             {name: "quantity", icon: "fa-solid fa-1", unique: true, "description": "Mark this item as a quantity column, which will be used to calculate the total price of an item and incrementing and decrementing inventory.<br><b>There can only be one quantity column.</b>"},
+            {name: "description", icon: "fa-solid fa-align-justify", unique: true, "description": "Mark this as the description column, this will be used for voice search.<br><b>There can only be one description column.</b>"},
+            {name: "mp", icon: "fa-solid fa-percent", unique: true, "description": "Mark this as the Marden's Price column.<br><b>There can only be one Marden's Price column.</b>"},
             {name: "readonly", icon: "fa-solid fa-lock", unique: false, "description": "Mark this item as readonly, which will prevent it from being edited and remove it from the addition form."},
         ];
         for (const attribute of attributes) {
