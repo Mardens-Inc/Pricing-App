@@ -2,6 +2,7 @@ import {buildOptionsForm} from "./database-options-manager.js";
 import {startLoading, stopLoading} from "./loading.js";
 import {buildImportFilemakerForm} from "./import-filemaker.js";
 import {download} from "./filesystem.js";
+import {buildInventoryingForm} from "./database-inventorying.js";
 
 /**
  * Represents a list of items in a database.
@@ -123,7 +124,7 @@ export default class DatabaseList {
         const table = this.buildColumns();
         const tbody = $("<tbody>");
         this.items.forEach((item) => {
-            const tr = $("<tr class='list-item'>");
+            const tr = $(`<tr id='${item.id}' class='list-item'>`);
             for (const column of this.options.columns) {
                 if (column.visible) {
                     const attributes = column.attributes ?? [];
@@ -157,6 +158,22 @@ export default class DatabaseList {
                     }
                 })
             });
+
+            tr.on('click', e=>{
+                if(e.target.tagName === "BUTTON") return;
+                tbody.find(`tr:not(#${item.id})`).removeClass("selected");
+
+                if(tr.hasClass("selected")){
+                    tr.removeClass("selected");
+                    $(document).trigger("item-selected", null);
+                    return;
+                }
+
+                tr.toggleClass("selected");
+                $(document).trigger("item-selected", item);
+            })
+
+
             extra.append(extraButton);
             tr.append(extra);
             tbody.append(tr);
@@ -164,10 +181,15 @@ export default class DatabaseList {
         this.list.empty();
         table.append(tbody);
         this.list.append(table);
+
+        if(this.options["allow-inventorying"])
+        {
+            this.list.append(await buildInventoryingForm(this.options["allow-inventorying"], this.options.columns));
+        }
     }
 
     buildColumns() {
-        const table = $("<table></table>");
+        const table = $("<table class='fill col'></table>");
         const columns = this.options.columns.filter(c => c.visible);
         const thead = $("<thead>");
 
@@ -188,12 +210,11 @@ export default class DatabaseList {
     /**
      * Retrieves the header information for the specified location.
      *
-     * @return {Promise<Object>} - A promise that resolves to an object containing the header information.
+     * @return {Promise<ListHeading>} - A promise that resolves to an object containing the header information.
      */
     async getListHeader() {
         const url = `${baseURL}/api/location/${this.id}/?headings=true`;
-        const json = await $.ajax({url: url, method: "GET"});
-        return {name: json["name"], location: json["location"], po: json["po"], image: json["image"], options: json["options"], posted: new Date(json["post_date"])};
+        return await $.ajax({url: url, method: "GET"});
     }
 
     /**
