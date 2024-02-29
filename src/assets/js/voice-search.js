@@ -6,7 +6,7 @@ const searchInput = $("#search");
 
 searchInput.on('keyup', async (event) => search(searchInput.val()));
 $("#voice-search-button").on('click', () => {
-    let voice = new Voice();
+    let voice = new Voice(/[^a-zA-Z0-9\s]/g);
     if (voice.unsupported) {
         alert(`Your browser does not support voice recognition`);
         return;
