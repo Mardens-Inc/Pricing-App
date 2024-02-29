@@ -67,8 +67,6 @@ export default class DatabaseList {
      */
     async loadView(query, force = false) {
         const newList = await this.getListItems(query);
-        console.log(newList)
-
         if (force || newList !== this.items) {
             this.items = newList;
             await this.buildList()
@@ -83,6 +81,7 @@ export default class DatabaseList {
      */
     async search(query) {
         await this.loadView(query, true);
+        $(document).trigger("load")
         return this.items;
     }
 
@@ -101,11 +100,31 @@ export default class DatabaseList {
      * // Returns a promise that resolves with the complete list of items.
      */
     async getListItems(query = "") {
-        const url = `${baseURL}/api/location/${this.id}/`;
-        let newList = await $.ajax({url: url, method: "GET"});
-        newList = newList["results"]["items"];
-        if (query !== "") {
-            newList = newList.filter((item) => item["name"].toLowerCase().includes(query.toLowerCase()));
+        let newList = [];
+
+        if (query !== null && query !== undefined && query !== "") {
+            const searchColumns = this.options.columns.filter(c => c.attributes.includes("search"));
+            const primaryKey = this.options.columns.filter(c => c.attributes.includes("primary"))[0];
+            query = query.toLowerCase();
+
+            const url = `${baseURL}/api/location/${this.id}/search`;
+            const searchQuery = {
+                "query": query,
+                "columns": searchColumns.map(c => c.name),
+                "limit": 100,
+                "offset": 0,
+                "asc": true,
+                "sort": primaryKey === undefined ? "id" : primaryKey.name
+            }
+
+            newList = await $.ajax({url: url, method: "POST", data: JSON.stringify(searchQuery), contentType: "application/json", headers: {"Accept": "application/json"}});
+            newList = newList["items"];
+
+
+        } else {
+            const url = `${baseURL}/api/location/${this.id}/`;
+            newList = await $.ajax({url: url, method: "GET"});
+            newList = newList["results"]["items"];
         }
         return newList;
     }
@@ -147,8 +166,9 @@ export default class DatabaseList {
             const extraButton = $(`<button><i class='fa fa-ellipsis-vertical'></i></button>`);
             extraButton.on("click", () => {
                 openDropdown(extraButton, {
-                    "Print": () => {
+                    "Print":async () => {
                         console.log("Print")
+                        await window.__TAURI__.invoke("print", {printer: JSON.parse(window.localStorage.getItem("settings")).selected_printer, content: "Hello, World!"})
                     },
                     "Edit": () => {
                         console.log("Edit")
@@ -159,11 +179,11 @@ export default class DatabaseList {
                 })
             });
 
-            tr.on('click', e=>{
-                if(e.target.tagName === "BUTTON") return;
+            tr.on('click', e => {
+                if (e.target.tagName === "BUTTON") return;
                 tbody.find(`tr:not(#${item.id})`).removeClass("selected");
 
-                if(tr.hasClass("selected")){
+                if (tr.hasClass("selected")) {
                     tr.removeClass("selected");
                     $(document).trigger("item-selected", null);
                     return;
@@ -181,10 +201,9 @@ export default class DatabaseList {
         this.list.empty();
         table.append(tbody);
         this.list.append(table);
-
-        if(this.options["allow-inventorying"])
-        {
-            this.list.append(await buildInventoryingForm(this.options["allow-inventorying"], this.options.columns));
+        console.log(this.options)
+        if (this.options["allow-inventorying"]) {
+            this.list.append(await buildInventoryingForm(this.options["allow-additions"], this.options.columns));
         }
     }
 
