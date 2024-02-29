@@ -108,8 +108,6 @@ export default class DirectoryList {
             $(".pagination").html("");
             return;
         }
-        console.log(this.items)
-
         // Try to build pagination using the loaded list items
         try {
             // Initialize pagination for a HTML element with 'pagination' class
