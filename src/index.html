@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Pricing App</title>
@@ -51,7 +51,9 @@
     </div>
 </main>
 
-<script>const baseURL = "http://pricing.local";</script>
+<script>
+    const baseURL = window.location.protocol === "https:" ? "https://pricing-new.mardens.com" : "http://pricing.local";
+</script>
 <script src="assets/js/element-label.js"></script>
 <script src="assets/js/element-dropdown.js"></script>
 <script src="assets/js/pagination.js"></script>
