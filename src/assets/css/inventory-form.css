@@ -7,6 +7,6 @@
     button[type=submit]
     {
         width: 200px;
-        margin: auto;
+        margin-inline: auto;
     }
 }
