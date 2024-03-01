@@ -26,3 +26,5 @@ dist-ssr
 src/assets/fonts/**/*
 src/assets/fontawesome/**/*
 src/assets/js/jquery-3.7.1.min.js
+
+config.json
