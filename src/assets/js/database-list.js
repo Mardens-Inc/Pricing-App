@@ -45,7 +45,9 @@ export default class DatabaseList {
             console.error(e)
         }
 
+        this.importing = false;
         if (this.items.length === 0) {
+            this.importing = true;
             this.list.append(await buildImportFilemakerForm())
         } else {
             if (options.length === 0 || options.layout === null || options.layout === "") {
@@ -80,9 +82,11 @@ export default class DatabaseList {
      * @return {Promise<Array>} - A promise that resolves to an array of items matching the search query.
      */
     async search(query) {
-        await this.loadView(query, true);
-        $(document).trigger("load")
-        return this.items;
+        if (!this.importing) {
+            await this.loadView(query, true);
+            $(document).trigger("load")
+            return this.items;
+        }
     }
 
     /**
@@ -148,8 +152,9 @@ export default class DatabaseList {
                 if (column.visible) {
                     const attributes = column.attributes ?? [];
                     let text = item[column.name];
-                    if (attributes.includes("price")) {
+                    if (attributes.includes("price") || attributes.includes("mp")) {
                         try {
+                            text = text.replace(/[^0-9.]/g, "")
                             text = parseFloat(text).toFixed(2);
                             text = text.toString().toLocaleString("en-US", {style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2, currencyDisplay: "symbol"});
                             text = `$${text}`;
@@ -158,40 +163,50 @@ export default class DatabaseList {
                         }
                     }
                     const td = $("<td>").html(text === "" ? "-" : text);
+                    for (const attribute of attributes) {
+                        td.addClass(attribute)
+                    }
                     tr.append(td);
                 }
             }
             const extra = $("<td></td>")
-            extra.css("justify-content", "end")
+            extra.addClass("extra")
             const extraButton = $(`<button><i class='fa fa-ellipsis-vertical'></i></button>`);
+
             extraButton.on("click", () => {
-                openDropdown(extraButton, {
-                    "Print":async () => {
-                        console.log("Print")
-                        await window.__TAURI__.invoke("print", {printer: JSON.parse(window.localStorage.getItem("settings")).selected_printer, content: "Hello, World!"})
-                    },
-                    "Edit": () => {
-                        console.log("Edit")
-                    },
-                    "Delete": () => {
-                        console.log("Delete")
-                    }
-                })
-            });
-
-            tr.on('click', e => {
-                if (e.target.tagName === "BUTTON") return;
-                tbody.find(`tr:not(#${item.id})`).removeClass("selected");
-
-                if (tr.hasClass("selected")) {
-                    tr.removeClass("selected");
-                    $(document).trigger("item-selected", null);
-                    return;
+                if (this.options["print-form"].enabled) {
+                    openDropdown(extraButton, {
+                        "Print": async () => {
+                            console.log("Print")
+                            await window.__TAURI__.invoke("print", {printer: JSON.parse(window.localStorage.getItem("settings")).selected_printer, content: "Hello, World!"})
+                        },
+                        "Delete": () => {
+                            console.log("Delete")
+                        }
+                    })
+                } else {
+                    openDropdown(extraButton, {
+                        "Delete": () => {
+                            console.log("Delete")
+                        }
+                    })
                 }
+            });
+            if (this.options["allow-inventorying"]) {
+                tr.on('click', e => {
+                    if (e.target.tagName === "BUTTON") return;
+                    tbody.find(`tr:not(#${item.id})`).removeClass("selected");
 
-                tr.toggleClass("selected");
-                $(document).trigger("item-selected", item);
-            })
+                    if (tr.hasClass("selected")) {
+                        tr.removeClass("selected");
+                        $(document).trigger("item-selected", null);
+                        return;
+                    }
+
+                    tr.toggleClass("selected");
+                    $(document).trigger("item-selected", item);
+                })
+            }
 
 
             extra.append(extraButton);
@@ -201,10 +216,12 @@ export default class DatabaseList {
         this.list.empty();
         table.append(tbody);
         this.list.append(table);
-        console.log(this.options)
+        console.log(this.items)
         if (this.options["allow-inventorying"]) {
             this.list.append(await buildInventoryingForm(this.options["allow-additions"], this.options.columns));
         }
+
+        $(document).trigger("load")
     }
 
     buildColumns() {
@@ -217,7 +234,7 @@ export default class DatabaseList {
             thead.append(th);
         }
 
-        thead.append($("<th>"));
+        thead.append($("<th class='extra'>"));
 
         table.append(thead);
         return table;
@@ -254,8 +271,6 @@ export default class DatabaseList {
         this.list.empty();
         this.list.append(await buildOptionsForm(this.id, async () => {
             window.location.reload();
-            // await this.loadView("", true);
-            // console.log("Reloaded")
         }));
 
         $(document).trigger("load")
