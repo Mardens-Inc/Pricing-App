@@ -3,6 +3,7 @@ import {startLoading, stopLoading} from "./loading.js";
 import {buildImportFilemakerForm} from "./import-filemaker.js";
 import {download} from "./filesystem.js";
 import {buildInventoryingForm} from "./database-inventorying.js";
+import auth from "./authentication.js";
 
 /**
  * Represents a list of items in a database.
@@ -15,14 +16,26 @@ export default class DatabaseList {
     /**
      * Constructor for creating a new instance of the class.
      *
-     * @param {string} id - The ID of the instance.
+     * @param {string|null} id - The ID of the instance.
      *
      * @return {void}
      */
     constructor(id) {
         this.list = $(".list");
+        this.list.empty()
         this.items = [];
         this.id = id;
+    }
+
+    static async create() {
+        if (!auth.isLoggedIn) return;
+        const db = new DatabaseList(null)
+        db.list.empty();
+        db.list.append(await buildOptionsForm(null, async () => {
+            window.location.reload();
+        }));
+        console.log('hi')
+        $(document).trigger("load")
     }
 
     async load() {
@@ -31,6 +44,8 @@ export default class DatabaseList {
         if (image !== "") {
             img.attr('src', image);
             img.css("border-radius", "12px");
+        } else {
+            img.attr('src', "assets/images/icon.svg");
         }
         this.options = options;
         title.html(name);
@@ -46,12 +61,14 @@ export default class DatabaseList {
         }
 
         this.importing = false;
-        if (this.items.length === 0) {
-            this.importing = true;
-            this.list.append(await buildImportFilemakerForm())
-        } else {
-            if (options.length === 0 || options.layout === null || options.layout === "") {
-                await this.edit();
+        if (this.id !== null) {
+            if (this.items.length === 0) {
+                this.importing = true;
+                this.list.append(await buildImportFilemakerForm())
+            } else {
+                if (options.length === 0 || options.layout === null || options.layout === "") {
+                    await this.edit();
+                }
             }
         }
 
@@ -104,6 +121,7 @@ export default class DatabaseList {
      * // Returns a promise that resolves with the complete list of items.
      */
     async getListItems(query = "") {
+        if (this.id === null) return [];
         let newList = [];
 
         if (query !== null && query !== undefined && query !== "") {
@@ -156,7 +174,6 @@ export default class DatabaseList {
                         try {
                             text = text.replace(/[^0-9.]/g, "")
                             text = parseFloat(text).toFixed(2);
-                            text = text.toString().toLocaleString("en-US", {style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2, currencyDisplay: "symbol"});
                             text = `$${text}`;
                         } catch (e) {
                             console.error(e)
@@ -173,24 +190,18 @@ export default class DatabaseList {
             extra.addClass("extra")
             const extraButton = $(`<button><i class='fa fa-ellipsis-vertical'></i></button>`);
 
+            const showExtraButton = this.options["print-form"].enabled || auth.isLoggedIn;
+
             extraButton.on("click", () => {
-                if (this.options["print-form"].enabled) {
-                    openDropdown(extraButton, {
-                        "Print": async () => {
-                            console.log("Print")
-                            await window.__TAURI__.invoke("print", {printer: JSON.parse(window.localStorage.getItem("settings")).selected_printer, content: "Hello, World!"})
-                        },
-                        "Delete": () => {
-                            console.log("Delete")
-                        }
-                    })
-                } else {
-                    openDropdown(extraButton, {
-                        "Delete": () => {
-                            console.log("Delete")
-                        }
-                    })
-                }
+                openDropdown(extraButton, {
+                    "Print": async () => {
+                        console.log("Print")
+                        await window.__TAURI__.invoke("print", {printer: JSON.parse(window.localStorage.getItem("settings")).selected_printer, content: "Hello, World!"})
+                    },
+                    "Delete": () => {
+                        console.log("Delete")
+                    }
+                }, {"Print": this.options["print-form"].enabled, "Delete": auth.isLoggedIn})
             });
             if (this.options["allow-inventorying"]) {
                 tr.on('click', e => {
@@ -208,10 +219,13 @@ export default class DatabaseList {
                 })
             }
 
-
             extra.append(extraButton);
             tr.append(extra);
             tbody.append(tr);
+            if (!showExtraButton) {
+                extra.css('opacity', 0);
+                extra.css('pointer-events', 'none');
+            }
         });
         this.list.empty();
         table.append(tbody);
@@ -240,8 +254,6 @@ export default class DatabaseList {
         return table;
     }
 
-    buildItemizedList() {
-    }
 
     /**
      * Retrieves the header information for the specified location.
@@ -249,6 +261,7 @@ export default class DatabaseList {
      * @return {Promise<ListHeading>} - A promise that resolves to an object containing the header information.
      */
     async getListHeader() {
+        if (this.id === null) return {name: "", location: "", po: "", image: "", options: [], posted: ""};
         const url = `${baseURL}/api/location/${this.id}/?headings=true`;
         return await $.ajax({url: url, method: "GET"});
     }
@@ -258,12 +271,13 @@ export default class DatabaseList {
      *
      * @return {void}
      */
-    exportCSV() {
-        const items = this.items;
-        const csv = items.map(item => {
-            return Object.values(item).join(",");
-        }).join("\n");
-        download("export.csv", csv);
+    async exportCSV() {
+        startLoading({fullscreen: true, message: "Exporting..."})
+        const csv = (await $.get({url: `${baseURL}/api/location/${this.id}/export`, headers: {"Accept": "text/csv"}})).toString();
+        const headers = await this.getListHeader();
+        const name = `${headers.name}-${headers.po}-${this.id}.csv`;
+        download(name, csv);
+        stopLoading();
 
     }
 
@@ -275,55 +289,6 @@ export default class DatabaseList {
 
         $(document).trigger("load")
     }
-}
-
-
-/*
-const list = $(".list");
-let loadedListItems = [];
-let currentId = "";
-let currentQuery = "";
-backButton.on('click', () => loadView("", "", true));
-loadView("", "", true);
-setInterval(async () => await loadView(currentId, currentQuery), 30 * 1000);
-
-async function loadList(id = "", query = "") {
-    currentQuery = query;
-    currentId = id;
-    if (!id) {
-        return await loadDatabaseList(query);
-    } else {
-        return await loadDatabase(id, query);
-    }
 
 }
 
-
-$("#search").on("keyup", async (e) => {
-    await loadView(currentId, e.target.value, true);
-});
-
-
-async function loadDatabase(id = "", query = "") {
-    const {_, name, location, po, image, options, posted} = await getListHeader(id);
-    console.log(id, name, location, po, image, options, posted);
-
-    if (image !== "") {
-        img.attr('src', image);
-        img.css("border-radius", "12px");
-    }
-    title.html(name);
-    subtitle.html(`${location} - ${po}`).css("display", "");
-    backButton.css("display", "");
-    list.html("");
-    $(".pagination").html("");
-    $("#search").val("");
-
-    loadedListItems = [];
-
-    return [];
-}
-
-
-
- */
