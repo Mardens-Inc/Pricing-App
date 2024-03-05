@@ -1,5 +1,6 @@
 import {startLoading, stopLoading} from "./loading.js";
 import auth from "./authentication.js";
+import {alert} from "./popups.js";
 
 /**
  * Represents a directory list.
@@ -169,7 +170,18 @@ export default class DirectoryList {
                         $(this).trigger("loadEdit", [item["id"]]);
                     },
                     "Delete": () => {
-                        console.log("Delete")
+                        alert("Are you sure you want to delete this database?<br>This can not be undone!", null, async () => {
+                            const url = `${baseURL}/api/locations/${item["id"]}`;
+                            try {
+                                startLoading({fullscreen: true})
+                                await $.ajax({url: url, method: "DELETE"});
+                                await this.loadView("", true);
+                            } catch (e) {
+                                console.error("Unable to delete item\n", url, e);
+                                alert("Unable to delete item");
+                            }
+                            stopLoading();
+                        });
                     }
                 })
             });
