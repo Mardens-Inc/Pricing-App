@@ -26,6 +26,7 @@
         background-color: #292929;
         padding: 1rem;
         border-radius: 10px;
+        min-width: 300px;
     }
 
     .popup-bg {
