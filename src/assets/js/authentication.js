@@ -43,11 +43,10 @@ $(auth).on("logged-in", async () => {
 (async () => {
     try {
         const response = await auth.loginWithTokenFromCookie();
-        if (typeof response === 'object') {
-            $(auth).trigger('logged-in');
-        } else {
+        if (typeof response !== 'object') {
             $(auth).trigger('log-out');
         }
+        // $("#new-button").trigger("click");
     } catch (e) {
         $(auth).trigger('log-out');
     }
