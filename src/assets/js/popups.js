@@ -51,25 +51,45 @@ function closePopup(name) {
  *
  * @param {string} message - The message to be displayed in the alert popup.
  * @param {function=} onclose - Optional callback function to be executed when the alert popup is closed.
+ * @param {function=} onOk - Optional callback function to be executed when the "OK" button is clicked.
  */
-function alert(message, onclose = () => {
-}) {
-    let popup = $(`<div class='popup'>`);
+function alert(message, onclose = null, onOk = null) {
+    let popup = $(`<div id="alert-popup" class='popup'>`);
     const popupContent = $(`<div class='popup-content'>`);
 
     popupContent.append(`<h1>Alert</h1>`)
     popupContent.append(`<p>${message}</p>`)
-    popupContent.append(`<button class="close primary">Close</button>`)
+    const buttons = $(`<div class="row">`);
+    if (onOk) {
+        const okButton = $(`<button class="primary fill">OK</button>`);
+        buttons.append(okButton)
+        okButton.on("click", () => {
+            closePopup("alert");
+            onOk();
+        });
+    }
+    const closeButton = $(`<button class="${onOk === null ? "primary" : "fill"}">${onOk === null ? "Cancel" : "Close"}</button>`);
+    buttons.append(closeButton)
+    closeButton.on("click", () => {
+        closePopup("alert");
+        if (onclose) {
+            onclose();
+        }
+    });
+
     const bg = $('<div class="close popup-bg"></div>')
     popup.append(popupContent);
     popup.append(bg);
+    popupContent.append(buttons);
     popup.appendTo("body");
     setTimeout(() => {
         popup.addClass("active");
 
         popup.find(".close").on("click", () => {
-            closePopup(name);
-            onclose();
+            closePopup("alert");
+            if (onclose) {
+                onclose();
+            }
         });
     }, 100)
 }
