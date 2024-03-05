@@ -6,13 +6,10 @@
  * @return {Promise<JQuery<HTMLElement>|HTMLElement>} - A promise that is resolved when the popup is opened.
  */
 async function openPopup(name, data = {}) {
-    const html = $(await $.get(`assets/popups/${name}.html`)).slice(1);
+    const html = await $.get(`assets/popups/${name}.html`);
     name = name.replace(/[^a-zA-Z]/g, "");
     let popup = $(`<div class='popup' id="${name}-popup">`);
-    const popupContent = $(`<div class='popup-content'>`);
-    for (let i = 0; i < html.length; i++) {
-        popupContent.append(html[i]);
-    }
+    const popupContent = $(`<div class='popup-content'>${html}</div>`);
     popupContent.append(`<button class="close"><i class="fa fa-close"></i></button>`)
     const bg = $('<div class="close popup-bg"></div>')
     bg.on("click", () => {
@@ -68,7 +65,7 @@ function alert(message, onclose = null, onOk = null) {
             onOk();
         });
     }
-    const closeButton = $(`<button class="${onOk === null ? "primary" : "fill"}">${onOk === null ? "Cancel" : "Close"}</button>`);
+    const closeButton = $(`<button class="fill">${onOk === null ? "Close" : "Cancel"}</button>`);
     buttons.append(closeButton)
     closeButton.on("click", () => {
         closePopup("alert");
