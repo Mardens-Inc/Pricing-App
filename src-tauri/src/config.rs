@@ -15,7 +15,6 @@ pub fn load() -> Configuration {
     if let Ok(config_file) = config_file {
         let config = serde_json::from_reader(config_file);
         if let Ok(config) = config {
-
             return config;
         }
     }
