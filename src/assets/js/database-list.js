@@ -1,9 +1,10 @@
-import {buildOptionsForm} from "./database-options-manager.js";
-import {startLoading, stopLoading} from "./loading.js";
-import {buildImportFilemakerForm} from "./import-filemaker.js";
-import {download} from "./filesystem.js";
-import {buildInventoryingForm} from "./database-inventorying.js";
 import auth from "./authentication.js";
+import {print} from "./crossplatform-utility.js";
+import {buildInventoryingForm} from "./database-inventorying.js";
+import {buildOptionsForm} from "./database-options-manager.js";
+import {download} from "./filesystem.js";
+import {buildImportFilemakerForm} from "./import-filemaker.js";
+import {startLoading, stopLoading} from "./loading.js";
 
 /**
  * Represents a list of items in a database.
@@ -127,7 +128,7 @@ export default class DatabaseList {
         if (query !== null && query !== undefined && query !== "") {
             const searchColumns = this.options.columns.filter(c => c.attributes.includes("search"));
             const primaryKey = this.options.columns.filter(c => c.attributes.includes("primary"))[0];
-            query = query.toLowerCase();
+            query = query.toLowerCase().replace(/^0+/, ''); // convert to lowercase and remove leading zeros
 
             const url = `${baseURL}/api/location/${this.id}/search`;
             const searchQuery = {
@@ -188,20 +189,22 @@ export default class DatabaseList {
             }
             const extra = $("<td></td>")
             extra.addClass("extra")
-            const extraButton = $(`<button><i class='fa fa-ellipsis-vertical'></i></button>`);
+            const extraButton = $(`<button title="More Options..."><i class='fa fa-ellipsis-vertical'></i></button>`);
+            const printButton = $(`<button title="Print"><i class='fa fa-print'></i></button>`);
+            printButton.on("click", () => print(JSON.stringify(item, null, 2)));
 
-            const showExtraButton = this.options["print-form"].enabled || auth.isLoggedIn;
+            const showExtraButton = auth.isLoggedIn;
+
 
             extraButton.on("click", () => {
                 openDropdown(extraButton, {
-                    "Print": async () => {
-                        console.log("Print")
-                        await window.__TAURI__.invoke("print", {printer: JSON.parse(window.localStorage.getItem("settings")).selected_printer, content: "Hello, World!"})
+                    "Copy": () => {
+                        navigator.clipboard.writeText(JSON.stringify(item, null, 2));
                     },
                     "Delete": () => {
                         console.log("Delete")
                     }
-                }, {"Print": this.options["print-form"].enabled, "Delete": auth.isLoggedIn})
+                }, {"Delete": auth.isLoggedIn})
             });
             if (this.options["allow-inventorying"]) {
                 tr.on('click', e => {
@@ -218,7 +221,8 @@ export default class DatabaseList {
                     $(document).trigger("item-selected", item);
                 })
             }
-
+            if (this.options["print-form"].enabled)
+                extra.append(printButton);
             extra.append(extraButton);
             tr.append(extra);
             tbody.append(tr);
