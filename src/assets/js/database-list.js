@@ -167,6 +167,8 @@ export default class DatabaseList {
         const tbody = $("<tbody>");
         this.items.forEach((item) => {
             const tr = $(`<tr id='${item.id}' class='list-item'>`);
+            let mp = null;
+            let retail = null;
             for (const column of this.options.columns) {
                 if (column.visible) {
                     const attributes = column.attributes ?? [];
@@ -175,6 +177,10 @@ export default class DatabaseList {
                         try {
                             text = text.replace(/[^0-9.]/g, "")
                             text = parseFloat(text).toFixed(2);
+
+                            if (attributes.includes("mp")) mp= text;
+                            if (attributes.includes("price")) retail = text;
+
                             text = `$${text}`;
                         } catch (e) {
                             console.error(e)
@@ -191,7 +197,13 @@ export default class DatabaseList {
             extra.addClass("extra")
             const extraButton = $(`<button title="More Options..."><i class='fa fa-ellipsis-vertical'></i></button>`);
             const printButton = $(`<button title="Print"><i class='fa fa-print'></i></button>`);
-            printButton.on("click", () => print(JSON.stringify(item, null, 2)));
+            printButton.on("click", () => print({
+                label: this.options["print-form"].label,
+                year: this.options["print-form"].year,
+                department: null,
+                retail: retail,
+                mp: mp
+            }));
 
             const showExtraButton = auth.isLoggedIn;
 
