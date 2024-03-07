@@ -34,7 +34,7 @@ async function buildSelectPrintersSection(html, settings) {
     if (settings.selected_printer === "") {
         console.log("No printer selected")
         value.text("No printer selected");
-    }else{
+    } else {
         value.text(settings.selected_printer);
     }
 
