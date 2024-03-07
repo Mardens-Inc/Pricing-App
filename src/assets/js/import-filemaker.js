@@ -267,9 +267,9 @@ async function push() {
 
             // format time as 00hr 00m 00s
             let etaFormatted = "";
-            if(hours > 0)
+            if (hours > 0)
                 etaFormatted += `${hours}hr `;
-            if(minutes > 0)
+            if (minutes > 0)
                 etaFormatted += `${minutes}m `;
             etaFormatted += `${seconds}s`;
 
