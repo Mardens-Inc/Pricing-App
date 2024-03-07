@@ -10,5 +10,4 @@ const PrintLabels = {
 };
 
 
-
 export {PrintLabels};
