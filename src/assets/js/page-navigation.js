@@ -1,3 +1,4 @@
+import auth from "./authentication.js";
 import DatabaseList from "./database-list.js";
 import DirectoryList from "./directory-list.js";
 import {startLoading, stopLoading} from "./loading.js";
@@ -10,6 +11,9 @@ resetListElement()
 const editButton = $("#edit-button");
 const newButton = $("#new-button");
 const exportButton = $("#export-button");
+
+
+$("#export-button").hide();
 
 $("#settings-button").on("click", async () => {
     await openSettings();
@@ -97,4 +101,3 @@ function resetListElement() {
         list.removeClass('row')
     }
 }
-
