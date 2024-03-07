@@ -32,10 +32,11 @@ async function buildOptionsForm(id, onclose) {
     await buildIconList(html);
     createColumnList(html);
     setDefaultOptionValues(html);
+    $("#export-button").hide();
     const printLabelSizeButton = html.find("#label-size");
-    currentOptions.options["print-form"]["label-size"] = currentOptions.options["print-form"]["label-size"] ?? "small";
-    printLabelSizeButton.attr("value", currentOptions.options["print-form"]["label-size"]);
-    printLabelSizeButton.find("span").text(currentOptions.options["print-form"]["label-size"]);
+    currentOptions.options["print-form"]["size"] = currentOptions.options["print-form"]["size"] ?? "small";
+    printLabelSizeButton.attr("value", currentOptions.options["print-form"]["size"]);
+    printLabelSizeButton.find("span").text(currentOptions.options["print-form"]["size"]);
 
     printLabelSizeButton.on('click', () => {
         const labelSizes = Object.keys(PrintLabels);
@@ -45,7 +46,7 @@ async function buildOptionsForm(id, onclose) {
             items[size] = () => {
                 printLabelSizeButton.attr("value", size);
                 printLabelSizeButton.find("span").text(labelSizes[i]);
-                currentOptions.options["print-form"]["label-size"] = size;
+                currentOptions.options["print-form"]["size"] = size;
             };
 
         }
@@ -110,16 +111,25 @@ async function buildIconList(html) {
  * @param {JQuery} html
  */
 function setDefaultOptionValues(html) {
+    console.log(currentOptions)
     if (currentOptions === undefined) return;
     html.find("input#database-name").val(currentOptions.name ?? "");
     html.find("input#database-location").val(currentOptions.location ?? "");
     html.find("input#database-po").val(currentOptions.po ?? "");
 
     if (currentOptions.options === undefined) return;
-    html.find("toggle#voice-search").attr("value", currentOptions.options["voice-search"] ?? false);
-    html.find("toggle#print").attr("value", currentOptions.options["print"] ?? false);
-    html.find("toggle#allow-inventorying").attr("value", currentOptions.options["allow-inventorying"] ?? false);
-    html.find("toggle#allow-additions").attr("value", currentOptions.options["allow-additions"] ?? false);
+    html.find("toggle#voice-search").attr("value", currentOptions.options["voice-search"] ?? "false");
+    html.find("toggle#print").attr("value", currentOptions.options["print-form"].enabled ?? "false");
+    html.find("toggle#allow-inventorying").attr("value", currentOptions.options["allow-inventorying"] ?? "false");
+    html.find("toggle#allow-additions").attr("value", currentOptions.options["allow-additions"] ?? "false");
+
+    if (currentOptions.options["print-form"] !== undefined && currentOptions.options["print-form"].enabled) {
+        html.find("input#print-label").val(currentOptions.options["print-form"]["label"] ?? "");
+        html.find("input#print-year").val(currentOptions.options["print-form"].year ?? "");
+        html.find("toggle#print-show-retail").attr("value", currentOptions.options["print-form"]["show-retail"] ?? "false");
+    }
+    html.find("toggle#voice-search").attr("value", currentOptions.options["voice-search"] ?? "false");
+
 }
 
 function createColumnList(html) {
@@ -537,18 +547,13 @@ async function save(id) {
         options: {
             "allow-inventorying": $("toggle#allow-inventorying").attr("value") === "true" ?? false,
             "allow-additions": $("toggle#allow-additions").attr("value") === "true" ?? false,
-            "voice-search-form": {
-                "enabled": $("toggle#voice-search").attr("value") === "true" ?? false,
-                "voice-description-column": $("input#voice-description-column").val() ?? "",
-                "voice-price-column": $("input#voice-price-column").val() ?? ""
-            },
+            "voice-search": $("toggle#voice-search").attr("value") === "true" ?? false,
             "print-form": {
                 "enabled": $("toggle#print").attr("value") === "true" ?? false,
-                "print-label": $("input#print-label").val() ?? "",
-                "print-year": $("input#print-year").val() ?? "",
-                "print-price-column": $("input#print-price-column").val() ?? "",
-                "print-retail-price-column": $("input#print-retail-price-column").val() ?? "",
-                "print-show-retail": $("toggle#print-show-retail").attr("value") ?? false
+                "label": $("input#print-label").val() ?? "",
+                "year": $("input#print-year").val() ?? "",
+                "size": currentOptions.options["print-form"]["size"],
+                "show-retail": $("toggle#print-show-retail").attr("value") ?? false
             },
             "columns": currentOptions.options.columns
         }
