@@ -1,5 +1,5 @@
 import {PrintLabels} from "./CONSTANTS.js";
-import {startLoading, stopLoading, updateLoadingOptions} from "./loading.js";
+import {startLoading, stopLoading} from "./loading.js";
 import {alert} from "./popups.js";
 
 /**+
@@ -34,10 +34,13 @@ async function buildOptionsForm(id, onclose) {
     setDefaultOptionValues(html);
     $("#export-button").hide();
     const printLabelSizeButton = html.find("#label-size");
-    currentOptions.options["print-form"]["size"] = currentOptions.options["print-form"]["size"] ?? "small";
-    printLabelSizeButton.attr("value", currentOptions.options["print-form"]["size"]);
-    printLabelSizeButton.find("span").text(currentOptions.options["print-form"]["size"]);
-
+    if (currentOptions?.options["print-form"] !== undefined) {
+        currentOptions.options["print-form"]["size"] = currentOptions?.options["print-form"]?.size ?? "small";
+        printLabelSizeButton.attr("value", currentOptions.options["print-form"].size);
+        printLabelSizeButton.find("span").text(currentOptions.options["print-form"].size);
+    } else {
+        currentOptions.options["print-form"] = {size: "small"};
+    }
     printLabelSizeButton.on('click', () => {
         const labelSizes = Object.keys(PrintLabels);
         const items = {};
@@ -118,15 +121,15 @@ function setDefaultOptionValues(html) {
     html.find("input#database-po").val(currentOptions.po ?? "");
 
     if (currentOptions.options === undefined) return;
-    html.find("toggle#voice-search").attr("value", currentOptions.options["voice-search"] ?? "false");
-    html.find("toggle#print").attr("value", currentOptions.options["print-form"].enabled ?? "false");
-    html.find("toggle#allow-inventorying").attr("value", currentOptions.options["allow-inventorying"] ?? "false");
-    html.find("toggle#allow-additions").attr("value", currentOptions.options["allow-additions"] ?? "false");
+    html.find("toggle#voice-search").attr("value", currentOptions?.options["voice-search"] ?? "false");
+    html.find("toggle#print").attr("value", currentOptions?.options["print-form"]?.enabled ?? "false");
+    html.find("toggle#allow-inventorying").attr("value", currentOptions?.options["allow-inventorying"] ?? "false");
+    html.find("toggle#allow-additions").attr("value", currentOptions?.options["allow-additions"] ?? "false");
 
-    if (currentOptions.options["print-form"] !== undefined && currentOptions.options["print-form"].enabled) {
-        html.find("input#print-label").val(currentOptions.options["print-form"]["label"] ?? "");
-        html.find("input#print-year").val(currentOptions.options["print-form"].year ?? "");
-        html.find("toggle#print-show-retail").attr("value", currentOptions.options["print-form"]["show-retail"] ?? "false");
+    if (currentOptions.options["print-form"] !== undefined && currentOptions?.options["print-form"].enabled) {
+        html.find("input#print-label").val(currentOptions?.options["print-form"]["label"] ?? "");
+        html.find("input#print-year").val(currentOptions?.options["print-form"]?.year ?? "");
+        html.find("toggle#print-show-retail").attr("value", currentOptions?.options["print-form"]["show-retail"] ?? "false");
     }
     html.find("toggle#voice-search").attr("value", currentOptions.options["voice-search"] ?? "false");
 
@@ -440,102 +443,6 @@ async function initCreation(html) {
 }
 
 
-async function push(id, csv) {
-
-    const count = csv.length;
-    let currentProcessed = 0;
-    let size = 1_000;
-
-    let itemsPerSecond = 0;
-    let start = new Date().getTime();
-    let countDown = 0;
-
-    for (let i = 0; i < count; i += size) {
-        // get the records from filemaker
-        const records = (await filemaker.getRecords(size, i > count ? count : i))
-            .map(record => {
-                let records = record.fields
-                // remove keys that start with g_ (filemaker internal fields)
-                for (const key in records) {
-                    if (key.startsWith("g_")) {
-                        delete records[key];
-                    }
-                }
-                return records;
-            }) // map the records to the fields
-        const json = JSON.stringify(records); // convert the records to json
-
-        try {
-            // upload the data to the server
-            await $.ajax({
-                url: `${baseURL}/api/location/${window.localStorage.getItem("loadedDatabase")}/`,
-                method: "POST",
-                data: json,
-                contentType: "application/json",
-                headers: {accept: "application/json"}
-            });
-        } catch (e) {
-            console.log(e)
-            // if an error occurs, update the loading message and return
-            updateLoadingOptions({
-                message: `An error has occurred while uploading data from filemaker.<br>Please contact support.`,
-                fullscreen: true,
-            })
-            clearInterval(countDown);
-
-            return;
-        }
-        // calculate items per second
-        const time = new Date().getTime();
-        itemsPerSecond = (size / ((time - start) / 1000));
-        start = time;
-
-        // calculate eta based on the items per second
-        const eta = (count - i) / itemsPerSecond;
-
-        // format time as 00hr 00m 00s
-        let hours = Math.floor(eta / 3600);
-        let minutes = Math.floor((eta % 3600) / 60);
-        let seconds = Math.floor(eta % 60);
-
-        // update the current processed records
-        currentProcessed += records.length;
-
-        clearInterval(countDown); // clear the interval (stop the countdown timer)
-        countDown = setInterval(() => {
-            seconds--; // decrement the seconds
-            if (seconds < 0) { // if seconds is less than 0
-                seconds = 59; // set seconds to 59
-                minutes--; // decrement minutes
-                if (minutes < 0) { // if minutes is less than 0
-                    minutes = 59; // set minutes to 59
-                    hours--; // decrement hours
-                }
-            }
-
-            // format time as 00hr 00m 00s
-            let etaFormatted = "";
-            if (hours > 0)
-                etaFormatted += `${hours}hr `;
-            if (minutes > 0)
-                etaFormatted += `${minutes}m `;
-            etaFormatted += `${seconds}s`;
-
-            // update the loading message
-            updateLoadingOptions({
-                message: `Importing data from filemaker, Please wait!<br>This can take some time.<br>Records ${currentProcessed} of ${count}<br>ETA: ${etaFormatted}`,
-                fullscreen: true,
-            })
-        }, 1000)
-
-    }
-
-    stopLoading(); // stop the loading screen
-    window.location.reload(); // reload the page
-
-}
-
-
 async function save(id) {
     startLoading({fullscreen: true});
     // build new options object
@@ -592,10 +499,6 @@ async function save(id) {
     stopLoading();
 
 
-}
-
-async function reset() {
-    await buildOptionsForm(id);
 }
 
 export {buildOptionsForm}
