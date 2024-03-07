@@ -1,42 +1,4 @@
-/**
- * @typedef {Object} ListHeading
- * @property {string} name
- * @property {string} location
- * @property {string} po
- * @property {string} image
- * @property {ListOptions} options
- * @property {string} post_date
- * @property {string[]} columns
- */
-/**
- * @typedef {Object} ListOptions
- * @property {bool} allow-inventorying
- * @property {bool} allow-additions
- * @property {Object} print-form
- * @property {boolean} print-form.enabled
- * @property {string} print-form.print-label
- * @property {string} print-form.print-year
- * @property {string} print-form.print-price-column
- * @property {string} print-form.print-retail-price-column
- * @property {boolean} print-form.print-show-retail
- * @property {Object} voice-form
- * @property {boolean} voice-form.enabled
- * @property {string} voice-form.voice-description-column
- * @property {string} voice-form.voice-price-column
- * @property {Object[]} columns
- * @property {string} columns.name
- * @property {boolean} columns.visible
- * @property {string[]} columns.attributes
- */
-
-/**
- * @typedef {Object} Icon
- * @property {string} name
- * @property {string} url
- * @property {string} file
- */
-
-
+import {PrintLabels} from "./CONSTANTS.js";
 import {startLoading, stopLoading, updateLoadingOptions} from "./loading.js";
 import {alert} from "./popups.js";
 
@@ -70,6 +32,27 @@ async function buildOptionsForm(id, onclose) {
     await buildIconList(html);
     createColumnList(html);
     setDefaultOptionValues(html);
+    const printLabelSizeButton = html.find("#label-size");
+    currentOptions.options["print-form"]["label-size"] = currentOptions.options["print-form"]["label-size"] ?? "small";
+    printLabelSizeButton.attr("value", currentOptions.options["print-form"]["label-size"]);
+    printLabelSizeButton.find("span").text(currentOptions.options["print-form"]["label-size"]);
+
+    printLabelSizeButton.on('click', () => {
+        const labelSizes = Object.keys(PrintLabels);
+        const items = {};
+        for (let i = 0; i < labelSizes.length; i++) {
+            const size = labelSizes[i];
+            items[size] = () => {
+                printLabelSizeButton.attr("value", size);
+                printLabelSizeButton.find("span").text(labelSizes[i]);
+                currentOptions.options["print-form"]["label-size"] = size;
+            };
+
+        }
+
+        openDropdown(printLabelSizeButton, items);
+
+    })
     html.find("#save").on("click", async () => {
         await save(id);
         onclose();
@@ -356,6 +339,7 @@ function createColumnList(html) {
 }
 
 async function initCreation(html) {
+    $("#hero button").css("display", "");
     $(".pagination").css("display", "none");
     console.log(html)
     const dragDropArea = html.find(".drag-drop-area");
@@ -391,11 +375,11 @@ async function initCreation(html) {
             },
             "print-form": {
                 "enabled": $("toggle#print").attr("value") === "true" ?? false,
-                "print-label": $("input#print-label").val() ?? "",
-                "print-year": $("input#print-year").val() ?? "",
-                "print-price-column": $("input#print-price-column").val() ?? "",
-                "print-retail-price-column": $("input#print-retail-price-column").val() ?? "",
-                "print-show-retail": $("toggle#print-show-retail").attr("value") ?? false
+                "label": $("input#print-label").val() ?? "",
+                "year": $("input#print-year").val() ?? "",
+                "price-column": $("input#print-price-column").val() ?? "",
+                "retail-price-column": $("input#print-retail-price-column").val() ?? "",
+                "show-retail": $("toggle#print-show-retail").attr("value") ?? false
             },
             "columns": currentOptions.options.columns
         };
