@@ -20,7 +20,7 @@
             width: 100%;
             flex-grow: 1;
 
-            &.extra{
+            &.extra {
                 --width: 45px;
                 min-width: var(--width);
                 width: var(--width);
