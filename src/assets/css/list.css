@@ -14,18 +14,13 @@
 
         th {
             text-align: left;
-            padding: 1rem;
+            padding-block: 1rem;
+            margin-left: 1rem;
             font-size: 1.2rem;
             font-weight: 400;
-            width: 100%;
+            width: 100px;
+            max-width: 100px;
             flex-grow: 1;
-
-            &.extra {
-                --width: 45px;
-                min-width: var(--width);
-                width: var(--width);
-                max-width: var(--width);
-            }
         }
     }
 
@@ -38,9 +33,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            width: 100%;
+            /*width: 100%;*/
             flex-grow: 1;
             margin-left: 1rem;
+            width: 100px;
+            overflow: scroll;
 
             &.description {
                 align-items: start;
@@ -106,6 +103,7 @@
         button {
             height: 100%;
             aspect-ratio: 1;
+            margin-block: 0;
 
             img {
                 height: 1rem;
