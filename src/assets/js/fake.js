@@ -14,10 +14,15 @@
  * @property {bool} allow-additions
  * @property {PrintOptions} print-form
  * @property {boolean} voice-search
- * @property {Object[]} columns
- * @property {string} columns.name
- * @property {boolean} columns.visible
- * @property {string[]} columns.attributes
+ * @property {Column[]} columns
+ */
+
+/**
+ * @typedef {Object} Column
+ * @property {string} name
+ * @property {string} real_name
+ * @property {boolean} visible
+ * @property {string[]} attributes
  */
 
 /**
