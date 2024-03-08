@@ -141,8 +141,30 @@ function createColumnList(html) {
     if (currentOptions.columns === undefined) return;
     if (currentOptions.options.columns === undefined || currentOptions.options.columns.length === 0) {
         currentOptions.options.columns = currentOptions.columns.filter(i => i !== "id").map(c => {
-            if (c === "date") return ({name: c, visible: false, attributes: ["readonly"]});
-            return ({name: c.toString(), visible: true})
+
+            let item = {name: c.toString(), real_name: c.toString(), visible: true, attributes: []};
+            try {
+                if (c.toLowerCase().includes("date")) {
+                    item.attributes = ["readonly"];
+                    item.visible = false;
+                }
+                if (c.toLowerCase().includes("note")) item.visible = false;
+                if (c.toLowerCase().includes("qty") || c.toLowerCase().includes("quantity")) item.attributes = ["quantity"];
+                if (c.toLowerCase().includes("mp") || c.toLowerCase().includes("marden")) item.attributes = ["mp"];
+                if ((c.toLowerCase().includes("price") || c.toLowerCase().includes("retail")) && !item.attributes.includes("mp")) item.attributes = ["price"];
+
+                if (c.toLowerCase().includes("desc") || c.toLowerCase().includes("title")) {
+                    item.attributes = ["description", "search"];
+                }
+                if (c.toLowerCase().includes("upc") || c.toLowerCase().includes("scan") || c.toLowerCase().includes("asin")) {
+                    item.attributes = ["primary", "search"]
+                }
+            } catch (e) {
+                console.log(e)
+            }
+
+
+            return item;
         });
     }
     currentOptions.options.columns.sort((a, b) => a.visible === b.visible ? 0 : a.visible ? -1 : 1);
