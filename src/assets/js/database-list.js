@@ -126,22 +126,27 @@ export default class DatabaseList {
         let newList = [];
 
         if (query !== null && query !== undefined && query !== "") {
-            const searchColumns = this.options.columns.filter(c => c.attributes.includes("search"));
-            const primaryKey = this.options.columns.filter(c => c.attributes.includes("primary"))[0];
-            query = query.toLowerCase().replace(/^0+/, ''); // convert to lowercase and remove leading zeros
+            try {
+                const searchColumns = this.options.columns.filter(c => c.attributes.includes("search"));
+                const primaryKey = this.options.columns.filter(c => c.attributes.includes("primary"))[0];
+                query = query.toLowerCase().replace(/^0+/, ''); // convert to lowercase and remove leading zeros
 
-            const url = `${baseURL}/api/location/${this.id}/search`;
-            const searchQuery = {
-                "query": query,
-                "columns": searchColumns.map(c => c.name),
-                "limit": 100,
-                "offset": 0,
-                "asc": true,
-                "sort": primaryKey === undefined ? "id" : primaryKey.name
+                const url = `${baseURL}/api/location/${this.id}/search`;
+                const searchQuery = {
+                    "query": query,
+                    "columns": searchColumns.map(c => c.name),
+                    "limit": 100,
+                    "offset": 0,
+                    "asc": true,
+                    "sort": primaryKey === undefined ? "id" : primaryKey.name
+                }
+
+                newList = await $.ajax({url: url, method: "POST", data: JSON.stringify(searchQuery), contentType: "application/json", headers: {"Accept": "application/json"}});
+                newList = newList["items"];
+            } catch (e) {
+                console.error(e);
+                return [];
             }
-
-            newList = await $.ajax({url: url, method: "POST", data: JSON.stringify(searchQuery), contentType: "application/json", headers: {"Accept": "application/json"}});
-            newList = newList["items"];
 
 
         } else {
@@ -163,35 +168,40 @@ export default class DatabaseList {
      * @returns {Promise<void>} A promise that resolves when the list is built.
      */
     async buildList() {
+        if(this.options.columns === undefined) return;
         const table = this.buildColumns();
         const tbody = $("<tbody>");
         this.items.forEach((item) => {
             const tr = $(`<tr id='${item.id}' class='list-item'>`);
             let mp = null;
             let retail = null;
-            for (const column of this.options.columns) {
-                if (column.visible) {
-                    const attributes = column.attributes ?? [];
-                    let text = item[column.name];
-                    if (attributes.includes("price") || attributes.includes("mp")) {
-                        try {
-                            text = text.replace(/[^0-9.]/g, "")
-                            text = parseFloat(text).toFixed(2);
+            try {
+                for (const column of this.options.columns) {
+                    if (column.visible) {
+                        const attributes = column.attributes ?? [];
+                        let text = item[column.name];
+                        if (attributes.includes("price") || attributes.includes("mp")) {
+                            try {
+                                text = text.replace(/[^0-9.]/g, "")
+                                text = parseFloat(text).toFixed(2);
 
-                            if (attributes.includes("mp")) mp= text;
-                            if (attributes.includes("price")) retail = text;
+                                if (attributes.includes("mp")) mp = text;
+                                if (attributes.includes("price")) retail = text;
 
-                            text = `$${text}`;
-                        } catch (e) {
-                            console.error(e)
+                                text = `$${text}`;
+                            } catch (e) {
+                                console.error(e)
+                            }
                         }
+                        const td = $("<td>").html(text === "" ? "-" : text);
+                        for (const attribute of attributes) {
+                            td.addClass(attribute)
+                        }
+                        tr.append(td);
                     }
-                    const td = $("<td>").html(text === "" ? "-" : text);
-                    for (const attribute of attributes) {
-                        td.addClass(attribute)
-                    }
-                    tr.append(td);
                 }
+            } catch (e) {
+                console.error(e)
             }
             const extra = $("<td></td>")
             extra.addClass("extra")
@@ -206,8 +216,6 @@ export default class DatabaseList {
             }));
 
             const showExtraButton = auth.isLoggedIn;
-
-
             extraButton.on("click", () => {
                 openDropdown(extraButton, {
                     "Copy": () => {
@@ -218,30 +226,31 @@ export default class DatabaseList {
                     }
                 }, {"Delete": auth.isLoggedIn})
             });
-            if (this.options["allow-inventorying"]) {
-                tr.on('click', e => {
-                    if (e.target.tagName === "BUTTON") return;
-                    tbody.find(`tr:not(#${item.id})`).removeClass("selected");
+            try {
+                if (this.options["allow-inventorying"]) {
+                    tr.on('click', e => {
+                        if (e.target.tagName === "BUTTON") return;
+                        tbody.find(`tr:not(#${item.id})`).removeClass("selected");
 
-                    if (tr.hasClass("selected")) {
-                        tr.removeClass("selected");
-                        $(document).trigger("item-selected", null);
-                        return;
-                    }
+                        if (tr.hasClass("selected")) {
+                            tr.removeClass("selected");
+                            $(document).trigger("item-selected", null);
+                            return;
+                        }
 
-                    tr.toggleClass("selected");
-                    $(document).trigger("item-selected", item);
-                })
+                        tr.toggleClass("selected");
+                        $(document).trigger("item-selected", item);
+                    })
+                }
+            } catch (e) {
+                console.error(e)
             }
             if (this.options["print-form"].enabled)
                 extra.append(printButton);
-            extra.append(extraButton);
+            if (showExtraButton)
+                extra.append(extraButton);
             tr.append(extra);
             tbody.append(tr);
-            if (!showExtraButton) {
-                extra.css('opacity', 0);
-                extra.css('pointer-events', 'none');
-            }
         });
         this.list.empty();
         table.append(tbody);
@@ -255,18 +264,25 @@ export default class DatabaseList {
     }
 
     buildColumns() {
+
         const table = $("<table class='fill col'></table>");
-        const columns = this.options.columns.filter(c => c.visible);
-        const thead = $("<thead>");
+        try {
+            if (this.options.columns === undefined) return table;
+            const columns = this.options.columns.filter(c => c.visible);
+            const thead = $("<thead>");
 
-        for (const column of columns) {
-            const th = $("<th>").html(column.name);
-            thead.append(th);
+            for (const column of columns) {
+                const th = $("<th>").html(column.name);
+                thead.append(th);
+            }
+
+            thead.append($("<th class='extra'>"));
+
+            table.append(thead);
+        } catch (e) {
+            console.error("Error building columns")
+            console.error(e)
         }
-
-        thead.append($("<th class='extra'>"));
-
-        table.append(thead);
         return table;
     }
 
