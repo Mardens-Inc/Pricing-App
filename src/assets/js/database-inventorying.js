@@ -1,3 +1,4 @@
+import {startLoading, stopLoading} from "./loading.js";
 import {alert} from "./popups.js";
 
 async function buildInventoryingForm(allowAdditions, columns) {
@@ -40,7 +41,7 @@ async function buildInventoryingForm(allowAdditions, columns) {
         const quantityInput = $(`
             <div class="floating-input">
                 <input type="number" id="quantity" name="quantity" required placeholder="" autocomplete="off" step="1">
-                <label for="quantity">${quantityColumn[0].name}</label>
+                <label for="quantity">${quantityColumn[0].name} (+/-)</label>
             </div>`)
 
         const submitButton = $(`<button type="submit" class="fill primary center horizontal vertical">Update</button>`);
@@ -69,19 +70,11 @@ async function buildInventoryingForm(allowAdditions, columns) {
             if (value) {
                 if (addToggle.text() === "Add?")
                     submitButton.text("Add")
-                const inputs = additionSection.find("input");
-                for (const input of inputs) {
-                    $(input).prop('required', true);
-                }
-                inputs.val('');
+                quantityInput.find('label').html(`${quantityColumn[0].name}`);
 
             } else {
                 submitButton.text("Update")
-                const inputs = additionSection.find("input");
-                for (const input of inputs) {
-                    $(input).prop('required', false);
-                }
-                inputs.val('');
+                quantityInput.find('label').html(`${quantityColumn[0].name} (+/-)`);
             }
         });
 
@@ -106,7 +99,12 @@ async function buildInventoryingForm(allowAdditions, columns) {
             }
             console.log(item)
             primaryInput.find("input").val(item[primaryKey]);
-            quantityInput.find("input").val(item[quantityKey]);
+            if (addToggle.attr('value') === "true") {
+                quantityInput.find("input").val(item[quantityKey]);
+            } else {
+                quantityInput.find("input").val("");
+                quantityInput.find("input").trigger('focus');
+            }
             addToggle.text("Edit?");
             submitButton.text("Update")
             window.localStorage.setItem("selectedItem", item.id);
@@ -123,6 +121,7 @@ async function buildInventoryingForm(allowAdditions, columns) {
         inventoryingForm.append($(`<link rel="stylesheet" href="assets/css/inventory-form.css">`))
 
         inventoryingForm.on('submit', async (e) => {
+            startLoading({fullscreen: true, message: "Adding/Updating..."})
             let selectedItem = window.localStorage.getItem("selectedItem");
 
             if (selectedItem === null || selectedItem === undefined) {
@@ -188,7 +187,11 @@ async function buildInventoryingForm(allowAdditions, columns) {
                 data[primaryKey] = primaryInput.find("input").val();
                 data[quantityKey] = quantityValue;
                 await update(selectedItem, data);
+
+                $(document).trigger("search", primaryInput.find("input").val());
             }
+
+            stopLoading();
         });
 
 
@@ -238,10 +241,18 @@ async function add(data) {
  * @returns {Promise<void>} - A promise that resolves when the update is completed.
  */
 async function update(item, data) {
-    const url = `${baseURL}/api/location/${window.localStorage.getItem("loadedDatabase")}`;
-    if (item !== null) data["id"] = item;
+    const url = `${baseURL}/api/location/${window.localStorage.getItem("loadedDatabase")}/`;
+    if (item !== null) data["id"] = item["id"];
     console.log(data)
-    // await $.ajax({url: url, method: "POST", data: JSON.stringify(data), contentType: "application/json", headers: {"Accept": "application/json"}});
+    try {
+        const response = await $.ajax({url: url, method: "POST", data: JSON.stringify(data), contentType: "application/json", headers: {"Accept": "application/json"}});
+        console.log(response);
+    } catch (e) {
+        const response = e.responseJSON ?? e.responseText ?? e;
+        console.error(e);
+        console.log(response);
+        alert(`Failed to add/update item, please contact IT/Support<br><p class="error">Error: ${response.error ?? "No error message was provided!"}</p>`, null, null);
+    }
 }
 
 
