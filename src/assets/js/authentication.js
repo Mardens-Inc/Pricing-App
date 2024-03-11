@@ -1,4 +1,4 @@
-import Authentication from 'https://cdn.jsdelivr.net/gh/Mardens-Inc/Authentication-API@8dcd5577b4771f4e50f2c8c7d8b26aa2d9c035bb/js/authentication.js';
+import Authentication from 'https://cdn.jsdelivr.net/gh/Mardens-Inc/Authentication-API@240fe69e848dbc2eb4c3c17f510a9ba85c68cb69/js/authentication.js';
 import {alert, closePopup, openPopup} from "./popups.js";
 
 const auth = new Authentication();
