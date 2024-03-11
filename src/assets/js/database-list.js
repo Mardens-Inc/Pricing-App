@@ -5,6 +5,7 @@ import {buildOptionsForm} from "./database-options-manager.js";
 import {download} from "./filesystem.js";
 import {buildImportFilemakerForm} from "./import-filemaker.js";
 import {startLoading, stopLoading} from "./loading.js";
+import {alert, confirm} from "./popups.js";
 
 /**
  * Represents a list of items in a database.
@@ -101,6 +102,7 @@ export default class DatabaseList {
      */
     async search(query) {
         if (!this.importing) {
+            $("#search").val(query);
             await this.loadView(query, true);
             $(document).trigger("load")
             return this.items;
@@ -168,7 +170,7 @@ export default class DatabaseList {
      * @returns {Promise<void>} A promise that resolves when the list is built.
      */
     async buildList() {
-        if(this.options.columns === undefined) return;
+        if (this.options.columns === undefined) return;
         const table = this.buildColumns();
         const tbody = $("<tbody>");
         this.items.forEach((item) => {
@@ -222,7 +224,17 @@ export default class DatabaseList {
                         navigator.clipboard.writeText(JSON.stringify(item, null, 2));
                     },
                     "Delete": () => {
-                        console.log("Delete")
+                        confirm("Are you sure you want to delete this item?", "Delete Item", "Cancel", async () => {
+                            startLoading({fullscreen: true, message: "Deleting..."})
+                            try {
+                                await $.ajax({url: `${baseURL}/api/location/${this.id}/${item.id}`, method: "DELETE"});
+                                await this.loadView("", true);
+                            } catch (e) {
+                                console.error(e)
+                                alert("An error occurred while trying to delete the item.");
+                            }
+                            stopLoading();
+                        });
                     }
                 }, {"Delete": auth.isLoggedIn})
             });
