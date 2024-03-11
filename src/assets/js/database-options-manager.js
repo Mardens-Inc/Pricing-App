@@ -15,6 +15,10 @@ let originalOptions = {};
  */
 let originalColumns = [];
 let renamedColumns = [];
+/**
+ * @type {Column[]} newColumns
+ */
+let newColumns = [];
 
 /**
  * Builds the options form for a given id.
@@ -62,6 +66,9 @@ async function buildOptionsForm(id, onclose) {
         onclose();
     });
     html.find("#cancel").on("click", onclose);
+
+    html.find("button#add-column").on('click', () => addColumn(html));
+
     if (id === null)
         await initCreation(html);
     stopLoading();
@@ -73,7 +80,7 @@ async function buildOptionsForm(id, onclose) {
  * @returns {Promise<Object>}
  */
 async function getCurrentOptions(id) {
-    if (id === null) return {};
+    if (id === null) return {options: {}};
     return $.get(`${baseURL}/api/location/${id}/?headings=true`);
 }
 
@@ -339,38 +346,24 @@ function createColumnList(html) {
                     listItem.toggleClass("hidden");
                     createColumnList(html);
                 },
-                "Insert Before": () => {
-                    const column = listItem.attr("name");
-                    const input = $(`<input class="name" type="text" value="">`);
-                    listItem.before(input);
-                    input.on("blur", () => {
-                        currentOptions.columns.push(input.val());
-                        currentOptions.options.columns.push({name: input.val(), visible: true});
-                        createColumnList(html);
-                    });
-                    input.focus();
-                },
-                "Insert After": () => {
-                    const column = listItem.attr("name");
-                    const input = $(`<input class="name" type="text" value="">`);
-                    listItem.after(input);
-                    input.on("blur", () => {
-                        currentOptions.columns.push(input.val());
-                        currentOptions.options.columns.push({name: input.val(), visible: true});
-                        createColumnList(html);
-                    });
-                    input.focus();
-                },
-                "Delete": () => {
-                    currentOptions.columns = currentOptions.columns.filter(c => c !== column);
-                    currentOptions.options.columns = currentOptions.options.columns.filter(c => c.name !== column);
-                    listItem.remove();
-                }
             });
         });
         list.append(listItem);
         loadLabels();
     }
+}
+
+function addColumn(html) {
+    const input = $(`<input class="name" type="text" value="">`);
+    input.on("blur", () => {
+        currentOptions.columns.push(input.val());
+        const column = {name: input.val(), visible: true, attributes: [], real_name: input.val()};
+        currentOptions.options.columns.push(column);
+        currentOptions.columns.push(input.val());
+        newColumns.push(column);
+        createColumnList(html);
+    });
+    input.trigger('focus');
 }
 
 async function initCreation(html) {
@@ -505,6 +498,23 @@ async function save(id) {
         }
     }
 
+    for (const column of newColumns) {
+        try {
+            const response = await $.ajax({
+                url: `${baseURL}/api/location/${id}/column/${column.real_name}`,
+                method: "POST",
+                contentType: "application/json",
+                headers: {"Accept": "application/json"},
+            });
+            console.log(response)
+        } catch (e) {
+            console.error(e);
+            alert("An error occurred while creating the column.<br>Please try again or contact support.<br>${e}")
+            stopLoading();
+            return;
+        }
+    }
+
     try {
         const response = await $.ajax({
             url: `${baseURL}/api/location/${id}/`,
@@ -516,6 +526,7 @@ async function save(id) {
         console.log(response);
     } catch (e) {
         console.log(e);
+        alert("An error occurred while updating the database.<br>Please try again or contact support.<br>${e}")
     }
 
     stopLoading();
