@@ -10,16 +10,16 @@ function print(data) {
 
     let bodyHtml = "";
     if (data.department) {
-        bodyHtml += `<p class="dpt">${data.department}</p>`;
+        bodyHtml += `<div class="dpt">${data.department}</div>`;
     }
-    bodyHtml += `<p class="label">${data.label}</p>`;
+    bodyHtml += `<div class="label">${data.label}</div>`;
     if (data.retail) {
-        bodyHtml += `<p class="rp">${data.retail}</p>`;
+        bodyHtml += `<div class="${data.mp ? "rp" : "mp"}">${data.retail}</div>`;
     }
     if (data.mp) {
-        bodyHtml += `<p class="mp">${data.mp}</p>`;
+        bodyHtml += `<div class="mp">${data.mp}</div>`;
     }
-    bodyHtml += `<p class="year">${data.year}</p>`;
+    bodyHtml += `<div class="year">${data.year}</div>`;
 
     const pageHtml = `<html lang="en">
                         <head>
@@ -27,14 +27,22 @@ function print(data) {
                             <link rel="stylesheet" href="assets/css/printer.css">
                         </head>
                         <body size="${data.size}">
-                            ${bodyHtml}
+                            <div id="box">
+                                ${bodyHtml}
+                            </div>
                         </body>
                     </html>`;
 
     console.log(pageHtml);
     printWindow.document.write(pageHtml);
-    printWindow.print();
-    printWindow.close();
+    setTimeout(() => {
+        try {
+            printWindow.print();
+        } catch (e) {
+            console.error(e);
+        }
+        printWindow.close();
+    }, 100)
 }
 
 
