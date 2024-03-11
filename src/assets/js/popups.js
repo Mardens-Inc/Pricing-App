@@ -91,4 +91,45 @@ function alert(message, onclose = null, onOk = null) {
     }, 100)
 }
 
-export {openPopup, closePopup, alert};
+function confirm(message, yes = "Yes", no = "No", onYes = null, onNo = null) {
+    let popup = $(`<div id="confirm-popup" class='popup'>`);
+    const popupContent = $(`<div class='popup-content'>`);
+    popupContent.append(`<h1>Confirm</h1>`)
+    popupContent.append(`<p>${message}</p>`)
+    const buttons = $(`<div class="row">`);
+    const okButton = $(`<button class="primary fill">${yes}</button>`);
+    buttons.append(okButton)
+    okButton.on("click", () => {
+        closePopup("confirm");
+        if (onYes) {
+            onYes();
+        }
+    });
+    const closeButton = $(`<button class="fill">${no}</button>`);
+    closeButton.on("click", () => {
+        closePopup("confirm");
+        if (onNo) {
+            onNo();
+        }
+    });
+    buttons.append(closeButton)
+
+    const bg = $('<div class="close popup-bg"></div>')
+    popup.append(popupContent);
+    popup.append(bg);
+    popupContent.append(buttons);
+    popup.appendTo("body");
+    setTimeout(() => {
+        popup.addClass("active");
+
+        popup.find(".close").on("click", () => {
+            closePopup("confirm");
+            if (onNo) {
+                onNo();
+            }
+        });
+    }, 100)
+
+}
+
+export {openPopup, closePopup, alert, confirm};
