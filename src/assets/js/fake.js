@@ -12,6 +12,8 @@
  * @typedef {Object} ListOptions
  * @property {bool} allow-inventorying
  * @property {bool} allow-additions
+ * @property {bool} add-if-missing
+ * @property {bool} remove-if-zero
  * @property {PrintOptions} print-form
  * @property {boolean} voice-search
  * @property {Column[]} columns
