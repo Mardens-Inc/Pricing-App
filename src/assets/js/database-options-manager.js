@@ -132,6 +132,8 @@ function setDefaultOptionValues(html) {
     html.find("toggle#print").attr("value", currentOptions?.options["print-form"]?.enabled ?? "false");
     html.find("toggle#allow-inventorying").attr("value", currentOptions?.options["allow-inventorying"] ?? "false");
     html.find("toggle#allow-additions").attr("value", currentOptions?.options["allow-additions"] ?? "false");
+    html.find("toggle#add-if-missing").attr("value", currentOptions?.options["add-if-missing"] ?? "false");
+    html.find("toggle#remove-if-zero").attr("value", currentOptions?.options["remove-if-zero"] ?? "false");
 
     if (currentOptions.options["print-form"] !== undefined && currentOptions?.options["print-form"].enabled) {
         html.find("input#print-label").val(currentOptions?.options["print-form"]["label"] ?? "");
@@ -354,15 +356,24 @@ function createColumnList(html) {
 }
 
 function addColumn(html) {
+
+    const listItem = $(`<div class="row fill column-item"></div>`);
     const input = $(`<input class="name" type="text" value="">`);
     input.on("blur", () => {
-        currentOptions.columns.push(input.val());
-        const column = {name: input.val(), visible: true, attributes: [], real_name: input.val()};
-        currentOptions.options.columns.push(column);
-        currentOptions.columns.push(input.val());
-        newColumns.push(column);
+        const value = input.val();
+        if (value !== "") {
+            if (currentOptions.columns === undefined) currentOptions.columns = [];
+            if (currentOptions.options.columns === undefined) currentOptions.options.columns = [];
+            const column = {name: value, visible: true, attributes: [], real_name: value};
+            currentOptions.options.columns.push(column);
+            newColumns.push(column);
+            currentOptions.columns.push(value);
+            console.log(currentOptions);
+        }
         createColumnList(html);
     });
+    listItem.append(input);
+    html.find("#column-list").append(listItem);
     input.trigger('focus');
 }
 
@@ -373,10 +384,10 @@ async function initCreation(html) {
     const dragDropArea = html.find(".drag-drop-area");
     console.log(dragDropArea)
 
-    currentOptions.options = {};
+    currentOptions.options = {columns: []};
 
     dragDropArea.css('display', '');
-    let csv;
+    let csv = null;
     dragDropArea.on('upload', (e, file) => {
         startLoading({fullscreen: true});
         csv = file.content;
@@ -396,6 +407,8 @@ async function initCreation(html) {
         const options = {
             "allow-inventorying": $("toggle#allow-inventorying").attr("value") === "true" ?? false,
             "allow-additions": $("toggle#allow-additions").attr("value") === "true" ?? false,
+            "add-if-missing": $("toggle#add-if-missing").attr("value") === "true" ?? false,
+            "remove-if-zero": $("toggle#remove-if-zero").attr("value") === "true" ?? false,
             "voice-search-form": {
                 "enabled": $("toggle#voice-search").attr("value") === "true" ?? false,
                 "voice-description-column": $("input#voice-description-column").val() ?? "",
@@ -423,6 +436,11 @@ async function initCreation(html) {
             const success = response["success"];
             console.log(response);
             if (success) {
+
+                // if csv is null map the columns to a csv string
+                if (csv === null) {
+                    csv = currentOptions.columns.join(",");
+                }
                 const id = response["id"];
                 try {
                     const response = await $.ajax({
@@ -461,6 +479,9 @@ async function initCreation(html) {
 async function save(id) {
     startLoading({fullscreen: true});
     // build new options object
+    /**
+     * @type {ListOptions}
+     */
     const newOptions = {
         name: $("input#database-name").val(),
         location: $("input#database-location").val(),
@@ -469,6 +490,8 @@ async function save(id) {
         options: {
             "allow-inventorying": $("toggle#allow-inventorying").attr("value") === "true" ?? false,
             "allow-additions": $("toggle#allow-additions").attr("value") === "true" ?? false,
+            "add-if-missing": $("toggle#add-if-missing").attr("value") === "true" ?? false,
+            "remove-if-zero": $("toggle#remove-if-zero").attr("value") === "true" ?? false,
             "voice-search": $("toggle#voice-search").attr("value") === "true" ?? false,
             "print-form": {
                 "enabled": $("toggle#print").attr("value") === "true" ?? false,
@@ -481,22 +504,22 @@ async function save(id) {
         }
     };
 
-    for (const column of renamedColumns) {
-        try {
-            console.log(`${baseURL}/api/location/${id}/columns/${column.old}`)
-            const response = await $.ajax({
-                url: `${baseURL}/api/location/${id}/columns/${column.old}`,
-                method: "PATCH",
-                data: JSON.stringify({name: column.new}),
-                contentType: "application/json",
-                headers: {"Accept": "application/json"},
-            });
-            console.log(response)
-        } catch (e) {
-            console.error(e);
-            return;
-        }
-    }
+    // for (const column of renamedColumns) {
+    //     try {
+    //         console.log(`${baseURL}/api/location/${id}/columns/${column.old}`)
+    //         const response = await $.ajax({
+    //             url: `${baseURL}/api/location/${id}/columns/${column.old}`,
+    //             method: "PATCH",
+    //             data: JSON.stringify({name: column.new}),
+    //             contentType: "application/json",
+    //             headers: {"Accept": "application/json"},
+    //         });
+    //         console.log(response)
+    //     } catch (e) {
+    //         console.error(e);
+    //         return;
+    //     }
+    // }
 
     for (const column of newColumns) {
         try {
