@@ -1,3 +1,4 @@
+import auth from "./authentication.js";
 /**
  * @typedef {Object} ListHeading
  * @property {string} name
@@ -55,4 +56,13 @@
  * @property {string?} department
  *
  *
+ */
+
+
+/**
+ * @typedef {Object} RecordHistory
+ * @property {string} date
+ * @property {string} action
+ * @property {UserProfile} user
+ * @property {Object} data
  */
