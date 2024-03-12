@@ -153,7 +153,7 @@ function createColumnList(html) {
 
             let item = {name: c.toString(), real_name: c.toString(), visible: true, attributes: []};
             try {
-                if (c.toLowerCase().includes("date")) {
+                if (c.toLowerCase().includes("date") || c.toLowerCase() === "history") {
                     item.attributes = ["readonly"];
                     item.visible = false;
                 }
@@ -176,9 +176,10 @@ function createColumnList(html) {
             return item;
         });
     }
+    currentOptions.options.columns = currentOptions.options.columns.filter(c => c !== undefined && c !== null);
     currentOptions.options.columns.sort((a, b) => a.visible === b.visible ? 0 : a.visible ? -1 : 1);
     for (const columnItem of currentOptions.options.columns) {
-        if (columnItem.name === "id") continue; // skip the id column
+        if (columnItem.name === "id" || columnItem.name === "history") continue; // skip the id and history columns
 
         const column = columnItem.name;
         const visible = columnItem.visible;
@@ -500,7 +501,7 @@ async function save(id) {
                 "size": currentOptions.options["print-form"]["size"],
                 "show-retail": $("toggle#print-show-retail").attr("value") ?? false
             },
-            "columns": currentOptions.options.columns
+            "columns": currentOptions.options.columns.filter(c => c !== undefined && c !== null)
         }
     };
 
@@ -521,7 +522,7 @@ async function save(id) {
     //     }
     // }
 
-    for (const column of newColumns) {
+    for (const column of newColumns.filter(c => c !== undefined && c !== null)) {
         try {
             const response = await $.ajax({
                 url: `${baseURL}/api/location/${id}/column/${column.real_name}`,
