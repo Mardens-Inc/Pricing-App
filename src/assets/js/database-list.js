@@ -5,7 +5,7 @@ import {buildOptionsForm} from "./database-options-manager.js";
 import {download} from "./filesystem.js";
 import {buildImportFilemakerForm} from "./import-filemaker.js";
 import {startLoading, stopLoading} from "./loading.js";
-import {alert, confirm} from "./popups.js";
+import {alert, confirm, openPopup} from "./popups.js";
 
 /**
  * Represents a list of items in a database.
@@ -65,8 +65,16 @@ export default class DatabaseList {
         if (this.id !== null) {
             if (this.items.length === 0) {
                 this.importing = true;
-                if (options.length === 0)
-                    this.list.append(await buildImportFilemakerForm())
+                if (options.length === 0) {
+                    if (auth.isLoggedIn && auth.getUserProfile().admin) {
+                        this.list.append(await buildImportFilemakerForm())
+                    } else {
+                        alert("This database is empty, and you do not have permission to import data.<br>Please contact an administrator for assistance.", () => {
+                            window.localStorage.removeItem("loadedDatabase");
+                            window.location.reload();
+                        });
+                    }
+                }
             } else {
                 if (options.length === 0)
                     await this.edit();
@@ -125,35 +133,39 @@ export default class DatabaseList {
     async getListItems(query = "") {
         if (this.id === null) return [];
         let newList = [];
+        try {
+            if (query !== null && query !== undefined && query !== "") {
+                try {
+                    const searchColumns = this.options.columns.filter(c => c.attributes.includes("search"));
+                    const primaryKey = this.options.columns.filter(c => c.attributes.includes("primary"))[0];
+                    query = query.toLowerCase().replace(/^0+/, ''); // convert to lowercase and remove leading zeros
 
-        if (query !== null && query !== undefined && query !== "") {
-            try {
-                const searchColumns = this.options.columns.filter(c => c.attributes.includes("search"));
-                const primaryKey = this.options.columns.filter(c => c.attributes.includes("primary"))[0];
-                query = query.toLowerCase().replace(/^0+/, ''); // convert to lowercase and remove leading zeros
+                    const url = `${baseURL}/api/location/${this.id}/search`;
+                    const searchQuery = {
+                        "query": query,
+                        "columns": searchColumns.map(c => c.real_name),
+                        "limit": 100,
+                        "offset": 0,
+                        "asc": true,
+                        "sort": primaryKey === undefined ? "id" : primaryKey.real_name
+                    }
 
-                const url = `${baseURL}/api/location/${this.id}/search`;
-                const searchQuery = {
-                    "query": query,
-                    "columns": searchColumns.map(c => c.real_name),
-                    "limit": 100,
-                    "offset": 0,
-                    "asc": true,
-                    "sort": primaryKey === undefined ? "id" : primaryKey.real_name
+                    newList = await $.ajax({url: url, method: "POST", data: JSON.stringify(searchQuery), contentType: "application/json", headers: {"Accept": "application/json"}});
+                    newList = newList["items"];
+                } catch (e) {
+                    console.error(e);
+                    return [];
                 }
 
-                newList = await $.ajax({url: url, method: "POST", data: JSON.stringify(searchQuery), contentType: "application/json", headers: {"Accept": "application/json"}});
-                newList = newList["items"];
-            } catch (e) {
-                console.error(e);
-                return [];
+
+            } else {
+                const url = `${baseURL}/api/location/${this.id}/`;
+                newList = await $.ajax({url: url, method: "GET"});
+                newList = newList["results"]["items"];
             }
-
-
-        } else {
-            const url = `${baseURL}/api/location/${this.id}/`;
-            newList = await $.ajax({url: url, method: "GET"});
-            newList = newList["results"]["items"];
+        } catch (e) {
+            console.error(`Error fetching items for location ${this.id}`)
+            console.error(e);
         }
         return newList;
     }
@@ -170,6 +182,7 @@ export default class DatabaseList {
      */
     async buildList() {
         if (this.options.columns === undefined) return;
+        this.options.columns = this.options.columns.filter(c => c !== null && c !== undefined);
         const table = this.buildColumns();
         table.css('--columnSize', `${(1 / (this.options.columns.filter(i => i.visible).length + 1)) * 100}%`);
         const tbody = $("<tbody>");
@@ -196,7 +209,7 @@ export default class DatabaseList {
                                 console.error(e)
                             }
                         } else if (attributes.includes("quantity")) {
-                            text = text.replace(/[^0-9]/g, "")
+                            text = text.replace(/[^0-9-]/g, "")
                             text = text === "" ? "0" : text;
                             text = parseInt(text);
                         }
@@ -225,6 +238,9 @@ export default class DatabaseList {
             const showExtraButton = auth.isLoggedIn;
             extraButton.on("click", () => {
                 openDropdown(extraButton, {
+                    "View History": () => {
+                        openPopup("history", {history: item.history});
+                    },
                     "Copy": () => {
                         navigator.clipboard.writeText(JSON.stringify(item, null, 2));
                     },
@@ -242,7 +258,7 @@ export default class DatabaseList {
                             stopLoading();
                         });
                     }
-                }, {"Delete": auth.isLoggedIn})
+                }, {"View History": item.history !== undefined && item.history.length > 0});
             });
             try {
                 if (this.options["allow-inventorying"]) {
@@ -265,7 +281,7 @@ export default class DatabaseList {
             }
             if (this.options["print-form"].enabled)
                 extra.append(printButton);
-            if (showExtraButton)
+            if (showExtraButton && auth.isLoggedIn && auth.getUserProfile().admin)
                 extra.append(extraButton);
             tr.append(extra);
             tbody.append(tr);
@@ -274,7 +290,7 @@ export default class DatabaseList {
         table.append(tbody);
         this.list.append(table);
         console.log(this.items)
-        if (this.options["allow-inventorying"]) {
+        if (this.options["allow-inventorying"] && auth.isLoggedIn) {
             this.list.append(await buildInventoryingForm(this.options["allow-additions"], this.options.columns, this.options["add-if-missing"], this.options["remove-if-zero"], this.options["voice-search"]));
         }
 
@@ -286,10 +302,11 @@ export default class DatabaseList {
         const table = $("<table class='fill col'></table>");
         try {
             if (this.options.columns === undefined) return table;
-            const columns = this.options.columns.filter(c => c.visible);
+            const columns = this.options.columns.filter(c => c !== null && c !== undefined && c.visible);
             const thead = $("<thead>");
 
             for (const column of columns) {
+                if (column === null || column === undefined) continue;
                 const th = $("<th>").html(column.name);
                 thead.append(th);
             }
