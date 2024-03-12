@@ -27,6 +27,8 @@ async function openPopup(name, data = {}) {
         });
     }, 100)
 
+    $(document).trigger("loadPopup", {data})
+
     return popup;
 }
 
