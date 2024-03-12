@@ -1,10 +1,23 @@
 import {startLoading, stopLoading} from "./loading.js";
-import {alert} from "./popups.js";
+import {alert, confirm} from "./popups.js";
 
-async function buildInventoryingForm(allowAdditions, columns) {
+/**
+ * Builds the inventorying form based on the provided parameters.
+ * @param {bool} allowAdditions - Flag indicating whether to allow additions to the inventory.
+ * @param {Column[]} columns - Array of Column objects representing the columns in the database.
+ * @param {bool} addIfMissing - Flag indicating whether to add a new item if no matching item is found.
+ * @param {bool} removeIfZero - Flag indicating whether to remove an item if its quantity becomes zero.
+ * @param {boolean} voiceSearch - Flag indicating whether to enable voice search in the form.
+ * @return {Promise.<JQuery<HTMLElement>>} - A promise resolving to the built inventorying form.
+ */
+async function buildInventoryingForm(allowAdditions, columns, addIfMissing, removeIfZero, voiceSearch) {
     try {
-        $("main > .list").addClass('row')
-        $("main > .list").removeClass('col')
+        window.localStorage.removeItem("selectedItem");
+        (() => {
+            const list = $("main > .list");
+            list.addClass('row')
+            list.removeClass('col')
+        })();
 
         const inventoryingForm = $(`<form id="inventorying-form" class="col fill" action="javascript:void(0);"></form>`);
 
@@ -120,7 +133,7 @@ async function buildInventoryingForm(allowAdditions, columns) {
 
         inventoryingForm.append($(`<link rel="stylesheet" href="assets/css/inventory-form.css">`))
 
-        inventoryingForm.on('submit', async (e) => {
+        inventoryingForm.on('submit', async () => {
             startLoading({fullscreen: true, message: "Adding/Updating..."})
             let selectedItem = window.localStorage.getItem("selectedItem");
 
@@ -162,10 +175,26 @@ async function buildInventoryingForm(allowAdditions, columns) {
                     addToggle.trigger("toggle", [{value: true}]);
                 }
             }
-            const quantityValue = processQuantityInput(quantityInput.find("input"), addToggle.attr("value") === "true" && selectedItem !== null, Number.parseInt(selectedItem[quantityKey]));
+
+            const isNewItem = (selectedItem === null || selectedItem === undefined) && (addToggle.attr('value') === "true" || addIfMissing);
+            // only set the quantity if the user is adding a new item or the user has toggled the add button
+            const setQuantity = isNewItem || addToggle.attr('value') === "true" || selectedItem[quantityKey] === null || selectedItem[quantityKey] === undefined;
+            const quantityValue = processQuantityInput(quantityInput.find("input"), setQuantity, Number.parseInt(setQuantity ? null : selectedItem[quantityKey]));
+
+            if (removeIfZero && quantityValue <= 0) {
+                confirm("Are you sure you want to remove this item?", "Delete", "Cancel", async (value) => {
+                    if (!value) return;
+                    startLoading()
+                    await $.ajax({url: `${baseURL}/api/location/${window.localStorage.getItem("loadedDatabase")}/${selectedItem["id"]}`, method: "DELETE", headers: {"Accept": "application/json"}});
+                    $(document).trigger("search", "");
+                    stopLoading();
+                });
+                stopLoading();
+                return;
+            }
 
             if (selectedItem === null || selectedItem === undefined) {
-                if (addToggle.attr('value') === "false") {
+                if (addToggle.attr('value') === "false" && !addIfMissing) {
                     alert("Item not found, please add the item first", null, null);
                     addToggle.trigger("toggle", [{value: true}]);
                 } else {
@@ -188,8 +217,8 @@ async function buildInventoryingForm(allowAdditions, columns) {
                 data[quantityKey] = quantityValue;
                 await update(selectedItem, data);
 
-                $(document).trigger("search", primaryInput.find("input").val());
             }
+            $(document).trigger("search", primaryInput.find("input").val());
 
             stopLoading();
         });
@@ -218,7 +247,7 @@ function processQuantityInput(quantity, edit, originalQuantity = null) {
         alert("Invalid quantity value, please enter a valid number", null, null);
         return 0;
     }
-    if (edit || originalQuantity === null) return value; // If the form is in edit mode or the original quantity is null, return the value.
+    if (edit || originalQuantity === null || isNaN(originalQuantity)) return value; // If the form is in edit mode or the original quantity is null, return the value.
     return value + originalQuantity; // Otherwise, return the sum of the value and the original quantity.
 }
 
@@ -230,7 +259,7 @@ function processQuantityInput(quantity, edit, originalQuantity = null) {
  * @return {Promise<void>} - A Promise that resolves when the update is complete.
  */
 async function add(data) {
-    await update(null, data);
+    await update(null, [data]);
 }
 
 /**
@@ -243,6 +272,9 @@ async function add(data) {
 async function update(item, data) {
     const url = `${baseURL}/api/location/${window.localStorage.getItem("loadedDatabase")}/`;
     if (item !== null) data["id"] = item["id"];
+    else
+        // remove id from data if it's a new item
+        delete data["id"];
     console.log(data)
     try {
         const response = await $.ajax({url: url, method: "POST", data: JSON.stringify(data), contentType: "application/json", headers: {"Accept": "application/json"}});
