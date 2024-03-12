@@ -36,7 +36,6 @@ export default class DatabaseList {
         db.list.append(await buildOptionsForm(null, async () => {
             window.location.reload();
         }));
-        console.log('hi')
         $(document).trigger("load")
     }
 
@@ -66,11 +65,11 @@ export default class DatabaseList {
         if (this.id !== null) {
             if (this.items.length === 0) {
                 this.importing = true;
-                this.list.append(await buildImportFilemakerForm())
+                if (options.length === 0)
+                    this.list.append(await buildImportFilemakerForm())
             } else {
-                if (options.length === 0 || options.layout === null || options.layout === "") {
+                if (options.length === 0)
                     await this.edit();
-                }
             }
         }
 
@@ -136,11 +135,11 @@ export default class DatabaseList {
                 const url = `${baseURL}/api/location/${this.id}/search`;
                 const searchQuery = {
                     "query": query,
-                    "columns": searchColumns.map(c => c.name),
+                    "columns": searchColumns.map(c => c.real_name),
                     "limit": 100,
                     "offset": 0,
                     "asc": true,
-                    "sort": primaryKey === undefined ? "id" : primaryKey.name
+                    "sort": primaryKey === undefined ? "id" : primaryKey.real_name
                 }
 
                 newList = await $.ajax({url: url, method: "POST", data: JSON.stringify(searchQuery), contentType: "application/json", headers: {"Accept": "application/json"}});
@@ -172,6 +171,7 @@ export default class DatabaseList {
     async buildList() {
         if (this.options.columns === undefined) return;
         const table = this.buildColumns();
+        table.css('--columnSize', `${(1 / (this.options.columns.filter(i => i.visible).length + 1)) * 100}%`);
         const tbody = $("<tbody>");
         this.items.forEach((item) => {
             const tr = $(`<tr id='${item.id}' class='list-item'>`);
@@ -181,10 +181,11 @@ export default class DatabaseList {
                 for (const column of this.options.columns) {
                     if (column.visible) {
                         const attributes = column.attributes ?? [];
-                        let text = item[column.name];
+                        let text = item[column.real_name] ?? "";
                         if (attributes.includes("price") || attributes.includes("mp")) {
                             try {
                                 text = text.replace(/[^0-9.]/g, "")
+                                text = text === "" ? "0" : text;
                                 text = parseFloat(text).toFixed(2);
 
                                 if (attributes.includes("mp")) mp = text;
@@ -194,6 +195,10 @@ export default class DatabaseList {
                             } catch (e) {
                                 console.error(e)
                             }
+                        } else if (attributes.includes("quantity")) {
+                            text = text.replace(/[^0-9]/g, "")
+                            text = text === "" ? "0" : text;
+                            text = parseInt(text);
                         }
                         const td = $("<td>").html(text === "" ? "-" : text);
                         for (const attribute of attributes) {
@@ -224,7 +229,8 @@ export default class DatabaseList {
                         navigator.clipboard.writeText(JSON.stringify(item, null, 2));
                     },
                     "Delete": () => {
-                        confirm("Are you sure you want to delete this item?", "Delete Item", "Cancel", async () => {
+                        confirm("Are you sure you want to delete this item?", "Delete Item", "Cancel", async (value) => {
+                            if (!value) return;
                             startLoading({fullscreen: true, message: "Deleting..."})
                             try {
                                 await $.ajax({url: `${baseURL}/api/location/${this.id}/${item.id}`, method: "DELETE"});
@@ -269,7 +275,7 @@ export default class DatabaseList {
         this.list.append(table);
         console.log(this.items)
         if (this.options["allow-inventorying"]) {
-            this.list.append(await buildInventoryingForm(this.options["allow-additions"], this.options.columns));
+            this.list.append(await buildInventoryingForm(this.options["allow-additions"], this.options.columns, this.options["add-if-missing"], this.options["remove-if-zero"], this.options["voice-search"]));
         }
 
         $(document).trigger("load")
