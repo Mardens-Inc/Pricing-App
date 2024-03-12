@@ -29,7 +29,11 @@
 
     <h2>Extra Options</h2>
     <toggle id="allow-inventorying" name="inventory" title="This will show the primary and quantity fields to allow inventorying" value="false">Allow Inventorying?</toggle>
-    <toggle id="allow-additions" name="additions" title="This will show the additions field to allow adding to the database" toggle-hidden="allow-inventorying" value="false">Allow Additions?</toggle>
+    <div toggle-hidden="allow-inventorying">
+        <toggle id="allow-additions" name="additions" title="This will show the additions field to allow adding to the database" value="false">Allow Additions?</toggle>
+        <toggle id="add-if-missing" name="add-if-missing" title="When updating an item, if its not present in the database, it will be added." value="false">Add if item is missing?</toggle>
+        <toggle id="remove-if-zero" name="remove-if-zero" title="When updating an item, if the item's quantity is less-than or equal to zero, remove it." value="false">Remove if quantity is less-than or equal to 0 (zero)</toggle>
+    </div>
     <toggle id="print" name="print" value="false">Can print label?</toggle>
     <div class="print-form fill extra-section col" toggle-hidden="print">
         <div class="row fill">
