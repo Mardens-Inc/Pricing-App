@@ -91,7 +91,18 @@ function alert(message, onclose = null, onOk = null) {
     }, 100)
 }
 
-function confirm(message, yes = "Yes", no = "No", onYes = null, onNo = null) {
+/**
+ * Displays a confirmation popup with a message and two buttons.
+ *
+ * @param {string} message - The message to display in the popup.
+ * @param {string} [yes="Yes"] - The text to display on the "Yes" button.
+ * @param {string} [no="No"] - The text to display on the "No" button.
+ * @param {(boolean)=>{}} [submit=null] - Optional callback function to execute when a button is clicked.
+ *                                   The function will be called with a single boolean parameter indicating
+ *                                   whether the "Yes" or "No" button was clicked.
+ * @return {void}
+ */
+function confirm(message, yes = "Yes", no = "No", submit = null) {
     let popup = $(`<div id="confirm-popup" class='popup'>`);
     const popupContent = $(`<div class='popup-content'>`);
     popupContent.append(`<h1>Confirm</h1>`)
@@ -101,15 +112,15 @@ function confirm(message, yes = "Yes", no = "No", onYes = null, onNo = null) {
     buttons.append(okButton)
     okButton.on("click", () => {
         closePopup("confirm");
-        if (onYes) {
-            onYes();
+        if (submit) {
+            submit(true);
         }
     });
     const closeButton = $(`<button class="fill">${no}</button>`);
     closeButton.on("click", () => {
         closePopup("confirm");
-        if (onNo) {
-            onNo();
+        if (submit) {
+            submit(false);
         }
     });
     buttons.append(closeButton)
@@ -124,8 +135,8 @@ function confirm(message, yes = "Yes", no = "No", onYes = null, onNo = null) {
 
         popup.find(".close").on("click", () => {
             closePopup("confirm");
-            if (onNo) {
-                onNo();
+            if (submit) {
+                submit(false);
             }
         });
     }, 100)
