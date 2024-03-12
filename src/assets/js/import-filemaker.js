@@ -1,4 +1,5 @@
 import Filemaker from "https://cdn.jsdelivr.net/gh/Mardens-Inc/Filemaker-API@8b2058fa149e11278487d0cadd3d2b33f37691e3/js/Filemaker.js";
+import auth from "./authentication.js";
 import {startLoading, stopLoading, updateLoadingOptions} from "./loading.js";
 
 const filemaker = new Filemaker("https://lib.mardens.com/fmutil", "admin", "19MRCC77!");
@@ -176,8 +177,14 @@ async function navigateToDatabaseLayoutList(html) {
                 //     if (response["success"] !== undefined && response["success"] === true)
                 //         window.location.reload();
                 // }, 3000)
-            } catch {
-                console.log("error")
+            } catch (e) {
+                console.error("Unable to push data from filemaker to server")
+                console.error(e)
+                updateLoadingOptions({
+                    message: `An error has occurred while uploading data from filemaker.<br>Please contact support.`,
+                    fullscreen: true,
+                })
+
             }
         }
     });
@@ -206,15 +213,33 @@ async function push() {
         // get the records from filemaker
         const records = (await filemaker.getRecords(size, i > count ? count : i))
             .map(record => {
-                let records = record.fields
-                // remove keys that start with g_ (filemaker internal fields)
-                for (const key in records) {
-                    if (key.startsWith("g_")) {
-                        delete records[key];
+                    let records = record.fields
+                    // remove keys that start with g_ (filemaker internal fields)
+                    for (const key in records) {
+                        if (key.startsWith("g_")) {
+                            delete records[key];
+                        }
                     }
+                    const data = {...records};
+                    // if the records have an "id" field, rename it to "identifier" and if the records have a "date" field, rename it to "fm_date"
+                    for (const key in data) {
+                        if (key.toLowerCase() === "id") {
+                            data["identifier"] = data[key];
+                            records["identifier"] = records[key];
+                            delete data[key];
+                            delete records[key];
+                        }
+                        if (key.toLowerCase() === "date") {
+                            data["fm_date"] = data[key];
+                            records["fm_date"] = records[key];
+                            delete data[key];
+                            delete records[key];
+                        }
+                    }
+                    records["history"] = [{"user": auth.getUserProfile(), "action": "Added", "date": new Date().toISOString(), "data": data}]
+                    return records;
                 }
-                return records;
-            }) // map the records to the fields
+            ) // map the records to the fields
         const json = JSON.stringify(records); // convert the records to json
 
         try {
@@ -255,7 +280,7 @@ async function push() {
 
         clearInterval(countDown); // clear the interval (stop the countdown timer)
         countDown = setInterval(() => {
-            seconds--; // decrement the seconds
+            seconds -= 1 / 60; // decrement the seconds
             if (seconds < 0) { // if seconds is less than 0
                 seconds = 59; // set seconds to 59
                 minutes--; // decrement minutes
@@ -271,14 +296,14 @@ async function push() {
                 etaFormatted += `${hours}hr `;
             if (minutes > 0)
                 etaFormatted += `${minutes}m `;
-            etaFormatted += `${seconds}s`;
+            etaFormatted += `${Math.ceil(seconds)}s`;
 
             // update the loading message
             updateLoadingOptions({
                 message: `Importing data from filemaker, Please wait!<br>This can take some time.<br>Records ${currentProcessed} of ${count}<br>ETA: ${etaFormatted}`,
                 fullscreen: true,
             })
-        }, 1000)
+        }, 100)
 
     }
 
@@ -293,7 +318,8 @@ async function push() {
  * @returns {Promise<void>} A promise that resolves when the columns are updated successfully.
  */
 async function setColumns() {
-    const columns = await filemaker.getRows();
+    let columns = await filemaker.getRows();
+    columns = columns.filter(row => !row.startsWith("g_")).map(c => c.toLowerCase() === "id" ? "identifier" : c.toLowerCase() === "date" ? "fm_date" : c);
     console.log(columns);
     const json = JSON.stringify(columns);
     await $.ajax({
