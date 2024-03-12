@@ -1,3 +1,4 @@
+import auth from "./authentication.js";
 import {startLoading, stopLoading} from "./loading.js";
 import {alert, confirm} from "./popups.js";
 
@@ -215,6 +216,7 @@ async function buildInventoryingForm(allowAdditions, columns, addIfMissing, remo
                 }
                 data[primaryKey] = primaryInput.find("input").val();
                 data[quantityKey] = quantityValue;
+                data["history"] = selectedItem["history"];
                 await update(selectedItem, data);
 
             }
@@ -259,6 +261,8 @@ function processQuantityInput(quantity, edit, originalQuantity = null) {
  * @return {Promise<void>} - A Promise that resolves when the update is complete.
  */
 async function add(data) {
+    const content = {...data}
+    data["history"] = [{"user": auth.getUserProfile(), "action": "Added", "date": new Date().toISOString(), "data": content}];
     await update(null, [data]);
 }
 
@@ -275,6 +279,14 @@ async function update(item, data) {
     else
         // remove id from data if it's a new item
         delete data["id"];
+    const content = {...data}
+    delete content["history"];
+    if (data["history"] === undefined || data["history"] === null) {
+        data["history"] = [{"user": auth.getUserProfile(), "action": "Added", "date": new Date().toISOString(), "data": content}]
+    } else {
+        data["history"].push({"user": auth.getUserProfile(), "action": "Updated", "date": new Date().toISOString(), "data": content});
+    }
+
     console.log(data)
     try {
         const response = await $.ajax({url: url, method: "POST", data: JSON.stringify(data), contentType: "application/json", headers: {"Accept": "application/json"}});
