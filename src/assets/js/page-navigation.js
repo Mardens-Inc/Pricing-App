@@ -23,22 +23,28 @@ $("#settings-button").on("click", async () => {
 editButton.css('display', 'none');
 exportButton.css('display', 'none');
 
-
 const directory = new DirectoryList();
 /**
  * @type {DatabaseList|null}
  */
 let database = null;
-if (window.localStorage.getItem("loadedDatabase") !== null) {
-    database = new DatabaseList(window.localStorage.getItem("loadedDatabase"));
-    database.load();
-    editButton.css('display', "");
-    exportButton.css('display', "");
-    newButton.css('display', 'none');
-} else {
-    startLoading({fullscreen: true})
-    directory.loadView("", true).then(() => stopLoading())
-}
+$(window).on('load', async () => {
+
+    if (window.localStorage.getItem("loadedDatabase") !== null) {
+        database = new DatabaseList(window.localStorage.getItem("loadedDatabase"));
+        await database.load();
+        editButton.css('display', "");
+        exportButton.css('display', "");
+        newButton.css('display', 'none');
+    } else {
+        startLoading({fullscreen: true})
+        await directory.loadView("", true);
+        stopLoading();
+        setTimeout(() => {
+            askToLogin();
+        }, 1000);
+    }
+})
 $(directory).on("loadExternalView", async (event, id) => {
     resetListElement()
     database = new DatabaseList(id);
@@ -99,5 +105,12 @@ function resetListElement() {
     if (list.hasClass("row")) {
         list.addClass('col')
         list.removeClass('row')
+    }
+}
+
+function askToLogin() {
+    if (!auth.isLoggedIn && window.localStorage.getItem("loginPrompt") === null) {
+        window.localStorage.setItem("loginPrompt", true);
+        $("#login-button").trigger("click");
     }
 }
