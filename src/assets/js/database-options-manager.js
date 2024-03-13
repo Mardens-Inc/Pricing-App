@@ -324,14 +324,15 @@ function createColumnList(html) {
                     const input = $(`<input class="name" type="text" value="${column}">`);
                     listItem.find(".name").replaceWith(input);
                     input.on("blur", () => {
-                        currentOptions.options.columns = currentOptions.options.columns.map(c => c.name === column ? {...c, name: input.val()} : c);
-                        listItem.find(".name").replaceWith(`<div class="name fill">${input.val()}</div>`);
-                        listItem.attr("name", input.val());
+                        const value = input.val().toString().trim().replace(/[^a-zA-Z0-9.\-+\s]/g, "");
+                        currentOptions.options.columns = currentOptions.options.columns.map(c => c.name === column ? {...c, name: value} : c);
+                        listItem.find(".name").replaceWith(`<div class="name fill">${value}</div>`);
+                        listItem.attr("name", value);
                         // check if renamed column already contains the old column name and update it
                         if (renamedColumns.filter(c => c.old === column).length > 0) {
-                            renamedColumns = renamedColumns.map(c => c.old === column ? {old: column, new: input.val()} : c);
+                            renamedColumns = renamedColumns.map(c => c.old === column ? {old: column, new: value} : c);
                         } else {
-                            renamedColumns.push({old: column, new: input.val()});
+                            renamedColumns.push({old: column, new: value});
                         }
                         console.log(renamedColumns);
                     });
