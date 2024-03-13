@@ -100,9 +100,10 @@
         img {
             border-radius: 100px;
             aspect-ratio: 1;
-            height: 100%;
             object-fit: contain;
             object-position: center;
+            width: 50px;
+            height: 50px;
         }
 
         button {
