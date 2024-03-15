@@ -57,12 +57,3 @@ import auth from "./authentication.js";
  *
  *
  */
-
-
-/**
- * @typedef {Object} RecordHistory
- * @property {string} date
- * @property {string} action
- * @property {UserProfile} user
- * @property {Object} data
- */
