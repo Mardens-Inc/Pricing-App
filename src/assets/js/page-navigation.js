@@ -1,10 +1,10 @@
 import auth from "./authentication.js";
+import {isDedicatedClient} from "./crossplatform-utility.js";
 import DatabaseList from "./database-list.js";
 import DirectoryList from "./directory-list.js";
 import {startLoading, stopLoading} from "./loading.js";
 import {loadSettings, openSettings} from "./settings.js";
 
-loadSettings();
 
 const list = $("main > .list")
 resetListElement()
@@ -13,7 +13,7 @@ const newButton = $("#new-button");
 const exportButton = $("#export-button");
 
 
-$("#export-button").hide();
+exportButton.hide();
 
 $("#settings-button").on("click", async () => {
     await openSettings();
@@ -30,6 +30,9 @@ const directory = new DirectoryList();
 let database = null;
 $(window).on('load', async () => {
 
+    if (isDedicatedClient) {
+        await loadSettings();
+    }
     if (window.localStorage.getItem("loadedDatabase") !== null) {
         database = new DatabaseList(window.localStorage.getItem("loadedDatabase"));
         await database.load();
