@@ -1,7 +1,12 @@
 import {PrintLabels} from "./CONSTANTS.js";
 import {startLoading, stopLoading} from "./loading.js";
-import {alert} from "./popups.js";
+import {alert, openPopup} from "./popups.js";
 
+let dragDropArea;
+/**
+ * @type {string|null}
+ */
+let csv = null;
 /**+
  * @type {ListHeading}
  */
@@ -68,12 +73,39 @@ async function buildOptionsForm(id, onclose) {
     html.find("#cancel").on("click", onclose);
 
     html.find("button#add-column").on('click', () => addColumn(html));
+    dragDropArea = html.find(".drag-drop-area")
+
+    dragDropArea.on('upload', (e, file) => {
+        startLoading({fullscreen: true});
+        csv = file.content;
+        if (csv === null) return;
+        const newColumns = csv.split('\n')[0].split(',');
+        if (currentOptions.columns.length === 0) {
+            currentOptions.columns = newColumns;
+            createColumnList(html);
+            stopLoading();
+            alert("CSV Loaded!");
+        } else {
+            stopLoading()
+            openPopup("column-mapping", {options: currentOptions, columns: newColumns, csv: csv}).then(async (popup) => {
+                $("document").off('loadedCSV');
+                $(document).on('loadedCSV', async (e, data) => {
+                    csv = data.data;
+                });
+                popup = $(popup);
+                popup.on("close", async (_, data) => {
+                    stopLoading();
+                });
+            });
+        }
+    });
 
     if (id === null)
         await initCreation(html);
     stopLoading();
     return html;
 }
+
 
 /**
  * @param {string|null} id
@@ -383,21 +415,10 @@ async function initCreation(html) {
     $("#hero button").css("display", "");
     $(".pagination").css("display", "none");
     console.log(html)
-    const dragDropArea = html.find(".drag-drop-area");
     console.log(dragDropArea)
 
     currentOptions.options = {columns: []};
 
-    dragDropArea.css('display', '');
-    let csv = null;
-    dragDropArea.on('upload', (e, file) => {
-        startLoading({fullscreen: true});
-        csv = file.content;
-        currentOptions.columns = file.content.split('\n')[0].split(',');
-        createColumnList(html);
-        stopLoading();
-        alert("CSV Loaded!");
-    });
     const saveButton = html.find("#save");
     saveButton.off("click")
     saveButton.on("click", async () => {
