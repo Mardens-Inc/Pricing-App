@@ -18,7 +18,6 @@ function download(filename, content, saveAs = false) {
     if (saveAs) {
         element.setAttribute('target', '_blank');
     }
-    console.log(element);
     element.click();
 }
 
