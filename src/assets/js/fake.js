@@ -1,4 +1,3 @@
-import auth from "./authentication.js";
 /**
  * @typedef {Object} ListHeading
  * @property {string} name
