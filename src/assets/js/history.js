@@ -2,6 +2,26 @@ import auth from "./authentication.js";
 import {alert} from "./popups.js";
 
 /**
+ * @typedef {Object} RecordOptions
+ * @property {number} limit - The number of records to return
+ * @property {number} page - The page number to return
+ * @property {string} sort - The field to sort by
+ * @property {boolean} asc - Whether to sort in ascending order
+ */
+
+/**
+ * @typedef {Object} HistoryRecord
+ * @property {string} location_id - The id of the location the record is associated with
+ * @property {string} record_id - The id of the record the history is associated with
+ * @property {ActionType} action_type - The type of action that was performed
+ * @property {string} user - The user that performed the action
+ * @property {Object} data - The data that was affected by the action
+ * @property {string} timestamp - The time the action was performed
+ * @property {string} id - The id of the history record
+ */
+
+
+/**
  * Represents action type for history records.
  * @typedef {Object} ActionType
  * @property {number} CREATE - When creating a database, table or record.
@@ -70,25 +90,6 @@ function getActionTypeFromInt(actionType) {
     }
 }
 
-
-/**
- * @typedef {Object} RecordOptions
- * @property {number} limit - The number of records to return
- * @property {number} page - The page number to return
- * @property {string} sort - The field to sort by
- * @property {boolean} asc - Whether to sort in ascending order
- */
-
-/**
- * @typedef {Object} HistoryRecord
- * @property {string} location_id - The id of the location the record is associated with
- * @property {string} record_id - The id of the record the history is associated with
- * @property {ActionType} action_type - The type of action that was performed
- * @property {string} user - The user that performed the action
- * @property {Object} data - The data that was affected by the action
- * @property {string} timestamp - The time the action was performed
- * @property {string} id - The id of the history record
- */
 
 /**
  * Retrieves the history of records from the server.
