@@ -45,6 +45,13 @@ $(auth).on("logged-in", async () => {
         $("[authorized-access]").remove();
     }
 });
+let timeout = 0;
+$(document).on('mousemove', () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+        auth.logout();
+    }, 60 * 60 * 1000) // 1 hour
+});
 
 
 (async () => {
