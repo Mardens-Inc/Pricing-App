@@ -5,8 +5,6 @@
 		"withGlobalTauri": true
 	},
 	"package": {
-		"productName": "Pricing App",
-		"version": "0.0.0"
 	},
 	"tauri": {
 		"allowlist": {
