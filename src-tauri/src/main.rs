@@ -7,6 +7,7 @@ use crate::config::init;
 mod print_manager;
 mod config;
 mod update_manager;
+mod updater;
 
 
 fn main() {
