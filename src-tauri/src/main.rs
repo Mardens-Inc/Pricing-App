@@ -2,23 +2,28 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 
-use crate::config::init;
+use crate::updater::install_update;
 
-mod print_manager;
-mod config;
+// mod print_manager;
+// mod config;
 mod update_manager;
 mod updater;
 
 
 fn main() {
-    init();
+    if install_update() {
+        return;
+    }
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-            print_manager::get_printers,
-            print_manager::print,
-            config::save,
-            config::load,
-            config::save_default,
+            // print_manager::get_printers,
+            // print_manager::print,
+            // config::save,
+            // config::load,
+            // config::save_default,
+            updater::download_update,
+            updater::get_current_version,
+            updater::install_update,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
