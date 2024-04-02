@@ -4,6 +4,7 @@ import DatabaseList from "./database-list.js";
 import DirectoryList from "./directory-list.js";
 import {startLoading, stopLoading} from "./loading.js";
 import {loadSettings, openSettings} from "./settings.js";
+import {getCurrentVersion} from "./updater.js";
 
 
 const list = $("main > .list")
@@ -12,6 +13,11 @@ const editButton = $("#edit-button");
 const newButton = $("#new-button");
 const exportButton = $("#export-button");
 
+if (isDedicatedClient) {
+    getCurrentVersion().then(version => {
+        subtitle.html(`v${window.version}`)
+    });
+}
 
 exportButton.hide();
 
@@ -113,7 +119,7 @@ function resetListElement() {
 }
 
 function askToLogin() {
-    if (!auth.isLoggedIn && window.localStorage.getItem("loginPrompt") === null) {
+    if (!auth.isLoggedIn && window.localStorage.getItem("loginPrompt") === null && isDedicatedClient) {
         window.localStorage.setItem("loginPrompt", true);
         $("#login-button").trigger("click");
     }
