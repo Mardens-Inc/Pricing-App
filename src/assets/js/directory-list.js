@@ -60,8 +60,7 @@ export default class DirectoryList {
         // Set the title to "Pricing Database"
         title.html("Pricing<br>Database");
 
-        // Hide the subtitle
-        subtitle.css("display", "none");
+        subtitle.html(`v${window.version}`)
 
         // Hide the back button
         backButton.css("display", "none");
