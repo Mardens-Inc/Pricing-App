@@ -35,7 +35,6 @@ const directory = new DirectoryList();
  */
 let database = null;
 $(window).on('load', async () => {
-
     if (isDedicatedClient) {
         await loadSettings();
     }
