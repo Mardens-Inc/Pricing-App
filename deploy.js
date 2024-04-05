@@ -10,18 +10,19 @@ async function build() {
     // run the command and wait for it to finish
     const process = exec(command, (error, stdout, stderr) => {
         if (error) {
-            console.error(`Error: ${error.message}`);
+            console.error(`BUILD >> ${error.message}`);
             return;
         }
         if (stderr) {
-            console.error(`stderr: ${stderr}`);
+            console.error(`BUILD >> ${stderr}`);
+        }
+        if(stdout) {
+            console.log(`BUILD >> ${stdout}`);
         }
     });
-    process.on('exit', (code) => {
-        console.log(`Finished building the project with code ${code}`);
-    });
 
-    while (process.exitCode === undefined) {
+    // wait for the process to finish
+    while (process.exitCode === undefined || process.exitCode === null) {
         await new Promise(resolve => setTimeout(resolve, 1000));
     }
     return path.join(__dirname, "src-tauri/target/release/pricing-app.exe");
