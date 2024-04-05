@@ -63,6 +63,7 @@ async function buildSelectPrintersSection(html, settings) {
  */
 async function loadSettings() {
     if (!isDedicatedClient) return null;
+    return null;
     const settings = await window.__TAURI__.invoke("load");
     console.log(settings);
     window.localStorage.setItem("settings", JSON.stringify(settings));
