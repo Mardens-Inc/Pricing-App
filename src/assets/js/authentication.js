@@ -11,29 +11,30 @@ loginButton.on('click', async () => {
             alert('This feature is not available on mobile devices <b>Yet</b>.<br><b><i><u>Please use a desktop device to download the dedicated client.</u></i></b>');
 
             // redirect to google play or ios app store based on the operating system
-        }
-        confirm("Are you sure you want to download the dedicated client?<br>This is only used for pricers and administrators and is not intended for store use.", "Download", "Cancel", (value) => {
-            if (value) {
+        } else if (window.os === "Windows") {
+            confirm("Are you sure you want to download the dedicated client?<br>This is only used for pricers and administrators and is not intended for store use.", "Download", "Cancel", (value) => {
+                if (value) {
 
-                let url = "";
+                    let url = "";
 
-                if (["Android", "IOS"].includes(window.os)) {
-                    alert('This feature is not available on mobile devices <b>Yet</b>.<br><b><i><u>Please use a desktop device to download the dedicated client.</u></i></b>');
-
-                    // redirect to google play or ios app store based on the operating system
-                    url = window.os === "Android" ? "https://play.google.com/store/apps/details?id=com.example.app" : "https://itunes.apple.com/app/id123456789";
-                    window.open(url, "_blank")
-                } else {
-                    // download os specific application
-                    url = `/api/clients/${window.os}`;
-                    const a = $("a");
-                    a.attr("href", url);
-                    a.attr("download", 'true');
-                    a.trigger('click');
+                    if (["Android", "IOS"].includes(window.os)) {
+                        // TODO: Implement mobile version of the pricing app.
+                        // redirect to google play or ios app store based on the operating system
+                        url = window.os === "Android" ? "https://play.google.com/store/apps/details?id=com.example.app" : "https://itunes.apple.com/app/id123456789";
+                        window.open(url, "_blank")
+                    } else {
+                        // download os specific application
+                        const a = document.createElement('a');
+                        a.href = "/api/clients/installer";
+                        a.click();
+                        console.log('downloading...')
+                    }
                 }
-            }
 
-        });
+            });
+        } else {
+            alert('This feature is only available on Windows platforms.<br><b><i><u>Please use a Windows device to download the dedicated client.</u></i></b>');
+        }
         return;
     }
 
@@ -94,6 +95,7 @@ $(document).on('mousemove', () => {
         button.html(`<i class="${icon}" style="margin-right: 1rem"></i> ${downloadText}`);
         button.css('aspect-ratio', 'unset')
         button.attr('data-title', "Download app");
+
         $("[authorized-access]").remove();
     } else {
         try {
