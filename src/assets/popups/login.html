@@ -1,6 +1,41 @@
+<style>
+    #login-popup {
+        #password-validation {
+            h3 {
+                margin-block: 0;
+            }
+
+            p {
+                margin-block: 0;
+
+                &.valid {
+                    color: green;
+
+                    &::before {
+                        content: "✓ ";
+                    }
+                }
+
+                &.invalid {
+                    color: red;
+
+                    &::before {
+                        content: "✗ ";
+                    }
+                }
+
+                &::before {
+                    display: inline-block;
+                    width: 1rem;
+                }
+            }
+        }
+    }
+</style>
+
 <div class="col">
     <h1>Login Form</h1>
-    <form action="javascript:void(0);" class="col center vertical horizontal fill vertical horizontal" style="width: 400px">
+    <form action="javascript:void(0);" class="col center vertical horizontal fill vertical horizontal" id="login-form" style="width: 400px">
         <div class="floating-input fill">
             <input autocomplete="off" id="username" name="username" placeholder="" required type="text">
             <label for="username">Username</label>
@@ -8,6 +43,14 @@
         <div class="floating-input fill">
             <input autocomplete="off" id="password" name="password" placeholder="" required type="password">
             <label for="password">Password</label>
+        </div>
+        <div id="password-validation" style="display: none">
+            <h3>Password must contain the following:</h3>
+            <p class="invalid" id="letter">A <b>lowercase</b> letter</p>
+            <p class="invalid" id="capital">A <b>capital (uppercase)</b> letter</p>
+            <p class="invalid" id="number">A <b>number</b></p>
+            <p class="invalid" id="special">A <b>special</b> character, like !@#$%^&*?</p>
+            <p class="invalid" id="length">Minimum <b>8 characters</b></p>
         </div>
         <p class="error" style="display: none"></p>
         <a href="javascript:void(0);" id="register-button" style="margin-block: 1rem;">Create an Account?</a>
@@ -17,12 +60,57 @@
 
 
 <script>
-    $("a#register-button").on('click', () => {
-        const popup = $("#login-popup")
-        popup.find('h1').text('Register');
-        popup.find('label[for="username"]').text('First and Last Name');
-        popup.find('label[for="password"]').text('Employee ID');
-        popup.find('button[type="submit"]').text('Register');
-        $("a#register-button").remove();
-    });
+    (() => {
+        let isRegister = false;
+        $("a#register-button").on('click', () => {
+            isRegister = true;
+            const popup = $("#login-popup")
+            popup.find('h1').text('Register');
+            popup.find('label[for="username"]').text('First and Last Name').attr('pattern', `[a-z]+\\.[a-z]+`).attr('title', "The username must be your first name '.' your last name all lower-case, ex: john.doe");
+            popup.find('label[for="password"]').text('Password').attr("pattern", `(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}`).attr("title", "Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters");
+            popup.find('button[type="submit"]').text('Register');
+            popup.find("#password-validation").show();
+            $("a#register-button").remove();
+        });
+        $("#password").on('keyup', e => {
+            if (isRegister) {
+                const validation = validatePassword($(e.currentTarget).val());
+                $("#letter").toggleClass('valid', validation.hasLetter).toggleClass('invalid', !validation.hasLetter);
+                $("#capital").toggleClass('valid', validation.hasCapital).toggleClass('invalid', !validation.hasCapital);
+                $("#number").toggleClass('valid', validation.hasNumber).toggleClass('invalid', !validation.hasNumber);
+                $("#special").toggleClass('valid', validation.hasSpecial).toggleClass('invalid', !validation.hasSpecial);
+                $("#length").toggleClass('valid', validation.hasLength).toggleClass('invalid', !validation.hasLength);
+            }
+        })
+
+        /**
+         * Validates a password based on various criteria.
+         *
+         * @param {string} password - The password to be validated.
+         * @returns {object} An object containing boolean values indicating if the password meets the criteria.
+         *  - hasLength: Whether the password has a minimum length of 8 characters.
+         *  - hasNumber: Whether the password contains at least one number.
+         *  - hasCapital: Whether the password contains at least one uppercase letter.
+         *  - hasLetter: Whether the password contains at least one lowercase letter.
+         *  - hasSpecial: Whether the password contains at least one special character.
+         *  - isValid: Whether the password meets all the above criteria.
+         */
+        function validatePassword(password) {
+            const hasLength = password.length >= 8;
+            const hasNumber = /\d/.test(password);
+            const hasCapital = /[A-Z]/.test(password);
+            const hasLetter = /[a-z]/.test(password);
+            const hasSpecial = /[^A-Za-z0-9]/.test(password);
+            const isValid = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}/.test(password);
+            return {
+                hasLength,
+                hasNumber,
+                hasCapital,
+                hasLetter,
+                hasSpecial,
+                isValid
+            }
+
+        }
+    })();
 </script>
