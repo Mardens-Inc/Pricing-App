@@ -35,7 +35,7 @@ async function getCurrentVersion() {
 }
 
 if (isDedicatedClient) {
-    let update = setInterval(async () => check, 1000 * 60 * 15); // Check every 15 minutes
+    let update = setInterval(async () => check, 1000 * 60 * 1); // Check every 15 minutes
     const check = (async () => {
         if (await checkForUpdates()) {
             $(window).trigger("updateAvailable")
