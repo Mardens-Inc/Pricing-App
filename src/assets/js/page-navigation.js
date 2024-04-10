@@ -6,6 +6,7 @@ import {startLoading, stopLoading} from "./loading.js";
 import {alert, confirm} from "./popups.js";
 import {loadSettings, openSettings} from "./settings.js";
 import {getCurrentVersion} from "./updater.js";
+
 window.alert = alert;
 window.confirm = confirm;
 
