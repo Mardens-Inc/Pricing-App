@@ -16,7 +16,7 @@ async function build() {
         if (stderr) {
             console.error(`BUILD >> ${stderr}`);
         }
-        if(stdout) {
+        if (stdout) {
             console.log(`BUILD >> ${stdout}`);
         }
     });
