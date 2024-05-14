@@ -85,7 +85,7 @@ async function searchRecords(query, columns = [], limit = 10, page = 0, sort = "
     return $.ajax({
         url: `${baseURL}/api/location/${window.localStorage.getItem("loadedDatabase")}/search`,
         method: "POST",
-        data: {query, columns, limit, page, sort, asc: ascending},
+        data: JSON.stringify({query, columns, limit, page, sort, asc: ascending}),
         headers: {accept: "application/json"},
     });
 }
