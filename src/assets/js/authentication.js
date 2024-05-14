@@ -46,7 +46,7 @@ loginButton.on('click', async () => {
     } else {
         const loginForm = await openPopup("login")
         console.log(loginForm)
-        loginForm.find('form').on('submit', async (event) => {
+        loginForm.find('form').on('submit', async () => {
             const email = loginForm.find('input[name="username"]').val();
             const password = loginForm.find('input[name="password"]').val();
             const response = await auth.login(email, password, expiration);
