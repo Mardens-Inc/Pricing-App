@@ -1,11 +1,13 @@
 import auth from "./authentication.js";
 import {print} from "./crossplatform-utility.js";
+import {buildInventoryingFormWithQuantity} from "./database-inventorying-with-quantity.js";
 import {buildInventoryingForm} from "./database-inventorying.js";
 import {buildOptionsForm} from "./database-options-manager.js";
 import {download} from "./filesystem.js";
 import {getHistory} from "./history.js";
 import {buildImportFilemakerForm} from "./import-filemaker.js";
 import {startLoading, stopLoading} from "./loading.js";
+import {deleteRecord} from "./location.js";
 import {alert, confirm, openPopup} from "./popups.js";
 
 /**
@@ -252,7 +254,8 @@ export default class DatabaseList {
                             if (!value) return;
                             startLoading({fullscreen: true, message: "Deleting..."})
                             try {
-                                await $.ajax({url: `${baseURL}/api/location/${this.id}/${item.id}`, method: "DELETE"});
+                                // await $.ajax({url: `${baseURL}/api/location/${this.id}/${item.id}`, method: "DELETE"});
+                                await deleteRecord(item.id);
                                 await this.loadView("", true);
                             } catch (e) {
                                 console.error(e)
@@ -272,10 +275,12 @@ export default class DatabaseList {
                         if (tr.hasClass("selected")) {
                             tr.removeClass("selected");
                             $(document).trigger("item-selected", null);
+                            localStorage.removeItem("selectedItem");
                             return;
                         }
 
                         tr.toggleClass("selected");
+                        localStorage.setItem("selectedItem", JSON.stringify(item));
                         $(document).trigger("item-selected", item);
                     })
                 }
@@ -294,7 +299,11 @@ export default class DatabaseList {
         this.list.append(table);
         console.log(this.items)
         if (this.options["allow-inventorying"] && auth.isLoggedIn) {
-            this.list.append(await buildInventoryingForm(this.options["allow-additions"], this.options.columns, this.options["add-if-missing"], this.options["remove-if-zero"], this.options["voice-search"]));
+            if (this.options.columns.filter(i => i.attributes.includes("quantity")).length === 0)
+                this.list.append(await buildInventoryingForm(this.options["allow-additions"], this.options.columns, this.options["add-if-missing"], this.options["voice-search"]));
+            else
+                this.list.append(await buildInventoryingFormWithQuantity(this.options["allow-additions"], this.options.columns, this.options["add-if-missing"], this.options["remove-if-zero"], this.options["voice-search"]));
+
         }
 
         $(document).trigger("load")
