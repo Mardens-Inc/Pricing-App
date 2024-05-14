@@ -28,3 +28,5 @@ src/assets/fontawesome/**/*
 src/assets/js/jquery-3.7.1.min.js
 
 config.json
+/src-tauri/tmp.exe
+/src-tauri/updater.exe
