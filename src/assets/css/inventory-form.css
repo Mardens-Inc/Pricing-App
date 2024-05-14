@@ -1,12 +1,21 @@
-#inventorying-form {
-    margin: 1rem 1rem 1rem 2rem;
+main > .list.col {
+    flex-direction: row;
 
-    #addition-section {
-        margin-bottom: 1rem;
-    }
+    #inventorying-form {
+        width: 75%;
+        margin: 1rem 1rem 1rem 2rem;
 
-    button[type=submit] {
-        width: 200px;
-        margin-inline: auto;
+        #addition-section {
+            margin-bottom: 1rem;
+        }
+
+        label i{
+            margin-left: 0.5rem;
+        }
+
+        button[type=submit] {
+            width: 200px;
+            margin-inline: auto;
+        }
     }
 }
