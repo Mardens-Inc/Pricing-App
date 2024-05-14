@@ -1,5 +1,6 @@
 use std::io::Write;
 use std::path::PathBuf;
+use std::process::{Command, Stdio};
 
 use tauri::command;
 
@@ -35,10 +36,8 @@ pub async fn download_update() -> bool {
     }
     println!("Update found!");
 
-    if !PathBuf::from("update.exe").exists() {
-        if !download_updater().await {
-            return false;
-        }
+    if !download_updater().await {
+        return false;
     }
 
     // build download url
@@ -72,9 +71,12 @@ async fn download_updater() -> bool
 
 #[command]
 pub fn install_update() -> bool {
-    if PathBuf::from("tmp.exe").exists() {
-        std::process::Command::new("updater.exe").args(&["tmp.exe", "pricing-app.exe"]).spawn().unwrap();
-        return true;
+    if PathBuf::from("updater.exe").exists() && PathBuf::from("tmp.exe").exists() {
+        return Command::new("updater.exe")
+            .args(&["tmp.exe", "pricing-app.exe"])
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn().is_ok();
     }
     return false;
 }
