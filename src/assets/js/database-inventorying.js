@@ -1,273 +1,291 @@
-import {ActionType, addHistory, getHistory} from "./history.js";
 import {startLoading, stopLoading} from "./loading.js";
-import {addRecord, updateRecord} from "./location.js";
-import {alert, confirm} from "./popups.js";
+import {addRecord, searchRecords, updateRecord} from "./location.js";
+import {alert} from "./popups.js";
+
+let primaryKeyDebounce = 0;
+
+/**
+ *
+ * @type {{addIfMissing: boolean, columns: Column[], voiceSearch: boolean, allowAdditions: boolean}}
+ */
+let formOptions = {
+    allowAdditions: true,
+    columns: [],
+    addIfMissing: true,
+    voiceSearch: true
+}
+
+let primaryKeyColumn;
+
+/**
+ * The submit button for the form.
+ * @type {JQuery<HTMLButtonElement>}
+ */
+const submitButton = $("<div>")
+    .text("Add")
+    .attr('id', 'submit-button')
+    .addClass('button primary center horizontal vertical')
+    .css({marginInline: 'auto', marginTop: '1em', minWidth: '100px', width: '33%', maxWidth: '500px'});
 
 /**
  * Builds the inventorying form based on the provided parameters.
- * @param {bool} allowAdditions - Flag indicating whether to allow additions to the inventory.
+ * @param {boolean} allowAdditions - Flag indicating whether to allow additions to the inventory.
  * @param {Column[]} columns - Array of Column objects representing the columns in the database.
- * @param {bool} addIfMissing - Flag indicating whether to add a new item if no matching item is found.
- * @param {bool} removeIfZero - Flag indicating whether to remove an item if its quantity becomes zero.
+ * @param {boolean} addIfMissing - Flag indicating whether to add a new item if no matching item is found.
  * @param {boolean} voiceSearch - Flag indicating whether to enable voice search in the form.
  * @return {Promise.<JQuery<HTMLElement>>} - A promise resolving to the built inventorying form.
  */
-async function buildInventoryingForm(allowAdditions, columns, addIfMissing, removeIfZero, voiceSearch) {
-    try {
-        window.localStorage.removeItem("selectedItem");
-        (() => {
-            const list = $("main > .list");
-            list.addClass('row')
-            list.removeClass('col')
-        })();
+async function buildInventoryingForm(allowAdditions, columns, addIfMissing, voiceSearch) {
+    formOptions.allowAdditions = allowAdditions;
+    formOptions.columns = columns;
+    formOptions.addIfMissing = addIfMissing;
+    formOptions.voiceSearch = voiceSearch;
+    primaryKeyColumn = formOptions.columns.filter(column => column.attributes.includes('primary')).map(column => column.name)[0];
 
-        const inventoryingForm = $(`<form id="inventorying-form" class="col fill" action="javascript:void(0);"></form>`);
 
-        inventoryingForm.append(`<h1>Inventorying</h1>`);
-        /**
-         * @type {Column[]}
-         */
-        const primaryKeyColumn = columns.filter(column => column.attributes.includes('primary'));
-        /**
-         * @type {Column[]}
-         */
-        const quantityColumn = columns.filter(column => column.attributes.includes('quantity'));
-        if (primaryKeyColumn.length === 0) {
-            inventoryingForm.append(`<p>Primary key column not found</p>`);
+    $(document).on("item-selected", (e, item) => handleSelection(item));
+
+    const form = createFormElements();
+
+    form.append(submitButton);
+
+    // events
+    form.on('submit', (e) => {
+        e.preventDefault();
+    });
+    submitButton.on('click', (e) => {
+        const data = form.serializeArray();
+        const item = {};
+        for (let {name, value} of data) {
+            item[name] = value;
         }
-        if (quantityColumn.length === 0) {
-            inventoryingForm.append(`<p>Quantity column not found</p>`);
-        }
-        if (primaryKeyColumn.length === 0 || quantityColumn.length === 0) {
-            inventoryingForm.append(`<p>Missing required fields, add them in the <a href="javascript:void();" onclick="$('#edit-button').trigger('click')">"Database Settings"</a> section</p>`);
-            return inventoryingForm;
-        }
+        submit(item);
+    });
 
-        const primaryKey = primaryKeyColumn[0].real_name;
-        const quantityKey = quantityColumn[0].real_name;
+    form.find("input[attributes*='primary']").on('keyup', (e) => {
+        clearTimeout(primaryKeyDebounce)
+        primaryKeyDebounce = setTimeout(async () => {
+            const input = $(e.target);
+            const value = input.val();
+            const item = await findSelectedItemFromPrimaryKey(value);
 
-
-        const primaryInput = $(`
-            <div class="floating-input">
-                <input type="text" id="primary-key" name="primary-key" required placeholder="" autocomplete="off">
-                <label for="primary-key">${primaryKeyColumn[0].name} <i class="fa-solid fa-key"></i></label>
-            </div>`)
-
-        const quantityInput = $(`
-            <div class="floating-input">
-                <input type="number" id="quantity" name="quantity" required placeholder="" autocomplete="off" step="1">
-                <label for="quantity">${quantityColumn[0].name} (+/-)</label>
-            </div>`)
-
-        const submitButton = $(`<button type="submit" class="fill primary center horizontal vertical">Update</button>`);
-        const addToggle = $(`<toggle id="add-item" value="false">Add?</toggle>`);
-        const additionSection = $(`<section id="addition-section" class="col fill" toggle-hidden="add-item"></section>`);
-        for (const column of columns) {
-            if (column.attributes.includes('primary') || column.attributes.includes('quantity') || column.attributes.includes('readonly')) continue;
-            const input = $(`
-                <div class="floating-input">
-                    <input type="text" id="${column.name}" name="${column.name}" placeholder="" autocomplete="off">
-                    <label for="${column.name}">${column.name}</label>
-                </div>`);
-            additionSection.append(input);
-        }
-
-        inventoryingForm.append(primaryInput);
-        inventoryingForm.append(quantityInput);
-        if (allowAdditions) {
-            inventoryingForm.append(addToggle);
-            inventoryingForm.append(additionSection);
-        }
-        inventoryingForm.append(submitButton);
-
-        addToggle.on("toggle", (e, data) => {
-            const value = data.value;
-            if (value) {
-                if (addToggle.text() === "Add?")
-                    submitButton.text("Add")
-                quantityInput.find('label').html(`${quantityColumn[0].name}`);
-
+            if (value !== '' && item && item[primaryKeyColumn] === value) {
+                submitButton.text("Update");
+                localStorage.setItem("selectedItem", JSON.stringify(item));
             } else {
-                submitButton.text("Update")
-                quantityInput.find('label').html(`${quantityColumn[0].name} (+/-)`);
-            }
-        });
-
-        $(document).on("item-selected", (e, item) => {
-
-            if (item === null || item === undefined) {
-                window.localStorage.removeItem("selectedItem");
-                primaryInput.find("input").val("");
-                quantityInput.find("input").val("");
-                if (allowAdditions) {
-                    addToggle.text("Add?");
-                    if (addToggle.attr('value') === "true") {
-                        submitButton.text("Add")
-                    }
-                    for (const column of columns) {
-                        if (column.attributes.includes('primary') || column.attributes.includes('quantity') || column.attributes.includes('readonly')) continue;
-                        additionSection.find(`input[name="${column.name}"]`).val("");
-                    }
-                }
-
-                return;
+                submitButton.text("Add");
+                localStorage.removeItem("selectedItem");
             }
             console.log(item)
-            primaryInput.find("input").val(item[primaryKey]);
-            if (addToggle.attr('value') === "true") {
-                quantityInput.find("input").val(item[quantityKey]);
-            } else {
-                quantityInput.find("input").val("");
-                quantityInput.find("input").trigger('focus');
-            }
-            addToggle.text("Edit?");
-            submitButton.text("Update")
-            window.localStorage.setItem("selectedItem", item.id);
+        }, 500);
+    });
 
 
-            if (allowAdditions) {
-                for (const column of columns) {
-                    if (column.attributes.includes('primary') || column.attributes.includes('quantity') || column.attributes.includes('readonly')) continue;
-                    additionSection.find(`input[name="${column.name}"]`).val(item[column.name]);
+    return form;
+
+}
+
+
+function createFormElements() {
+    const form = $(`<form id='inventorying-form' class="col" action="javascript:void(0);"></form>`);
+    form.append($(`<h1>Inventorying Form</h1>`));
+    for (let column of formOptions.columns) {
+        if (column.attributes.includes('readonly')) continue;
+        const attributes = column.attributes.join(',');
+        let id = column.name.replace(/\s/g, '-').toLowerCase();
+
+        const input = $(`
+        <div class="floating-input">
+                <input type="${column.attributes.includes('price') || column.attributes.includes('mp') ? 'number" min="0" step="0.01' : 'text'}" id="${id}" name="${id}" placeholder="" autocomplete="off" attributes="${attributes}" realname="${column.real_name}">
+                <label for="${id}">${column.name}${column.attributes.includes('primary') ? '<i class="fa-solid fa-key"></i>' : ''}</label>
+            </div>
+        `)
+
+        if (column.attributes.includes('required')) {
+            input.find('input').attr('required', 'true');
+        }
+        form.append(input);
+    }
+    form.append($(`<link rel="stylesheet" href="assets/css/inventory-form.css">`))
+
+    return form;
+}
+
+function handleSelection(item) {
+    if (item == null) {
+        clearFormInputs();
+        submitButton.text("Add");
+        return;
+    }
+    for (let key in item) {
+        const input = $(`input[realname="${key}"]`);
+        if (input.length === 0) continue;
+        input.val(item[key]);
+    }
+    submitButton.text("Update");
+}
+
+/**
+ * The `submit` function is used to submit the form data and perform certain follow-up actions.
+ * @param {Object} item - The item to be submitted.
+ */
+function submit(item) {
+    const selectedItem = localStorage.getItem("selectedItem");
+    if (selectedItem) {
+        try {
+
+            const selected = JSON.parse(selectedItem);
+            for (let key in selected) {
+                if (item[key] === undefined) {
+                    item[key] = selected[key];
                 }
             }
-        });
-
-        inventoryingForm.append($(`<link rel="stylesheet" href="assets/css/inventory-form.css">`))
-
-        inventoryingForm.on('submit', async () => {
-            startLoading({fullscreen: true, message: "Adding/Updating..."})
-            let selectedItem = window.localStorage.getItem("selectedItem");
-
-            if (selectedItem === null || selectedItem === undefined) {
-                if (primaryInput.find("input").val() === "" || quantityInput.find("input").val() === "") {
-                    alert("Primary key and quantity are required");
-                    return;
-                } else {
-                    const searchResults = (await $.ajax({
-                        url: `${baseURL}/api/location/${window.localStorage.getItem("loadedDatabase")}/search`,
-                        method: "POST",
-                        data: JSON.stringify({"query": primaryInput.find("input").val(), "columns": [primaryKey], "limit": 1, "offset": 0, "asc": true, "sort": primaryKey}),
-                        contentType: "application/json",
-                        headers: {"Accept": "application/json"}
-                    }))["items"];
-                    if (searchResults.length > 0) {
-                        selectedItem = searchResults[0];
-                        console.log(selectedItem)
-                        // fill in the rest of the form
-                        for (const column of columns) {
-                            if (column.attributes.includes('primary') ||
-                                column.attributes.includes('quantity') ||
-                                column.attributes.includes('readonly') ||
-                                additionSection.find(`#${column.name}`).val() !== "") continue;
-
-                            additionSection.find(`input[name="${column.name}"]`).val(searchResults[0][column.name]);
-                        }
-                    } else {
-                        selectedItem = null;
-                    }
-                }
-            } else {
-                const url = `${baseURL}/api/location/${window.localStorage.getItem("loadedDatabase")}/${selectedItem}`;
-                try {
-                    selectedItem = await $.ajax({url, method: "GET", headers: {"Accept": "application/json"}});
-                } catch (e) {
-                    console.error(e);
-                    alert(`Unable to get selected item from the server, please contact IT/Support<br>${e.error ?? "No error message was provided!"}`, null, null);
-                    addToggle.trigger("toggle", [{value: true}]);
-                }
-            }
-
-            const isNewItem = (selectedItem === null || selectedItem === undefined) && (addToggle.attr('value') === "true" || addIfMissing);
-            // only set the quantity if the user is adding a new item or the user has toggled the add button
-            const setQuantity = isNewItem || addToggle.attr('value') === "true" || selectedItem[quantityKey] === null || selectedItem[quantityKey] === undefined;
-            const quantityValue = processQuantityInput(quantityInput.find("input"), setQuantity, Number.parseInt(setQuantity ? null : selectedItem[quantityKey]));
-
-            if (removeIfZero && quantityValue <= 0) {
-                confirm("Are you sure you want to remove this item?", "Delete", "Cancel", async (value) => {
-                    if (!value) return;
-                    startLoading()
-                    await $.ajax({url: `${baseURL}/api/location/${window.localStorage.getItem("loadedDatabase")}/${selectedItem["id"]}`, method: "DELETE", headers: {"Accept": "application/json"}});
-                    $(document).trigger("search", "");
-                    stopLoading();
-                });
-                stopLoading();
+            const id = selected['id'];
+            if (id !== undefined) {
+                console.log(`Using selected item: ${id}`)
+                update(id, item);
                 return;
             }
-
-            if (selectedItem === null || selectedItem === undefined) {
-                if (addToggle.attr('value') === "false" && !addIfMissing) {
-                    alert("Item not found, please add the item first", null, null);
-                    addToggle.trigger("toggle", [{value: true}]);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+    // search for the item based on the id
+    const value = item[primaryKeyColumn.toLowerCase()];
+    if (value) {
+        startLoading({fullscreen: true, message: "Searching..."})
+        findSelectedItemFromPrimaryKey(value)
+            .then((result) => {
+                stopLoading();
+                if (result) {
+                    update(result['id'], item);
                 } else {
-                    const data = {};
-                    for (const column of columns) {
-                        if (column.attributes.includes('primary') || column.attributes.includes('quantity') || column.attributes.includes('readonly')) continue;
-                        data[column.name] = additionSection.find(`input[name="${column.name}"]`).val();
-                    }
-                    data[primaryKey] = primaryInput.find("input").val();
-                    data[quantityKey] = quantityValue;
-                    await addRecord([data]);
+                    add(item);
                 }
-            } else {
-                const data = {};
-                for (const column of columns) {
-                    if (column.attributes.includes('primary') || column.attributes.includes('quantity') || column.attributes.includes('readonly')) continue;
-                    data[column.name] = additionSection.find(`input[name="${column.name}"]`).val();
-                }
-                data[primaryKey] = primaryInput.find("input").val();
-                data[quantityKey] = quantityValue;
-
-                try {
-                    let history = await getHistory(window.localStorage.getItem("loadedDatabase"), selectedItem["id"]);
-                    if (history.length === 0) {
-                        let ogData = {...selectedItem};
-                        delete ogData["id"];
-                        delete ogData["date"];
-                        delete ogData["last_modified_date"];
-                        await addHistory(window.localStorage.getItem("loadedDatabase"), selectedItem["id"], ActionType.CREATE, ogData);
-                    }
-                    await updateRecord(selectedItem["id"], data);
-                } catch (e) {
-                    const response = e.responseJSON ?? e.responseText ?? e;
-                    console.error(e);
-                    console.log(response);
-                    alert(`Failed to add/update item, please contact IT/Support<br><p class="error">Error: ${response.error ?? "No error message was provided!"}</p>`, null, null);
-                }
-
-            }
-            $(document).trigger("search", primaryInput.find("input").val());
-
-            stopLoading();
-        });
+            })
+            .catch((err) => {
+                stopLoading();
+                console.error(err);
+            });
+    } else {
+        alert("Missing primary key value.");
+    }
 
 
-        return inventoryingForm;
-    } catch (error) {
-        console.error(error);
-        return $("<p>Failed to load inventorying form</p>");
+    console.log(item);
+    $(document).trigger("item-selected", null);
+    stopLoading();
+    clearFormInputs();
+}
+
+/**
+ * Searches for an item in the database based on the provided value.
+ * @param {string} value
+ * @returns {Promise<Object|null>}
+ */
+async function findSelectedItemFromPrimaryKey(value) {
+    try {
+        const results = await searchRecords(value, [`${primaryKeyColumn}`], 1, 0, primaryKeyColumn, true);
+        if (results == null || results.length === 0) return null;
+        return results["items"][0];
+    } catch (e) {
+        console.error(e);
+        return null;
     }
 }
 
 /**
- * Processes the input for the quantity field.
- * @param {JQuery<HTMLInputElement<number>>} quantity - The input element for the quantity field.
- * @param {boolean} edit - Whether the form is in edit mode.
- * @param {number|null} originalQuantity - The original data for the item.
- * @returns {number}
+ * The `update` function is used to update a record and perform certain
+ * follow-up actions.
+ *
+ * @param {number|string} id - The identification unique to the record to be updated.
+ * @param {object} item - The updated values for the record.
+ *
+ * The function does the following:
+ *
+ *   1.  Initiates full-screen loading with a provided message "Updating...",
+ *   2.  Calls `updateRecord(id, item)` method to update the record,
+ *   3.  Upon successful completion of the update:
+ *       -  Stops the loading animation,
+ *       -  Clears form inputs,
+ *       -  Triggers a 'search' event on the document with `id` as parameter.
+ *   4.  If an error occurs during the update:
+ *       -  Stops the loading animation,
+ *       -  Writes out the console error message.
+ *
+ * The whole operation is asynchronous (returns a promise).
  */
-function processQuantityInput(quantity, edit, originalQuantity = null) {
-    let value = 0;
-    try {
-        value = Number.parseInt(quantity.val().replace(/[^0-9-]/g, "")); // Parse the value of the input as an integer.
-    } catch (e) {
-        console.log(e);
-        alert("Invalid quantity value, please enter a valid number", null, null);
-        return 0;
-    }
-    if (edit || originalQuantity === null || isNaN(originalQuantity)) return value; // If the form is in edit mode or the original quantity is null, return the value.
-    return value + originalQuantity; // Otherwise, return the sum of the value and the original quantity.
+function update(id, item) {
+    startLoading({fullscreen: true, message: "Updating..."})
+    const real_item = mapItemToRealName(item);
+    updateRecord(id, real_item)
+        .then(() => {
+            stopLoading();
+            clearFormInputs();
+            $(document).trigger("search", item[primaryKeyColumn.toLowerCase()]);
+        })
+        .catch((err) => {
+            stopLoading();
+            console.error(err);
+        });
 }
 
+/**
+ * The `add` function is used to add a new item and perform certain follow-up actions.
+ *
+ * @param {Object} item - The item to be added.
+ *
+ * The function does the following:
+ *   1.  Initiates full-screen loading with a provided message "Adding...",
+ *   2.  Calls `addRecord(item)` method to add the item,
+ *   3.  Upon successful completion of the addition:
+ *       - Stops the loading animation,
+ *       - Clears form inputs,
+ *       - Triggers a 'search' event on the document with the primary key of the added item as a parameter.
+ *   4.  If an error occurs during the addition:
+ *       - Stops the loading animation,
+ *       - Writes out the console error message.
+ *
+ * The whole operation is asynchronous (returns a promise).
+ */
+function add(item) {
+
+    startLoading({fullscreen: true, message: "Adding..."})
+
+    const real_item = mapItemToRealName(item);
+    addRecord([real_item])
+        .then(() => {
+            stopLoading();
+            clearFormInputs();
+            $(document).trigger("search", item[primaryKeyColumn.toLowerCase()]);
+        })
+        .catch((err) => {
+            stopLoading();
+            console.error(err);
+        });
+}
+
+/**
+ * The `mapItemToRealName` function is used to map the item to the real name.
+ * @param {Object} item - The item to be mapped.
+ * @returns {Object} - The mapped item.
+ */
+function mapItemToRealName(item) {
+    const realItem = {};
+    for (let key in item) {
+        const column = formOptions.columns.filter(column => column.name.toLowerCase() === key.toLowerCase())[0];
+        if (column) {
+            realItem[column.real_name] = item[key];
+        }
+    }
+    return realItem;
+}
+
+/**
+ * The `clearFormInputs` function is used to clear all the inputs in the form.
+ */
+function clearFormInputs() {
+    $("#inventorying-form input").val("");
+}
 
 export {buildInventoryingForm}
