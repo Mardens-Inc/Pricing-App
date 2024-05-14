@@ -19,7 +19,11 @@ const exportButton = $("#export-button");
 
 if (isDedicatedClient) {
     getCurrentVersion().then(version => {
-        subtitle.html(`v${window.version}`)
+        if (version === "web-client") {
+            subtitle.html(`Web Client`)
+        } else {
+            subtitle.html(`v${version}`)
+        }
     });
 }
 
@@ -52,10 +56,11 @@ $(window).on('load', async () => {
         startLoading({fullscreen: true})
         await directory.loadView("", true);
         stopLoading();
-        setTimeout(() => {
-            askToLogin();
-        }, 1000);
     }
+    setTimeout(() => {
+        askToLogin();
+        $(auth).on('log-out', () => askToLogin())
+    }, 1000);
 })
 $(directory).on("loadExternalView", async (event, id) => {
     resetListElement()
@@ -87,6 +92,7 @@ $(directory).on("unloadExternalView", (event, id) => {
 });
 
 $(document).on("search", async (event, data) => {
+    $("#search").val(data);
     if (database !== null) {
         await database.search(data);
     } else {
@@ -122,8 +128,8 @@ function resetListElement() {
 }
 
 function askToLogin() {
-    if (!auth.isLoggedIn && window.localStorage.getItem("loginPrompt") === null && isDedicatedClient) {
-        window.localStorage.setItem("loginPrompt", true);
+    if (!auth.isLoggedIn /*&& window.localStorage.getItem("loginPrompt") === null*/ && isDedicatedClient) {
+        // window.localStorage.setItem("loginPrompt", true);
         $("#login-button").trigger("click");
     }
 }
