@@ -43,19 +43,35 @@ const directory = new DirectoryList();
  */
 let database = null;
 $(window).on('load', async () => {
-    if (isDedicatedClient) {
-        await loadSettings();
+    try {
+        if (isDedicatedClient) {
+            await loadSettings();
+        }
+    } catch (e) {
+        console.error(e)
     }
     if (window.localStorage.getItem("loadedDatabase") !== null) {
-        database = new DatabaseList(window.localStorage.getItem("loadedDatabase"));
-        await database.load();
-        editButton.css('display', "");
-        exportButton.css('display', "");
-        newButton.css('display', 'none');
+        try {
+            database = new DatabaseList(window.localStorage.getItem("loadedDatabase"));
+            await database.load();
+            editButton.css('display', "");
+            exportButton.css('display', "");
+            newButton.css('display', 'none');
+        } catch (e) {
+            console.error(e)
+            startLoading({fullscreen: true})
+            await directory.loadView("", true);
+            stopLoading();
+        }
     } else {
-        startLoading({fullscreen: true})
-        await directory.loadView("", true);
-        stopLoading();
+        try {
+
+            startLoading({fullscreen: true})
+            await directory.loadView("", true);
+            stopLoading();
+        } catch (e) {
+            console.error(e)
+        }
     }
     setTimeout(() => {
         askToLogin();
@@ -92,7 +108,7 @@ $(directory).on("unloadExternalView", (event, id) => {
 });
 
 $(document).on("search", async (event, data) => {
-    $("#search").val(data);
+    // $("#search").val(data);
     if (database !== null) {
         await database.search(data);
     } else {
