@@ -65,18 +65,17 @@
             for (let i = 0; i < loadedJson.length; i++) {
                 let obj = {};
                 for (let j = 0; j < currentColumns.length; j++) {
-                    const column = currentColumns[j];
-                    const newColumn = columnMappings[column];
+                    const column = currentColumns[j]?.trim() ?? "";
+                    if (column === "") continue;
+                    const newColumn = columnMappings[column]?.trim() ?? "";
+                    if (newColumn === "") continue;
                     obj[column] = loadedJson[i][newColumn]?.toString()?.trim() ?? "";
                 }
                 json.push(obj);
             }
 
-            console.log(loadedJson)
-            console.log(json);
             newCsv = jsonToCSV(json);
-            console.log(newCsv);
-            $("document").trigger('loadedCSV', newCsv);
+            $(document).trigger('loadedCSV', newCsv);
         });
     });
 
@@ -99,7 +98,7 @@
             let currentLine = lines[i].split(",");
 
             for (let j = 0; j < headers.length; j++) {
-                obj[headers[j]] = currentLine[j];
+                obj[headers[j].trim()] = currentLine[j].trim();
             }
 
             json.push(obj);
