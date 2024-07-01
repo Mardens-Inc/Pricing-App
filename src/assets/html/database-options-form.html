@@ -55,6 +55,29 @@
     </div>
     <toggle id="voice-search" name="voice-search" value="false">Enable voice searching?</toggle>
 
+
+    <div class="col fill">
+        <toggle id="dynamically-generate-mardens-price">Dynamically Generate Mardens Price.</toggle>
+        <div class="row fill" toggle-hidden="dynamically-generate-mardens-price">
+            <button id="add-mardens-price-category" title="Add Discount Category"><i class="fa fa-plus"></i></button>
+            <div class="col fill" id="mardens-price-categories">
+                <h3>Categories</h3>
+                <div class="discount-category fill row">
+                    <div class="col fill">
+                        <label for="category-name">Category Name</label>
+                        <input id="category-name" name="category-name" placeholder="Category Name" type="text">
+                    </div>
+                    <div class="col fill">
+                        <label for="category-discount">Discount</label>
+                        <input id="category-discount" name="category-discount" placeholder="Discount" type="text">
+                    </div>
+                    <button class="remove-category" title="Remove Category"><i class="fa fa-trash"></i></button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
     <div class="row fill center horizontal" id="action-button-row">
         <button class="primary" id="save" type="submit">Save</button>
         <button id="cancel" type="button">Cancel</button>
