@@ -204,7 +204,15 @@ export default class DatabaseList {
                                 text = text === "" ? "0" : text;
                                 text = parseFloat(text).toFixed(2);
 
-                                if (attributes.includes("mp")) mp = text;
+                                if (attributes.includes("mp")) {
+                                    mp = text;
+                                    if (this.options["mardens-price"] !== undefined && this.options["mardens-price"] !== "" && this.options["mardens-price"] !== null) {
+                                        const percentage = parseFloat(this.options["mardens-price"].replace(/[^0-9]/g, "")) / 100;
+                                        if (retail != null) {
+                                            text = mp = (parseFloat(retail) * (1 - percentage)).toFixed(2);
+                                        }
+                                    }
+                                }
                                 if (attributes.includes("price")) retail = text;
 
                                 text = `$${text}`;
@@ -216,6 +224,7 @@ export default class DatabaseList {
                             text = text === "" ? "0" : text;
                             text = parseInt(text);
                         }
+
                         const td = $("<td>").html(text === "" ? "-" : text);
                         for (const attribute of attributes) {
                             td.addClass(attribute)
