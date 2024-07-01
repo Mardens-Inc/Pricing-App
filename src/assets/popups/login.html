@@ -68,7 +68,7 @@
         let isRegister = false;
         $("a#register-button").on('click', () => {
             isRegister = true;
-            const popup = $("#login-popup")
+            const popup = $("#login-popup").addClass('register')
             popup.find('h1').text('Register');
             popup.find('label[for="username"]').text('First and Last Name').attr('pattern', `[a-z]+\\.[a-z]+`).attr('title', "The username must be your first name '.' your last name all lower-case, ex: john.doe");
             popup.find('label[for="password"]').text('Password').attr("pattern", `(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}`).attr("title", "Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters");
