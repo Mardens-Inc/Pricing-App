@@ -101,9 +101,9 @@ function createFormElements() {
             </div>
         `)
 
-        if (column.attributes.includes('required')) {
-            input.find('input').attr('required', 'true');
-        }
+        // if (column.attributes.includes('required')) {
+        //     input.find('input').attr('required', 'true');
+        // }
         form.append(input);
     }
     form.append($(`<link rel="stylesheet" href="assets/css/inventory-form.css">`))
