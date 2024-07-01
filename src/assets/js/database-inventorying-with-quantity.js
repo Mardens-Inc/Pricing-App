@@ -22,6 +22,12 @@ async function buildInventoryingFormWithQuantity(allowAdditions, columns, addIfM
         })();
 
         const inventoryingForm = $(`<form id="inventorying-form" class="col fill" action="javascript:void(0);"></form>`);
+        inventoryingForm.css({
+            "width": "50%",
+            "margin-left": "2rem",
+            "margin-right": "1rem",
+            "min-width": "500px",
+        })
 
         inventoryingForm.append(`<h1>Inventorying</h1>`);
         /**
@@ -49,17 +55,17 @@ async function buildInventoryingFormWithQuantity(allowAdditions, columns, addIfM
 
         const primaryInput = $(`
             <div class="floating-input">
-                <input type="text" id="primary-key" name="primary-key" required placeholder="" autocomplete="off">
+                <input type="text" id="primary-key" name="primary-key"  placeholder="" autocomplete="off">
                 <label for="primary-key">${primaryKeyColumn[0].name} <i class="fa-solid fa-key"></i></label>
             </div>`)
 
         const quantityInput = $(`
             <div class="floating-input">
-                <input type="number" id="quantity" name="quantity" required placeholder="" autocomplete="off" step="1">
+                <input type="number" id="quantity" name="quantity"  placeholder="" autocomplete="off" step="1">
                 <label for="quantity">${quantityColumn[0].name} (+/-)</label>
             </div>`)
 
-        const submitButton = $(`<button type="submit" class="fill primary center horizontal vertical">Update</button>`);
+        const submitButton = $(`<div class="button fill primary center horizontal vertical">Update</div>`);
         const addToggle = $(`<toggle id="add-item" value="false">Add?</toggle>`);
         const additionSection = $(`<section id="addition-section" class="col fill" toggle-hidden="add-item"></section>`);
         for (const column of columns) {
@@ -137,13 +143,14 @@ async function buildInventoryingFormWithQuantity(allowAdditions, columns, addIfM
 
         inventoryingForm.append($(`<link rel="stylesheet" href="assets/css/inventory-form.css">`))
 
-        inventoryingForm.on('submit', async () => {
+        submitButton.on('click', async () => {
             startLoading({fullscreen: true, message: "Adding/Updating..."})
             let selectedItem = window.localStorage.getItem("selectedItem");
 
             if (selectedItem === null || selectedItem === undefined) {
                 if (primaryInput.find("input").val() === "" || quantityInput.find("input").val() === "") {
                     alert("Primary key and quantity are required");
+                    stopLoading();
                     return;
                 } else {
                     const searchResults = (await $.ajax({
