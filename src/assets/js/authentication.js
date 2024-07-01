@@ -1,5 +1,6 @@
-import Authentication from 'https://cdn.jsdelivr.net/gh/Mardens-Inc/Authentication-API@9873d0299b21e3c7dd7950f7f02e87ec621f09a5/js/authentication.js';
+import Authentication from 'https://cdn.jsdelivr.net/gh/Mardens-Inc/Authentication-API@9dde338199189bf8bdec2faff12f11229c798c83/js/authentication.js';
 import {isDedicatedClient} from "./crossplatform-utility.js";
+import {startLoading, stopLoading, updateLoadingOptions} from "./loading.js";
 import {alert, closePopup, confirm, openPopup} from "./popups.js";
 
 const auth = new Authentication();
@@ -47,9 +48,19 @@ loginButton.on('click', async () => {
         const loginForm = await openPopup("login")
         console.log(loginForm)
         loginForm.find('form').on('submit', async () => {
+            startLoading()
+            const isRegister = loginForm.hasClass('register');
             const email = loginForm.find('input[name="username"]').val();
             const password = loginForm.find('input[name="password"]').val();
-            const response = await auth.login(email, password, expiration);
+            let response;
+            if (isRegister) {
+                updateLoadingOptions({message: "Creating account..."})
+                response = await auth.register(email, password);
+                console.log(response)
+            }
+
+            updateLoadingOptions({message: "Logging in..."})
+            response = await auth.login(email, password, expiration);
             console.log(response)
             if (response['success']) {
                 closePopup("login");
@@ -57,6 +68,7 @@ loginButton.on('click', async () => {
             } else {
                 loginForm.find('.error').css('display', "").text(response['message']);
             }
+            stopLoading()
         });
     }
 });
