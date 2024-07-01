@@ -16,6 +16,7 @@
  * @property {boolean} remove-if-zero
  * @property {PrintOptions} print-form
  * @property {boolean} voice-search
+ * @property {string} mardens-price
  * @property {Column[]} columns
  */
 
