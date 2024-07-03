@@ -23,7 +23,7 @@ async function addRecord(records) {
 
 /**
  * Adds multiple records to the specified location in the database.
- * @param {Object[]} data
+ * @param {string} data
  * @returns {Promise<void>}
  */
 async function batchAddRecords(data) {
