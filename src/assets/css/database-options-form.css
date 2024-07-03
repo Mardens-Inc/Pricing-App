@@ -1,5 +1,6 @@
 #options-form {
     max-width: calc(100% - 2rem);
+    padding-bottom: 20vh;
 
     #action-button-row {
         position: fixed;
