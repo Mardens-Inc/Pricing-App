@@ -229,6 +229,7 @@ export default class DatabaseList
             const tr = $(`<tr id='${item.id}' class='list-item'>`);
             let mp = null;
             let retail = null;
+            let mpCategory = null;
             try
             {
                 for (const column of this.options.columns)
@@ -248,15 +249,27 @@ export default class DatabaseList
                                 if (attributes.includes("mp"))
                                 {
                                     mp = text;
-                                    if (this.options["mardens-price"] !== undefined && this.options["mardens-price"] !== "" && this.options["mardens-price"] !== null)
+                                    if (this.options["mardens-price"] !== undefined && this.options["mardens-price"] !== null)
                                     {
-                                        const percentage = parseFloat(this.options["mardens-price"].replace(/[^0-9]/g, "")) / 100;
-                                        if (retail != null)
+                                        const all = this.options["mardens-price"].filter(m => m.column === "All")[0];
+                                        const mpOption = this.options["mardens-price"].filter(m => m.column === column.real_name)[0] ?? all;
+                                        if (mpOption !== undefined)
                                         {
-                                            text = mp = (parseFloat(retail) * (1 - percentage)).toFixed(2);
+                                            const mpValue = parseFloat(mpOption.mp);
+                                            const priceValue = parseFloat(retail);
+                                            const percent = mpOption.percent / 100;
+                                            text = (priceValue * (1 - percent)).toFixed(2);
                                         }
+
+
                                     }
                                 }
+
+                                if (attributes.includes("mp-category"))
+                                {
+                                    mpCategory = text;
+                                }
+
                                 if (attributes.includes("price")) retail = text;
 
                                 text = `$${text}`;
