@@ -1,0 +1,43 @@
+:root {
+    --primary: #0fd30f;
+    --background: white;
+}
+
+body {
+    color: black !important;
+    color-scheme: light;
+}
+
+input {
+    background: #e8e8e8;
+    color: black;
+}
+
+#search-area, #actions-area {
+    background: #e8e8e8 !important;
+}
+
+.list {
+    .list-item {
+        background: #e8e8e8 !important;
+        color: black !important;
+    }
+}
+
+button:not(.primary):hover, .button:not(.primary):hover {
+    background-color: #1E1E1E !important;
+    color: white !important;
+}
+
+button:not(.primary), .button:not(.primary) {
+    &:hover {
+        img {
+            filter: invert(1) !important;
+        }
+    }
+}
+
+.label {
+    color: black !important;
+    background-color: #dcdcdc;
+}
