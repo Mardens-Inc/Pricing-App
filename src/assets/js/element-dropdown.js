@@ -1,8 +1,9 @@
 // Creating a dropdown element
-const dropdown = $(`<div class="dropdown-items" tabindex="-1"> </div>`)
-if ($(".dropdown-items").length === 0) {
+const dropdown = $(`<div class="dropdown-items" tabindex="-1"> </div>`);
+if ($(".dropdown-items").length === 0)
+{
     // Appending the dropdown to the body of the HTML
-    $('body').append(dropdown)
+    $("body").append(dropdown);
 }
 
 /**
@@ -19,72 +20,93 @@ if ($(".dropdown-items").length === 0) {
  *
  * @return {void} - This method does not return anything.
  */
-function openDropdown(element, items, conditionals = {}) {
+function openDropdown(element, items, conditionals = {})
+{
 
     // Convert the element to a jQuery object
     element = $(element);
 
     // Clear the dropdown
     dropdown.html("");
+    dropdown.css({
+                     width: ""
+                 });
 
-    const numberOfVisibleItems = conditionals === {} ? Object.keys(items).filter(item => conditionals[item] !== undefined && conditionals[item]).length : Object.keys(items).length;
-    if (numberOfVisibleItems === 0) {
-        dropdown.html("<div class='dropdown-item'>No items available</div>")
+    const numberOfVisibleItems = conditionals === {} ?
+                                 Object.keys(items).filter(item => conditionals[item] !== undefined && conditionals[item]).length :
+                                 Object.keys(items).length;
+    if (numberOfVisibleItems === 0)
+    {
+        dropdown.html("<div class='dropdown-item'>No items available</div>");
     }
 
 
     // Populate the dropdown with the items
-    for (const item of Object.keys(items)) {
+    for (const item of Object.keys(items))
+    {
         if (conditionals[item] !== undefined && !conditionals[item]) continue; // Skip this item if it's conditional and the condition is not met
 
         const itemElement = $(`<div class="dropdown-item">${item}</div>`);
-        itemElement.on('click', () => {
+        itemElement.on("click", () =>
+        {
             items[item]();
-            closeDropdown()
-        })
-        dropdown.append(itemElement)
+            closeDropdown();
+        });
+        dropdown.append(itemElement);
     }
 
-    dropdown[0].scrollTo({top: 0, behavior: 'auto'});
+    dropdown[0].scrollTo({top: 0, behavior: "auto"});
     // Logic for positioning the dropdown menu.
-    let x = element.offset().left + element.width() / 2 - (dropdown.width() / 2)
-    const scrollYOffset = window.scrollY
-    let y = element.offset().top + element.height() + 40 + scrollYOffset
-    if (y + dropdown.height() > window.innerHeight) {
-        y = window.innerHeight - dropdown.height() - 10
+    let x = element.offset().left + element.width() / 2 - (dropdown.width() / 2);
+    const scrollYOffset = window.scrollY;
+    let y = element.offset().top + element.height() + 40 + scrollYOffset;
+    if (y + dropdown.height() > window.innerHeight)
+    {
+        y = window.innerHeight - dropdown.height() - 10;
     }
-    if (x + dropdown.width() > window.innerWidth) {
-        x = window.innerWidth - dropdown.width() - 10
+    if (x + dropdown.width() > window.innerWidth)
+    {
+        x = window.innerWidth - dropdown.width() - 10;
     }
     // Apply CSS styles to position the dropdown correctly
     dropdown.css({
-        top: y,
-        left: x,
-        opacity: 1,
-        "pointer-events": "all",
-    })
-    if (element.width() > dropdown.width()) {
+                     top: y,
+                     left: x,
+                     opacity: 1,
+                     "pointer-events": "all"
+                 });
+    if (element.width() > dropdown.width())
+    {
         dropdown.css({
-            width: element.width(),
-            left: element.offset().left
-        })
+                         width: element.width(),
+                         left: element.offset().left
+                     });
+    } else
+    {
+        dropdown.css({
+                         width: ""
+                     });
     }
-    dropdown.trigger("focus")
+    dropdown.trigger("focus");
 }
 
-function closeDropdown() {
+function closeDropdown()
+{
     dropdown.css({
-        opacity: 0,
-        "pointer-events": "none"
-    })
+                     opacity: 0,
+                     "pointer-events": "none"
+                 });
 }
 
-dropdown.on("blur", () => {
-    closeDropdown()
+dropdown.on("blur", () =>
+{
+    closeDropdown();
 });
 
-$("*").on('scroll', e => {
-    if (e.currentTarget !== dropdown[0]) {
-        closeDropdown()
+$("*").on("scroll", e =>
+{
+    if (e.currentTarget !== dropdown[0])
+    {
+        closeDropdown();
     }
-})
+});
