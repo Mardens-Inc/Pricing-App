@@ -10,17 +10,19 @@
 
 <script>
 
-    $(document).on('loadPopup', async (element, data) => {
+    $(document).on("loadPopup", async (element, data) =>
+    {
         const columnMappingElement = $("#column-mapping");
         columnMappingElement.empty();
-        console.log(data)
+        console.log(data);
         data = data.data;
         const columnsToBeMapped = data.columns.filter(column => column !== "id" && column !== "date" && column !== "history" && column !== "last_modified_date");
         const currentColumns = data.options.columns.filter(column => column !== "id" && column !== "date" && column !== "history" && column !== "last_modified_date");
-        const csv = data.csv;
+        // const csv = data.csv;
         let columnMappings = {};
         console.log(columnsToBeMapped, currentColumns);
-        for (let i = 0; i < currentColumns.length; i++) {
+        for (let i = 0; i < currentColumns.length; i++)
+        {
             const column = currentColumns[i];
             const columnElement = $(`<div class="row fill center vertical column-item"></div>`);
             columnElement.append(`<span class="fill">${column}</span>`);
@@ -30,17 +32,22 @@
             columnElement.attr("selectedColumn", null);
             columnElement.attr("column", column);
 
-            button.on('click', () => {
+            button.on("click", () =>
+            {
                 let buttonMapping = {};
-                for (let j = 0; j < columnsToBeMapped.length; j++) {
+                for (let j = 0; j < columnsToBeMapped.length; j++)
+                {
                     const c = columnsToBeMapped[j];
-                    buttonMapping[c] = () => {
-                        if (columnElement.attr("selectedColumn") === c) {
+                    buttonMapping[c] = () =>
+                    {
+                        if (columnElement.attr("selectedColumn") === c)
+                        {
                             // Deselect Item
                             button.html(`<i class="fa fa-chevron-down"></i>`);
                             columnElement.attr("selectedColumn", null);
                             columnMappings[column] = null;
-                        } else {
+                        } else
+                        {
                             // Select Item
                             button.html(`<span class="fill" style="margin-right: 1rem">${c}</span><i class="fa fa-chevron-down"></i>`);
                             columnElement.attr("selectedColumn", `${c}`);
@@ -48,78 +55,38 @@
                         }
                     };
                 }
-                openDropdown(button, buttonMapping)
+                openDropdown(button, buttonMapping);
             });
             columnMappingElement.append(columnElement);
         }
 
-        $("#save-column-mappings").on('click', () => {
+        $("#save-column-mappings").on("click", () =>
+        {
             // Create new csv with new columns
             let newCsv = "";
             // map csv to json
-            const loadedJson = csvToJson(csv);
             let json = [];
 
             // map the columns from the loadedJson to the new json
             // use the columnMappings to map the columns
-            for (let i = 0; i < loadedJson.length; i++) {
+            for (let i = 0; i < data.json.length; i++)
+            {
                 let obj = {};
-                for (let j = 0; j < currentColumns.length; j++) {
+                for (let j = 0; j < currentColumns.length; j++)
+                {
                     const column = currentColumns[j]?.trim() ?? "";
                     if (column === "") continue;
                     const newColumn = columnMappings[column]?.trim() ?? "";
                     if (newColumn === "") continue;
-                    obj[column] = loadedJson[i][newColumn]?.toString()?.trim() ?? "";
+                    obj[column] = data.json[i][newColumn]?.toString()?.trim() ?? "";
                 }
                 json.push(obj);
             }
 
-            newCsv = jsonToCSV(json);
-            $(document).trigger('loadedCSV', newCsv);
+            console.log(json);
+
+            $(document).trigger("loadedCSV", json);
         });
     });
 
-    /**
-     * Converts a CSV string to JSON format.
-     *
-     * @param {string} csv - The CSV string to be converted.
-     *
-     * @return {Array<Object>} - An array of JSON objects representing the CSV data.
-     */
-    function csvToJson(csv) {
-        let lines = csv.split("\n").filter(line => line !== "").map(line => line.trim());
-
-        let headers = lines[0].split(",");
-
-        let json = [];
-
-        for (let i = 1; i < lines.length; i++) {
-            let obj = {};
-            let currentLine = lines[i].split(",");
-
-            for (let j = 0; j < headers.length; j++) {
-                obj[headers[j].trim()] = currentLine[j].trim();
-            }
-
-            json.push(obj);
-        }
-
-        return json;
-    }
-
-    function jsonToCSV(json) {
-        let csv = "";
-        let headers = Object.keys(json[0]);
-        csv += headers.join(",") + "\n";
-        for (let i = 0; i < json.length; i++) {
-            let obj = json[i];
-            let line = "";
-            for (let j = 0; j < headers.length; j++) {
-                line += obj[headers[j]];
-                if (j !== headers.length - 1) line += ",";
-            }
-            csv += line + "\n";
-        }
-        return csv;
-    }
 </script>
