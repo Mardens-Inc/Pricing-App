@@ -55,8 +55,8 @@
                 </div>
             </div>
         </div>
-        <toggle id="print-show-retail" name="print-show-retail" value="true" style="display: none">Show Retail Price?</toggle>
-        <toggle id="print-show-mp" name="print-show-mp" value="true" style="display: none">Show Mardens Price?</toggle>
+        <toggle id="print-show-retail" name="print-show-retail" value="true">Show Retail Price?</toggle>
+        <toggle id="print-show-mp" name="print-show-mp" value="true">Show Mardens Price?</toggle>
     </div>
     <toggle id="voice-search" name="voice-search" value="false">Enable voice searching?</toggle>
 
@@ -67,24 +67,25 @@
             <button id="add-mardens-price-category" title="Add Discount Category" style="aspect-ratio: 1;width: 50px;position: absolute;right: 10px;top: 10px;"><i class="fa fa-plus"></i></button>
             <div class="col fill" id="mardens-price-categories">
                 <h3>Categories</h3>
-                <div class="discount-category fill row" style="gap: 1rem;">
-                    <div class="col fill">
-                        <button class="category-name" title="Category Name" style="width: 100%;height: 50px;aspect-ratio: 1;margin-block:auto">
+                <div id="discount-categories" class="fill col">
+                    <div class="discount-category fill row" style="gap: 1rem;" index="0">
+                        <div class="col fill">
+                            <button class="category-name" title="Category Name" style="width: 100%;height: 50px;aspect-ratio: 1;margin-block:auto">
                             <span style="margin-right: auto">
                                <span style="opacity: .5;font-weight: 100">Category Name: </span>
                                 <span>All</span>
                             </span>
-                            <i class="fa fa-chevron-down" style="font-size: 12px"></i></button>
-                    </div>
-                    <div class="cat-items col">
-                        <div class="cat-item row">
+                                <i class="fa fa-chevron-down" style="font-size: 12px"></i>
+                            </button>
+                        </div>
+                        <div class="row">
                             <div class="floating-input col">
-                                <input id="category-discount" name="category-discount" placeholder="Discount" type="number">
-                                <label for="category-discount">Discount</label>
+                                <input id="category-discount-0" name="category-discount" placeholder="Discount" type="number" value="40">
+                                <label for="category-discount-0">Discount</label>
                             </div>
-                            <button class="remove-category" title="Remove Category" style="width: auto;height: 50px;aspect-ratio: 1;margin: auto auto auto 1rem;"><i class="fa fa-trash"></i></button>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
