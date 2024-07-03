@@ -110,6 +110,8 @@ input, .input {
     font-size: 1rem;
     font-family: inherit;
 
+    padding-block: 1rem;
+
 
     &::-webkit-search-decoration,
     &::-webkit-search-cancel-button,
