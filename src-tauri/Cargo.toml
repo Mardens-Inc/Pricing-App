@@ -1,6 +1,6 @@
 [package]
 name = "pricing-app"
-version = "0.0.9"
+version = "0.1.0"
 description = "A pricing and inventory app for Mardens Inc"
 authors = ["Drew Chase"]
 edition = "2021"
