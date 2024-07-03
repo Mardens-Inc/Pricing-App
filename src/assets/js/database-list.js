@@ -1,5 +1,4 @@
 import auth from "./authentication.js";
-import {print} from "./crossplatform-utility.js";
 import {buildInventoryingFormWithQuantity} from "./database-inventorying-with-quantity.js";
 import {buildInventoryingForm} from "./database-inventorying.js";
 import {buildOptionsForm} from "./database-options-manager.js";
@@ -15,8 +14,9 @@ import {alert, confirm, openPopup} from "./popups.js";
  *
  * @class
  */
-export default class DatabaseList {
-    function
+export default class DatabaseList
+{
+    function;
 
     /**
      * Constructor for creating a new instance of the class.
@@ -25,31 +25,37 @@ export default class DatabaseList {
      *
      * @return {void}
      */
-    constructor(id) {
+    constructor(id)
+    {
         this.list = $(".list");
-        this.list.empty()
+        this.list.empty();
         this.items = [];
         this.id = id;
     }
 
-    static async create() {
+    static async create()
+    {
         if (!auth.isLoggedIn) return;
-        const db = new DatabaseList(null)
+        const db = new DatabaseList(null);
         db.list.empty();
-        db.list.append(await buildOptionsForm(null, async () => {
+        db.list.append(await buildOptionsForm(null, async () =>
+        {
             window.location.reload();
         }));
-        $(document).trigger("load")
+        $(document).trigger("load");
     }
 
-    async load() {
+    async load()
+    {
         startLoading({fullscreen: true});
         const {name, location, po, image, options, posted} = await this.getListHeader();
-        if (image !== "") {
-            img.attr('src', image);
+        if (image !== "")
+        {
+            img.attr("src", image);
             img.css("border-radius", "12px");
-        } else {
-            img.attr('src', "assets/images/icon.svg");
+        } else
+        {
+            img.attr("src", "assets/images/icon.svg");
         }
         this.options = options;
         title.html(name);
@@ -58,34 +64,45 @@ export default class DatabaseList {
         this.list.html("");
         $(".pagination").html("");
         $("#search").val("");
-        try {
+        try
+        {
             await this.loadView("", true);
-        } catch (e) {
-            console.error(e)
+        } catch (e)
+        {
+            console.error(e);
         }
 
         this.importing = false;
-        if (this.id !== null) {
-            if (this.items.length === 0) {
+        if (this.id !== null)
+        {
+            if (this.items.length === 0)
+            {
                 this.importing = true;
-                if (options.hasOwnProperty("from_filemaker")) {
-                    if (auth.isLoggedIn && auth.getUserProfile().admin) {
-                        this.list.append(await buildImportFilemakerForm())
-                    } else {
-                        alert("This database is empty, and you do not have permission to import data.<br>Please contact an administrator for assistance.", () => {
+                if (options.hasOwnProperty("from_filemaker"))
+                {
+                    if (auth.isLoggedIn && auth.getUserProfile().admin)
+                    {
+                        this.list.append(await buildImportFilemakerForm());
+                    } else
+                    {
+                        alert("This database is empty, and you do not have permission to import data.<br>Please contact an administrator for assistance.", () =>
+                        {
                             window.localStorage.removeItem("loadedDatabase");
                             window.location.reload();
                         });
                     }
                 }
-            } else {
+            } else
+            {
                 if (options.hasOwnProperty("from_filemaker"))
+                {
                     await this.edit();
+                }
             }
         }
 
-        $(document).trigger("load")
-        stopLoading()
+        $(document).trigger("load");
+        stopLoading();
     }
 
     /**
@@ -96,11 +113,13 @@ export default class DatabaseList {
      *
      * @return {Promise<void>} - A promise that resolves once the view is loaded and displayed.
      */
-    async loadView(query, force = false) {
+    async loadView(query, force = false)
+    {
         const newList = await this.getListItems(query);
-        if (force || newList !== this.items) {
+        if (force || newList !== this.items)
+        {
             this.items = newList;
-            await this.buildList()
+            await this.buildList();
         }
     }
 
@@ -110,11 +129,13 @@ export default class DatabaseList {
      * @param {string} query - The search query.
      * @return {Promise<Array>} - A promise that resolves to an array of items matching the search query.
      */
-    async search(query) {
-        if (!this.importing) {
+    async search(query)
+    {
+        if (!this.importing)
+        {
             // $("#search").val(query);
             await this.loadView(query, true);
-            $(document).trigger("load")
+            $(document).trigger("load");
             return this.items;
         }
     }
@@ -133,15 +154,19 @@ export default class DatabaseList {
      * getListItems();
      * // Returns a promise that resolves with the complete list of items.
      */
-    async getListItems(query = "") {
+    async getListItems(query = "")
+    {
         if (this.id === null) return [];
         let newList = [];
-        try {
-            if (query !== null && query !== undefined && query !== "") {
-                try {
+        try
+        {
+            if (query !== null && query !== undefined && query !== "")
+            {
+                try
+                {
                     const searchColumns = this.options.columns.filter(c => c.attributes.includes("search"));
                     const primaryKey = this.options.columns.filter(c => c.attributes.includes("primary"))[0];
-                    query = query.toLowerCase().replace(/^0+/, ''); // convert to lowercase and remove leading zeros
+                    query = query.toLowerCase().replace(/^0+/, ""); // convert to lowercase and remove leading zeros
 
                     const url = `${baseURL}/api/location/${this.id}/search`;
                     const searchQuery = {
@@ -151,23 +176,32 @@ export default class DatabaseList {
                         "offset": 0,
                         "asc": true,
                         "sort": primaryKey === undefined ? "id" : primaryKey.real_name
-                    }
+                    };
 
-                    newList = await $.ajax({url: url, method: "POST", data: JSON.stringify(searchQuery), contentType: "application/json", headers: {"Accept": "application/json"}});
+                    newList = await $.ajax({
+                                               url: url,
+                                               method: "POST",
+                                               data: JSON.stringify(searchQuery),
+                                               contentType: "application/json",
+                                               headers: {"Accept": "application/json"}
+                                           });
                     newList = newList["items"];
-                } catch (e) {
+                } catch (e)
+                {
                     console.error(e);
                     return [];
                 }
 
 
-            } else {
+            } else
+            {
                 const url = `${baseURL}/api/location/${this.id}/`;
                 newList = await $.ajax({url: url, method: "GET"});
                 newList = newList["results"]["items"];
             }
-        } catch (e) {
-            console.error(`Error fetching items for location ${this.id}`)
+        } catch (e)
+        {
+            console.error(`Error fetching items for location ${this.id}`);
             console.error(e);
         }
         return newList;
@@ -183,32 +217,42 @@ export default class DatabaseList {
      *
      * @returns {Promise<void>} A promise that resolves when the list is built.
      */
-    async buildList() {
+    async buildList()
+    {
         if (this.options.columns === undefined) return;
         this.options.columns = this.options.columns.filter(c => c !== null && c !== undefined);
         const table = this.buildColumns();
-        table.css('--columnSize', `${(1 / (this.options.columns.filter(i => i.visible).length + 1)) * 100}%`);
+        table.css("--columnSize", `${(1 / (this.options.columns.filter(i => i.visible).length + 1)) * 100}%`);
         const tbody = $("<tbody>");
-        for (const item of this.items) {
+        for (const item of this.items)
+        {
             const tr = $(`<tr id='${item.id}' class='list-item'>`);
             let mp = null;
             let retail = null;
-            try {
-                for (const column of this.options.columns) {
-                    if (column.visible) {
+            try
+            {
+                for (const column of this.options.columns)
+                {
+                    if (column.visible)
+                    {
                         const attributes = column.attributes ?? [];
                         let text = item[column.real_name] ?? "";
-                        if (attributes.includes("price") || attributes.includes("mp")) {
-                            try {
-                                text = text.replace(/[^0-9.]/g, "")
+                        if (attributes.includes("price") || attributes.includes("mp"))
+                        {
+                            try
+                            {
+                                text = text.replace(/[^0-9.]/g, "");
                                 text = text === "" ? "0" : text;
                                 text = parseFloat(text).toFixed(2);
 
-                                if (attributes.includes("mp")) {
+                                if (attributes.includes("mp"))
+                                {
                                     mp = text;
-                                    if (this.options["mardens-price"] !== undefined && this.options["mardens-price"] !== "" && this.options["mardens-price"] !== null) {
+                                    if (this.options["mardens-price"] !== undefined && this.options["mardens-price"] !== "" && this.options["mardens-price"] !== null)
+                                    {
                                         const percentage = parseFloat(this.options["mardens-price"].replace(/[^0-9]/g, "")) / 100;
-                                        if (retail != null) {
+                                        if (retail != null)
+                                        {
                                             text = mp = (parseFloat(retail) * (1 - percentage)).toFixed(2);
                                         }
                                     }
@@ -216,58 +260,108 @@ export default class DatabaseList {
                                 if (attributes.includes("price")) retail = text;
 
                                 text = `$${text}`;
-                            } catch (e) {
-                                console.error(e)
+                            } catch (e)
+                            {
+                                console.error(e);
                             }
-                        } else if (attributes.includes("quantity")) {
-                            text = text.replace(/[^0-9-]/g, "")
+                        } else if (attributes.includes("quantity"))
+                        {
+                            text = text.replace(/[^0-9-]/g, "");
                             text = text === "" ? "0" : text;
                             text = parseInt(text);
                         }
 
                         const td = $("<td>").html(text === "" ? "-" : text);
-                        for (const attribute of attributes) {
-                            td.addClass(attribute)
+                        for (const attribute of attributes)
+                        {
+                            td.addClass(attribute);
                         }
                         tr.append(td);
                     }
                 }
-            } catch (e) {
-                console.error(e)
+            } catch (e)
+            {
+                console.error(e);
             }
-            const extra = $("<td></td>")
-            extra.addClass("extra")
+            const extra = $("<td></td>");
+            extra.addClass("extra");
             const extraButton = $(`<button title="More Options..."><i class='fa fa-ellipsis-vertical'></i></button>`);
             const printButton = $(`<button title="Print"><i class='fa fa-print'></i></button>`);
-            printButton.on("click", () => print({
-                label: this.options["print-form"].label,
-                year: this.options["print-form"].year,
-                department: null,
-                retail: retail,
-                mp: mp
-            }));
+            printButton.on("click", () =>
+            {
+                const printForm = this.options["print-form"];
+                console.log(this.options["print-form"]);
+                const url = new URL(`${baseURL}/api/tag-pricer${printForm.route}`);
+                if (printForm.label !== undefined && printForm.label !== null && printForm.label !== "")
+                {
+                    url.searchParams.append("label", printForm.label);
+                }
+                if (printForm.year !== undefined && printForm.year !== null)
+                {
+                    url.searchParams.append("year", printForm.year.toString());
+                }
+                if (printForm.department !== undefined && printForm.department !== null && printForm.department !== "")
+                {
+                    url.searchParams.append("department", printForm.department);
+                }
+
+                if (printForm["show-retail"])
+                {
+                    url.searchParams.append("price", retail);
+                }
+
+                if (printForm["show-mp"])
+                {
+                    url.searchParams.append("mp", mp);
+                }
+
+                $.get(url.toString())
+                 .then(data =>
+                       {
+                           const printWindow = window.open("", "PRINT", "height=400,width=600");
+                           printWindow.document.write(data);
+                           setTimeout(() =>
+                                      {
+                                          try
+                                          {
+                                              printWindow.print();
+                                          } catch (e)
+                                          {
+                                              console.error(e);
+                                          }
+                                          printWindow.close();
+                                      }, 100);
+                       });
+            });
 
 
             const showExtraButton = auth.isLoggedIn;
-            extraButton.on("click", async () => {
+            extraButton.on("click", async () =>
+            {
                 const itemHistory = await getHistory(this.id, item.id);
                 openDropdown(extraButton, {
-                    "View History": () => {
+                    "View History": () =>
+                    {
                         openPopup("history", {history: itemHistory});
                     },
-                    "Copy": () => {
+                    "Copy": () =>
+                    {
                         navigator.clipboard.writeText(JSON.stringify(item, null, 2));
                     },
-                    "Delete": () => {
-                        confirm("Are you sure you want to delete this item?", "Delete Item", "Cancel", async (value) => {
+                    "Delete": () =>
+                    {
+                        confirm("Are you sure you want to delete this item?", "Delete Item", "Cancel", async (value) =>
+                        {
                             if (!value) return;
-                            startLoading({fullscreen: true, message: "Deleting..."})
-                            try {
+                            startLoading({fullscreen: true, message: "Deleting..."});
+                            try
+                            {
                                 // await $.ajax({url: `${baseURL}/api/location/${this.id}/${item.id}`, method: "DELETE"});
                                 await deleteRecord(item.id);
                                 await this.loadView("", true);
-                            } catch (e) {
-                                console.error(e)
+                            } catch (e)
+                            {
+                                console.error(e);
                                 alert("An error occurred while trying to delete the item.");
                             }
                             stopLoading();
@@ -275,13 +369,17 @@ export default class DatabaseList {
                     }
                 }, {"View History": itemHistory !== undefined && itemHistory.length > 0});
             });
-            try {
-                if (this.options["allow-inventorying"]) {
-                    tr.on('click', e => {
+            try
+            {
+                if (this.options["allow-inventorying"])
+                {
+                    tr.on("click", e =>
+                    {
                         if (e.target.tagName === "BUTTON") return;
                         tbody.find(`tr:not(#${item.id})`).removeClass("selected");
 
-                        if (tr.hasClass("selected")) {
+                        if (tr.hasClass("selected"))
+                        {
                             tr.removeClass("selected");
                             $(document).trigger("item-selected", null);
                             localStorage.removeItem("selectedItem");
@@ -291,42 +389,54 @@ export default class DatabaseList {
                         tr.toggleClass("selected");
                         localStorage.setItem("selectedItem", JSON.stringify(item));
                         $(document).trigger("item-selected", item);
-                    })
+                    });
                 }
-            } catch (e) {
-                console.error(e)
+            } catch (e)
+            {
+                console.error(e);
             }
             if (this.options["print-form"].enabled)
+            {
                 extra.append(printButton);
+            }
             if (showExtraButton && auth.isLoggedIn && auth.getUserProfile().admin)
+            {
                 extra.append(extraButton);
+            }
             tr.append(extra);
             tbody.append(tr);
         }
         this.list.empty();
         table.append(tbody);
         this.list.append(table);
-        console.log(this.items)
-        if (this.options["allow-inventorying"] && auth.isLoggedIn) {
+        console.log(this.items);
+        if (this.options["allow-inventorying"] && auth.isLoggedIn)
+        {
             if (this.options.columns.filter(i => i.attributes.includes("quantity")).length === 0)
+            {
                 this.list.append(await buildInventoryingForm(this.options["allow-additions"], this.options.columns, this.options["add-if-missing"], this.options["voice-search"]));
-            else
+            } else
+            {
                 this.list.append(await buildInventoryingFormWithQuantity(this.options["allow-additions"], this.options.columns, this.options["add-if-missing"], this.options["remove-if-zero"], this.options["voice-search"]));
+            }
 
         }
 
-        $(document).trigger("load")
+        $(document).trigger("load");
     }
 
-    buildColumns() {
+    buildColumns()
+    {
 
         const table = $("<table class='fill col'></table>");
-        try {
+        try
+        {
             if (this.options.columns === undefined) return table;
             const columns = this.options.columns.filter(c => c !== null && c !== undefined && c.visible);
             const thead = $("<thead>");
 
-            for (const column of columns) {
+            for (const column of columns)
+            {
                 if (column === null || column === undefined) continue;
                 const th = $("<th>").html(column.name);
                 thead.append(th);
@@ -335,9 +445,10 @@ export default class DatabaseList {
             thead.append($("<th class='extra'>"));
 
             table.append(thead);
-        } catch (e) {
-            console.error("Error building columns")
-            console.error(e)
+        } catch (e)
+        {
+            console.error("Error building columns");
+            console.error(e);
         }
         return table;
     }
@@ -348,8 +459,19 @@ export default class DatabaseList {
      *
      * @return {Promise<ListHeading>} - A promise that resolves to an object containing the header information.
      */
-    async getListHeader() {
-        if (this.id === null) return {name: "", location: "", po: "", image: "", options: [], posted: ""};
+    async getListHeader()
+    {
+        if (this.id === null)
+        {
+            return {
+                name: "",
+                location: "",
+                po: "",
+                image: "",
+                options: [],
+                posted: ""
+            };
+        }
         const url = `${baseURL}/api/location/${this.id}/?headings=true`;
         return await $.ajax({url: url, method: "GET"});
     }
@@ -359,9 +481,13 @@ export default class DatabaseList {
      *
      * @return {void}
      */
-    async exportCSV() {
-        startLoading({fullscreen: true, message: "Exporting..."})
-        const csv = (await $.get({url: `${baseURL}/api/location/${this.id}/export`, headers: {"Accept": "text/csv"}})).toString();
+    async exportCSV()
+    {
+        startLoading({fullscreen: true, message: "Exporting..."});
+        const csv = (await $.get({
+                                     url: `${baseURL}/api/location/${this.id}/export`,
+                                     headers: {"Accept": "text/csv"}
+                                 })).toString();
         const headers = await this.getListHeader();
         const name = `${headers.name}-${headers.po}-${this.id}.csv`;
         download(name, csv);
@@ -369,13 +495,15 @@ export default class DatabaseList {
 
     }
 
-    async edit() {
+    async edit()
+    {
         this.list.empty();
-        this.list.append(await buildOptionsForm(this.id, async () => {
+        this.list.append(await buildOptionsForm(this.id, async () =>
+        {
             window.location.reload();
         }));
 
-        $(document).trigger("load")
+        $(document).trigger("load");
     }
 
 }
