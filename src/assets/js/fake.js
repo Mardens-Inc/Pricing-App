@@ -16,7 +16,7 @@
  * @property {boolean} remove-if-zero
  * @property {PrintOptions} print-form
  * @property {boolean} voice-search
- * @property {string} mardens-price
+ * @property {MardensPriceOption[]} mardens-price
  * @property {Column[]} columns
  */
 
@@ -33,9 +33,11 @@
  * @typedef {Object} PrintOptions
  * @property {boolean} enabled
  * @property {string} label
- * @property {string} year
- * @property {string} size
+ * @property {number} year
+ * @property {string} department
+ * @property {string} route
  * @property {boolean} show-retail
+ * @property {boolean} show-mp
  */
 
 
@@ -59,10 +61,6 @@
  */
 
 
-/*
-         {"routes":{"\/percent":{"params":{"department":"string","year":"int","percent":"float","price":"float"},"name":"Generic Percent Off","description":"Prints a price tag with a percent off"},"\/amazon\/white":{"params":{"department":"string","label":"string","year":"int","price":"float"},"name":"Amazon White Label","description":"Prints a price tag for Amazon with a white background"},"\/eyewear":{"params":{"price":"float"},"name":"Eyewear","description":"Prints a price tag for eyewear"},"\/sams":{"params":{"price":"float","mp":"float"},"name":"Sams Club","description":"Prints a price tag for Sam's Club"}}}
-          */
-
 /**
  * @typedef {Object} PriceTaggerOptions
  * @property {PriceTaggerOption[]} routes
@@ -80,4 +78,10 @@
  * @property {number} params.percent
  * @property {number} params.mp
  *
+ */
+
+/**
+ * @typedef {Object} MardensPriceOption
+ * @property {string} column - The column name or 'All' for all columns
+ * @property {number} percent - Whole number percentage (ie 50% = 50)
  */
