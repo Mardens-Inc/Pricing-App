@@ -111,14 +111,15 @@ async function buildOptionsForm(id, onclose)
             openPopup("column-mapping", {
                 options: currentOptions,
                 columns: newColumns,
-                csv: csv.replace(/[^0-9A-Za-z,\s\n_\-+$.()]/g, "")
+                csv: csv.replace(/[^0-9A-Za-z,\s\n_\-+$.()"']/g, "")
             }).then(async (popup) =>
                     {
                         $(document).off("loadedCSV");
                         $(document).on("loadedCSV", async (e, data) =>
                         {
-                            csv = data.data;
-                            closePopup("column-mapping");
+                            csv = data;
+                            closePopup("columnmapping");
+
                         });
                         popup = $(popup);
                         popup.on("close", async (_, data) =>
@@ -134,7 +135,8 @@ async function buildOptionsForm(id, onclose)
         await initCreation(html);
     }
 
-    buildMardensPriceForm();
+    buildMardensPriceForm(html);
+    buildPrintSection(html);
     stopLoading();
     return html;
 }
@@ -369,7 +371,7 @@ function createColumnList(html)
                     $(e.currentTarget).addClass("active");
                 }
                 $(document).trigger("column-attribute-change", {
-                    column: column.name,
+                    column: column,
                     attribute: attribute.name,
                     attributes: attributes,
                     is_active: attributes.includes(attribute.name)
@@ -639,7 +641,7 @@ async function initCreation(html)
                 } catch (e)
                 {
                     console.error(e);
-                    alert("An error occurred while uploading the CSV file.<br>Please try again or contact support.<br>${e}");
+                    alert(`An error occurred while uploading the CSV file.<br>Please try again or contact support.<br>${e}`);
                 }
             } else
             {
@@ -703,6 +705,7 @@ async function save(id)
     //     }
     // }
 
+
     for (const column of newColumns.filter(c => c !== undefined && c !== null))
     {
         try
@@ -717,7 +720,7 @@ async function save(id)
         } catch (e)
         {
             console.error(e);
-            alert("An error occurred while creating the column.<br>Please try again or contact support.<br>${e}");
+            alert(`An error occurred while creating the column.<br>Please try again or contact support.<br>${e}`);
             stopLoading();
             return;
         }
@@ -736,15 +739,181 @@ async function save(id)
     } catch (e)
     {
         console.log(e);
-        alert("An error occurred while updating the database.<br>Please try again or contact support.<br>${e}");
+        alert(`An error occurred while updating the database.<br>Please try again or contact support.<br>${e}`);
     }
 
+
+    if (csv !== undefined && csv !== null && csv !== "")
+    {
+        const json = Papa.parse(csv, {
+            header: true, skipEmptyLines: true, delimiter: ","
+        }).data;
+        await batchAddRecords(json);
+    }
     stopLoading();
+
 }
 
-function buildMardensPriceForm()
+/**
+ * This function is used to build Mardens price form.
+ *
+ * @param {JQuery<HTMLElement>} html - The jQuery HTML object.
+ *
+ * The function gets a column from `currentOptions.options.columns` that has "mp-category" attribute. This column will be used for setting the title of price categories.
+ * If it succeeds to find such column, title will be changed to "`<found column> Categories`".
+ * If it failed to find such column, title will be set to "Categories - No Column Selected".
+ * It also listens for "column-attribute-change" event. The event is assumed to have an object that provides "is_active" and "column" properties.
+ * If the "column-attribute-change" event is triggered and "is_active" property is true, then the function updates the title and make a GET request to fetch unique column items.
+ * If the response values for the column items are not defined or are empty, it will handle those cases also by defining an empty array.
+ * If "is_active" property is false, the title is reset and uniqueColumnItems array is cleared.
+ * The function also has an event listener on "button.category-name" elements for a "click" event, which is empty at the moment and can be filled based on the requirements.
+ **/
+function buildMardensPriceForm(html)
 {
+    const title = html.find("#mardens-price-categories > h3");
+    let column = currentOptions.options.columns.filter(i => i.attributes.includes("mp-category"))[0];
+    let uniqueColumnItems = [];
+    if (column !== undefined)
+    {
+        title.html(`${column} Categories`);
+    } else
+    {
+        title.html(`Categories - No Column Selected`);
+    }
+    $(document).on("column-attribute-change", async (e, data) =>
+    {
+        if (data.is_active)
+        {
+            column = data.column;
+            title.html(`${data.column.name} Categories - Loading...`);
+            const response = await $.get(`${baseURL}/api/location/${window.localStorage.getItem("loadedDatabase")}/columns/${column.real_name}`);
+            uniqueColumnItems = response["values"];
+            if (uniqueColumnItems === undefined) uniqueColumnItems = [];
+            uniqueColumnItems = uniqueColumnItems.filter(i => i !== undefined && i !== null && i !== "");
 
+            title.html(`${data.column.name} Categories`);
+        } else
+        {
+            title.html(`Categories - No Column Selected`);
+            uniqueColumnItems = [];
+        }
+
+    });
+
+    html.find("button.category-name").on("click", (e) =>
+    {
+        const target = $(e.currentTarget);
+        const items = {
+            "All": () =>
+            {
+                target.html(`
+                    <span style="margin-right: auto">
+                        <span style="opacity: .5;font-weight: 100">Category Name: </span>
+                        <span>All</span>
+                    </span>
+                    <i class="fa fa-chevron-down" style="font-size: 12px"></i>
+                `);
+            }
+        };
+        for (const item of uniqueColumnItems)
+        {
+            items[item] = () =>
+            {
+                target.html(`
+                    <span style="margin-right: auto">
+                        <span style="opacity: .5;font-weight: 100">Category Name: </span>
+                        <span>${item}</span>
+                    </span>
+                    <i class="fa fa-chevron-down" style="font-size: 12px"></i>
+                `);
+            };
+        }
+        openDropdown(e.currentTarget, items);
+    });
+
+
+}
+
+async function buildPrintSection()
+{
+    try
+    {
+        /**
+         * @type {PriceTaggerOptions}
+         */
+        const options = await $.get(`${baseURL}/api/tag-pricer/`);
+
+        const select = $("<select></select>");
+        const categories = {};
+        const routes = Object.keys(options.routes);
+        const printLabelInput = $("#print-label").parent();
+        const printYearInput = $("#print-year").parent();
+        const departmentInput = $("#print-department").parent();
+        const showRetailToggle = $("#print-show-retail");
+        const showMPToggle = $("#print-show-mp");
+
+
+        printLabelInput.hide();
+        printYearInput.hide();
+        departmentInput.hide();
+        showRetailToggle.hide();
+        showMPToggle.hide();
+
+        for (const route of routes)
+        {
+            const category = options.routes[route];
+            categories[category.name] = () =>
+            {
+                $("#print-category-button").html(`
+                    <span style="margin-right: auto;">
+                        <span style="opacity: .5; font-weight: 100">Tag Type: </span>
+                        ${category.name}
+                    </span>
+                    <i class="fa fa-chevron-down" style="font-size: 12px"></i>
+                `);
+
+                printLabelInput.hide();
+                printYearInput.hide();
+                departmentInput.hide();
+                showRetailToggle.hide();
+                showMPToggle.hide();
+
+                switch (route)
+                {
+                    case "/percent":
+                        departmentInput.show();
+                        printLabelInput.show();
+                        printYearInput.show();
+                        showRetailToggle.show();
+                        break;
+                    case "/amazon/white":
+                        departmentInput.show();
+                        printLabelInput.show();
+                        printYearInput.show();
+                        showRetailToggle.show();
+                        break;
+                    case "/eyewear":
+                        showRetailToggle.show();
+                        break;
+                    case "/sams":
+                        showRetailToggle.show();
+                        showMPToggle.show();
+                        break;
+                }
+
+            };
+        }
+        $("#print-category-button").on(`click`, e =>
+        {
+            openDropdown(e.currentTarget, categories);
+        });
+
+
+    } catch (e)
+    {
+        console.error("An error occurred while loading the print options");
+        alert(`An error occurred while loading the print options.<br>Please try again or contact support.<br>${e}`);
+    }
 
 }
 
