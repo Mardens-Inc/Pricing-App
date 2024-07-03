@@ -1,4 +1,3 @@
-import {PrintLabels} from "./CONSTANTS.js";
 import {startLoading, stopLoading} from "./loading.js";
 import {batchAddRecords} from "./location.js";
 import {alert, closePopup, openPopup} from "./popups.js";
@@ -44,35 +43,6 @@ async function buildOptionsForm(id, onclose)
     createColumnList(html);
     setDefaultOptionValues(html);
     $("#export-button").hide();
-    const printLabelSizeButton = html.find("#label-size");
-    if (currentOptions?.options["print-form"] !== undefined)
-    {
-        currentOptions.options["print-form"]["size"] = currentOptions?.options["print-form"]?.size ?? "small";
-        printLabelSizeButton.attr("value", currentOptions.options["print-form"].size);
-        printLabelSizeButton.find("span").text(currentOptions.options["print-form"].size);
-    } else
-    {
-        currentOptions.options["print-form"] = {size: "small"};
-    }
-    printLabelSizeButton.on("click", () =>
-    {
-        const labelSizes = Object.keys(PrintLabels);
-        const items = {};
-        for (let i = 0; i < labelSizes.length; i++)
-        {
-            const size = labelSizes[i];
-            items[size] = () =>
-            {
-                printLabelSizeButton.attr("value", size);
-                printLabelSizeButton.find("span").text(labelSizes[i]);
-                currentOptions.options["print-form"]["size"] = size;
-            };
-
-        }
-
-        openDropdown(printLabelSizeButton, items);
-
-    });
     html.find("#save").on("click", async () =>
     {
         await save(id);
@@ -207,15 +177,7 @@ function setDefaultOptionValues(html)
     html.find("toggle#allow-additions").attr("value", currentOptions?.options["allow-additions"] ?? "false");
     html.find("toggle#add-if-missing").attr("value", currentOptions?.options["add-if-missing"] ?? "false");
     html.find("toggle#remove-if-zero").attr("value", currentOptions?.options["remove-if-zero"] ?? "false");
-
-    if (currentOptions.options["print-form"] !== undefined && currentOptions?.options["print-form"].enabled)
-    {
-        html.find("input#print-label").val(currentOptions?.options["print-form"]["label"] ?? "");
-        html.find("input#print-year").val(currentOptions?.options["print-form"]?.year ?? "");
-        html.find("toggle#print-show-retail").attr("value", currentOptions?.options["print-form"]["show-retail"] ?? "false");
-    }
     html.find("toggle#voice-search").attr("value", currentOptions.options["voice-search"] ?? "false");
-    html.find("input#mardens-price").val(currentOptions.options["mardens-price"] ?? "");
 
 }
 
@@ -680,8 +642,10 @@ async function save(id)
                 "enabled": $("toggle#print").attr("value") === "true" ?? false,
                 "label": $("input#print-label").val() ?? "",
                 "year": $("input#print-year").val() ?? "",
-                "size": currentOptions.options["print-form"]["size"],
-                "show-retail": $("toggle#print-show-retail").attr("value") ?? false
+                "department": $("input#print-department").val() ?? "",
+                "route": currentOptions?.options["print-form"]?.route ?? "",
+                "show-retail": $("toggle#print-show-retail").attr("value") ?? false,
+                "show-mp": $("toggle#print-show-mp").attr("value") ?? false
             },
             "mardens-price": $("input#mardens-price").val() ?? "",
             "columns": currentOptions.options.columns.filter(c => c !== undefined && c !== null)
@@ -770,8 +734,20 @@ async function save(id)
  **/
 function buildMardensPriceForm(html)
 {
+    window.currentOptions = currentOptions;
+    if (typeof currentOptions.options["mardens-price"] !== "object") currentOptions.options["mardens-price"] = [];
+    if (currentOptions.options["mardens-price"].length === 0)
+    {
+        currentOptions.options["mardens-price"][0] =
+            {
+                column: "All",
+                percent: 40
+            };
+    }
     const title = html.find("#mardens-price-categories > h3");
     let column = currentOptions.options.columns.filter(i => i.attributes.includes("mp-category"))[0];
+    const categoryList = html.find("#mardens-price-categories #discount-categories");
+    const addCategoryButton = html.find("button#add-mardens-price-category");
     let uniqueColumnItems = [];
     if (column !== undefined)
     {
@@ -800,11 +776,88 @@ function buildMardensPriceForm(html)
 
     });
 
-    html.find("button.category-name").on("click", (e) =>
+    addCategoryButton.on("click", () =>
+    {
+        const index = categoryList.find(".discount-category").length;
+        const category = $(`
+                    <div class="discount-category fill row" style="gap: 1rem;" index="${index}">
+                        <div class="col fill">
+                            <button class="category-name" title="Category Name" style="width: 100%;height: 50px;aspect-ratio: 1;margin-block:auto">
+                                <span style="margin-right: auto">
+                                   <span style="opacity: .5;font-weight: 100">Category Name: </span>
+                                    <span>All</span>
+                                </span>
+                                <i class="fa fa-chevron-down" style="font-size: 12px"></i>
+                            </button>
+                        </div>
+                        <div class="row">
+                            <div class="floating-input col">
+                                <input id="category-discount-${index}" name="category-discount" placeholder="Discount" type="number">
+                                <label for="category-discount-${index}">Discount</label>
+                            </div>
+                            <button class="remove-category" title="Remove Category" style="width: auto;height: 50px;aspect-ratio: 1;margin: auto auto auto 1rem;"><i class="fa fa-trash"></i></button>
+                        </div>
+                    </div>
+        `);
+
+        category.find("button.category-name").on("click", openPopup);
+
+        category.find("button.remove-category").on("click", () =>
+        {
+            console.log("removing category", currentOptions.options["mardens-price"]);
+            categoryList.find("");
+            category.remove();
+            currentOptions.options["mardens-price"] = currentOptions.options["mardens-price"].filter((i, idx) => idx !== index);
+            // update the index of each category
+            categoryList.find(".discount-category").each((i, e) =>
+                                                         {
+                                                             $(e).attr("index", i);
+                                                         });
+            console.log(currentOptions.options["mardens-price"]);
+        });
+        category.find(`input[id='category-discount-${index}']`).on("keyup", (e) =>
+        {
+            const target = $(e.currentTarget);
+            const value = Number.parseInt(target.val());
+            const parent = target.parent().parent().parent();
+            const index = Number.parseInt(parent.attr("index"));
+            currentOptions.options["mardens-price"][index].percent = value;
+            console.log(currentOptions.options["mardens-price"][index]);
+        });
+
+        currentOptions.options["mardens-price"][index] =
+            {
+                column: "All",
+                percent: 0
+            };
+
+        categoryList.append(category);
+    });
+
+
+    html.find("button.category-name").on("click", openPopup);
+
+    /**
+     * @param {JQuery.ClickEvent} e
+     */
+    function openPopup(e)
     {
         const target = $(e.currentTarget);
-        const items = {
-            "All": () =>
+        const index = Number.parseInt(target.parent().parent().attr("index"));
+        /**
+         * @type {JQuery<HTMLInputElement>}
+         */
+        const discountInput = target.parent().parent().find(`input[id='category-discount-${index}']`);
+        const discount = Number.parseInt(discountInput.val());
+        const items = {};
+        const localUniqueColumnItems = [...uniqueColumnItems, "All"];
+
+        const alreadySelected = currentOptions.options["mardens-price"].map(i => i.column);
+
+        if (!alreadySelected.includes("All"))
+        {
+
+            items["All"] = () =>
             {
                 target.html(`
                     <span style="margin-right: auto">
@@ -813,9 +866,16 @@ function buildMardensPriceForm(html)
                     </span>
                     <i class="fa fa-chevron-down" style="font-size: 12px"></i>
                 `);
-            }
-        };
-        for (const item of uniqueColumnItems)
+                currentOptions.options["mardens-price"][index] =
+                    {
+                        column: "All",
+                        percent: discount
+                    };
+                console.log(currentOptions.options["mardens-price"]);
+            };
+        }
+
+        for (const item of localUniqueColumnItems.filter(i => !alreadySelected.includes(i)))
         {
             items[item] = () =>
             {
@@ -826,10 +886,16 @@ function buildMardensPriceForm(html)
                     </span>
                     <i class="fa fa-chevron-down" style="font-size: 12px"></i>
                 `);
+                currentOptions.options["mardens-price"][index] =
+                    {
+                        column: item,
+                        percent: discount
+                    };
+                console.log(currentOptions.options["mardens-price"]);
             };
         }
         openDropdown(e.currentTarget, items);
-    });
+    }
 
 
 }
@@ -853,18 +919,74 @@ async function buildPrintSection()
         const showMPToggle = $("#print-show-mp");
 
 
+        if (currentOptions.options["print-form"] !== undefined && currentOptions?.options["print-form"].enabled)
+        {
+            printLabelInput.find("input").val(currentOptions?.options["print-form"]["label"] ?? "");
+            printYearInput.find("input").val(currentOptions?.options["print-form"]["year"] ?? "");
+            departmentInput.find("input").val(currentOptions?.options["print-form"]["department"] ?? "");
+            showRetailToggle.attr("value", currentOptions?.options["print-form"]["show-retail"] ?? "false");
+            showMPToggle.attr("value", currentOptions?.options["print-form"]["show-mp"] ?? "false");
+        }
+
+
+        printLabelInput.on("input", (e) =>
+        {
+            currentOptions.options["print-form"].label = $(e.currentTarget).val();
+        });
+
+        printYearInput.on("input", (e) =>
+        {
+            currentOptions.options["print-form"].year = $(e.currentTarget).val();
+        });
+
+        departmentInput.on("keyup", (e) =>
+        {
+            currentOptions.options["print-form"].department = $(e.target).val();
+        });
+
+        showRetailToggle.on("click", (e) =>
+        {
+            currentOptions.options["print-form"]["show-retail"] = $(e.currentTarget).attr("value") === "true";
+        });
+        showMPToggle.on("click", (e) =>
+        {
+            currentOptions.options["print-form"]["show-mp"] = $(e.currentTarget).attr("value") === "true";
+        });
+
+
         printLabelInput.hide();
         printYearInput.hide();
         departmentInput.hide();
-        showRetailToggle.hide();
-        showMPToggle.hide();
+
+        if (currentOptions.options["print-form"] !== undefined && currentOptions.options["print-form"].route !== undefined)
+        {
+            handleRouteSelect(currentOptions.options["print-form"].route);
+        }
 
         for (const route of routes)
         {
             const category = options.routes[route];
             categories[category.name] = () =>
             {
-                $("#print-category-button").html(`
+                handleRouteSelect(route);
+
+                // clear all inputs and disable the toggles
+                printLabelInput.find("input").val("");
+                printYearInput.find("input").val("");
+                departmentInput.find("input").val("");
+                showRetailToggle.attr("value", "false");
+                showMPToggle.attr("value", "false");
+            };
+        }
+        $("#print-category-button").on(`click`, e =>
+        {
+            openDropdown(e.currentTarget, categories);
+        });
+
+        function handleRouteSelect(route)
+        {
+            const category = options.routes[route];
+            $("#print-category-button").html(`
                     <span style="margin-right: auto;">
                         <span style="opacity: .5; font-weight: 100">Tag Type: </span>
                         ${category.name}
@@ -872,41 +994,32 @@ async function buildPrintSection()
                     <i class="fa fa-chevron-down" style="font-size: 12px"></i>
                 `);
 
-                printLabelInput.hide();
-                printYearInput.hide();
-                departmentInput.hide();
-                showRetailToggle.hide();
-                showMPToggle.hide();
+            printLabelInput.hide();
+            printYearInput.hide();
+            departmentInput.hide();
 
-                switch (route)
-                {
-                    case "/percent":
-                        departmentInput.show();
-                        printLabelInput.show();
-                        printYearInput.show();
-                        showRetailToggle.show();
-                        break;
-                    case "/amazon/white":
-                        departmentInput.show();
-                        printLabelInput.show();
-                        printYearInput.show();
-                        showRetailToggle.show();
-                        break;
-                    case "/eyewear":
-                        showRetailToggle.show();
-                        break;
-                    case "/sams":
-                        showRetailToggle.show();
-                        showMPToggle.show();
-                        break;
-                }
+            currentOptions.options["print-form"].route = route;
 
-            };
+            switch (route)
+            {
+                case "/percent":
+                    departmentInput.show();
+                    printLabelInput.show();
+                    printYearInput.show();
+                    break;
+                case "/amazon/white":
+                    departmentInput.show();
+                    printLabelInput.show();
+                    printYearInput.show();
+                    break;
+                case "/eyewear":
+                    break;
+                case "/sams":
+                    break;
+            }
+
+
         }
-        $("#print-category-button").on(`click`, e =>
-        {
-            openDropdown(e.currentTarget, categories);
-        });
 
 
     } catch (e)
