@@ -84,7 +84,7 @@
             }
 
             console.log(json);
-
+            window.mappedData = json;
             $(document).trigger("loadedCSV", json);
         });
     });
