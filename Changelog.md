@@ -1,3 +1,39 @@
+# Version 0.1.0:
+Date: _07/03/2024_
+## Added
+- Assigned mapped data to window object
+- Added and implemented mpCategory in database list
+- Add PapaParse v5.4.1 for CSV parsing
+- Add new PriceTagger routes and options in fake.js
+- Add light mode CSS file
+- Add padding to input fields in CSS
+- Add padding to bottom of options form
+- Add Changelog.md with version history
+
+## Updated
+- Updated visibility and structure of form elements in database-options-form
+- Updated property types and added MardensPriceOption in fake.js
+- Update Papaparse library link and comment out lightmode.css
+
+## Improved
+- Refined print settings and improved 'mardens-price' implementation
+- Improved print functionality, using the new price tagger system.
+
+## Changed
+- Changed parameter type in batchAddRecords function
+
+## Implemented
+- Implemented "mardens-price"
+
+## Refactored
+- Refactor CSV parsing and variable handling
+- Refactor page-navigation.js for better readability
+- Refactor and enhance dropdown element JavaScript
+- Refactor database options form HTML
+- Refactor code for loading unique column data
+- Refactor loadPopup and remove unused functions
+- Enhance CSV handling and form building functionality
+
 # Version 0.0.8:
 Date: _07/03/2024_
 ## Added
