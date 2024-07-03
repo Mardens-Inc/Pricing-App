@@ -3,10 +3,7 @@ import {batchAddRecords} from "./location.js";
 import {alert, closePopup, openPopup} from "./popups.js";
 
 let dragDropArea;
-/**
- * @type {string|null}
- */
-let csv = null;
+let csvJSON = null;
 /**+
  * @type {ListHeading}
  */
@@ -56,19 +53,12 @@ async function buildOptionsForm(id, onclose)
     dragDropArea.on("upload", (e, file) =>
     {
         startLoading({fullscreen: true});
-        csv = file.content;
+        let csv = file.content;
         if (csv === null) return;
-        const newColumns = csv.split("\n")[0].split(",").map(c =>
-                                                             {
-                                                                 let t = c;
-                                                                 t = t.trim().replace(/[^a-zA-Z0-9.\-+\s]/g, "");
-                                                                 // make sure the first character is a letter
-                                                                 if (!t[0].match(/[a-zA-Z]/))
-                                                                 {
-                                                                     t = "column" + t;
-                                                                 }
-                                                                 return t;
-                                                             });
+        csvJSON = Papa.parse(csv, {
+            header: true, skipEmptyLines: true, delimiter: ","
+        }).data;
+        const newColumns = Object.keys(csvJSON[0]);
         if (currentOptions.columns == null || currentOptions.columns.length === 0)
         {
             currentOptions.columns = newColumns;
@@ -81,15 +71,15 @@ async function buildOptionsForm(id, onclose)
             openPopup("column-mapping", {
                 options: currentOptions,
                 columns: newColumns,
-                csv: csv.replace(/[^0-9A-Za-z,\s\n_\-+$.()"']/g, "")
+                json: csvJSON
             }).then(async (popup) =>
                     {
                         $(document).off("loadedCSV");
                         $(document).on("loadedCSV", async (e, data) =>
                         {
-                            csv = data;
+                            csvJSON = window.mappedData;
+                            delete window.mappedData;
                             closePopup("columnmapping");
-
                         });
                         popup = $(popup);
                         popup.on("close", async (_, data) =>
@@ -647,7 +637,7 @@ async function save(id)
                 "show-retail": $("toggle#print-show-retail").attr("value") ?? false,
                 "show-mp": $("toggle#print-show-mp").attr("value") ?? false
             },
-            "mardens-price": $("input#mardens-price").val() ?? "",
+            "mardens-price": currentOptions.options["mardens-price"] ?? [],
             "columns": currentOptions.options.columns.filter(c => c !== undefined && c !== null)
         }
     };
@@ -707,12 +697,9 @@ async function save(id)
     }
 
 
-    if (csv !== undefined && csv !== null && csv !== "")
+    if (csvJSON !== undefined && csvJSON !== null && csvJSON !== "")
     {
-        const json = Papa.parse(csv, {
-            header: true, skipEmptyLines: true, delimiter: ","
-        }).data;
-        await batchAddRecords(json);
+        await batchAddRecords(csvJSON);
     }
     stopLoading();
 
