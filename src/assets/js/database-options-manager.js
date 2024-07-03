@@ -734,7 +734,6 @@ async function save(id)
  **/
 function buildMardensPriceForm(html)
 {
-    window.currentOptions = currentOptions;
     if (typeof currentOptions.options["mardens-price"] !== "object") currentOptions.options["mardens-price"] = [];
     if (currentOptions.options["mardens-price"].length === 0)
     {
@@ -751,7 +750,7 @@ function buildMardensPriceForm(html)
     let uniqueColumnItems = [];
     if (column !== undefined)
     {
-        title.html(`${column} Categories`);
+        loadUniqueColumnData(column);
     } else
     {
         title.html(`Categories - No Column Selected`);
@@ -760,14 +759,7 @@ function buildMardensPriceForm(html)
     {
         if (data.is_active)
         {
-            column = data.column;
-            title.html(`${data.column.name} Categories - Loading...`);
-            const response = await $.get(`${baseURL}/api/location/${window.localStorage.getItem("loadedDatabase")}/columns/${column.real_name}`);
-            uniqueColumnItems = response["values"];
-            if (uniqueColumnItems === undefined) uniqueColumnItems = [];
-            uniqueColumnItems = uniqueColumnItems.filter(i => i !== undefined && i !== null && i !== "");
-
-            title.html(`${data.column.name} Categories`);
+            await loadUniqueColumnData(data.column);
         } else
         {
             title.html(`Categories - No Column Selected`);
@@ -775,6 +767,17 @@ function buildMardensPriceForm(html)
         }
 
     });
+
+    async function loadUniqueColumnData(column)
+    {
+        title.html(`${column.name} Categories - Loading...`);
+        const response = await $.get(`${baseURL}/api/location/${window.localStorage.getItem("loadedDatabase")}/columns/${column.real_name}`);
+        uniqueColumnItems = response["values"];
+        if (uniqueColumnItems === undefined) uniqueColumnItems = [];
+        uniqueColumnItems = uniqueColumnItems.filter(i => i !== undefined && i !== null && i !== "");
+
+        title.html(`${column.name} Categories`);
+    }
 
     addCategoryButton.on("click", () =>
     {
