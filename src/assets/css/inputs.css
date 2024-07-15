@@ -1,23 +1,15 @@
-/* This the styling for all button elements and any element with a class of .button */
 button, .button, .pagination li {
-    /* These are CSS variables for the default button states */
-    --default-bg-color: #4d4d4d; /* default background color */
-    --default-color: #ccc; /* default text color */
-    --hover-color: var(--background); /* background color upon hover */
-    --hover-bg-color: #e8e8e8; /* background color upon hover */
-
-    /* These are CSS variables for the disabled button state */
-    --disabled-bg-color: #ccc; /* background color when disabled */
-    --disabled-color: #a8a8a8; /* text color when disabled */
-
-    /* CSS variables for the primary button */
-    --primary-bg-color: var(--primary); /* Background color for primary buttons */
-    --primary-color: var(--background); /* primary text color */
-    --primary-hover-color: #3de03d; /* Hover color for primary buttons */
-    --primary-disabled-bg-color: #218621; /* Background color for primary buttons when disabled */
-    --primary-disabled-color: #000000; /* Text color for primary buttons when disabled */
-
-    /* Common styles to all buttons */
+    --default-bg-color: #4d4d4d;
+    --default-color: #ccc;
+    --hover-color: var(--background);
+    --hover-bg-color: #e8e8e8;
+    --disabled-bg-color: #ccc;
+    --disabled-color: #a8a8a8;
+    --primary-bg-color: var(--primary);
+    --primary-color: var(--background);
+    --primary-hover-color: #3de03d;
+    --primary-disabled-bg-color: #218621;
+    --primary-disabled-color: #000000;
     background-color: var(--default-bg-color);
     border: none;
     color: var(--default-color);
@@ -30,77 +22,65 @@ button, .button, .pagination li {
     cursor: pointer;
     border-radius: 100px;
     transition: background-color .2s;
-
-    /* Styles when hovering over the button */
-
-    &:hover {
-        background-color: var(--hover-bg-color);
-        color: var(--background);
-
-        img {
-            filter: invert(0);
-        }
-    }
-
-    /* Styles for disabled buttons */
-
-    &:disabled, &.disabled {
-        background-color: var(--disabled-bg-color);
-        color: var(--disabled-color);
-        cursor: not-allowed;
-    }
-
-
-    img {
-        filter: invert(1);
-    }
-
-    /* Styles exclusive to primary buttons */
-
-    &.primary, &.active {
-        color: var(--primary-color);
-        background-color: var(--primary-bg-color);
-
-        img {
-            filter: invert(0);
-        }
-
-        /* Styles when hovering over a primary button */
-
-        &:hover {
-            background-color: var(--primary-hover-color);
-        }
-
-        /* Styles for a disabled primary button */
-
-        &:disabled,
-        &.disabled {
-            background-color: var(--primary-disabled-bg-color);
-            color: var(--primary-disabled-color);
-        }
-    }
-
-    &#voice-search-button {
-        transition: outline .2s;
-
-        &.primary {
-            animation-name: ripple;
-            animation-duration: 2s;
-            animation-timing-function: linear;
-            animation-iteration-count: infinite;
-        }
-    }
-
-    i {
-        pointer-events: none;
-    }
-
 }
 
-/* This is the styling for all input elements and any element with a class of .input */
+button:hover, .button:hover, .pagination li:hover {
+    background-color: var(--hover-bg-color);
+    color: var(--background);
+}
+
+button:hover img, .button:hover img, .pagination li:hover img {
+    filter: invert(0);
+}
+
+button:disabled, .button:disabled, .pagination li:disabled, button.disabled, .button.disabled, .pagination li.disabled {
+    background-color: var(--disabled-bg-color);
+    color: var(--disabled-color);
+    cursor: not-allowed;
+}
+
+button img, .button img, .pagination li img {
+    filter: invert(1);
+}
+
+button.primary, .button.primary, .pagination li.primary, button.active, .button.active, .pagination li.active {
+    color: var(--primary-color);
+    background-color: var(--primary-bg-color);
+}
+
+button.primary img, .button.primary img, .pagination li.primary img, button.active img, .button.active img, .pagination li.active img {
+    filter: invert(0);
+}
+
+button.primary:hover, .button.primary:hover, .pagination li.primary:hover, button.active:hover, .button.active:hover, .pagination li.active:hover {
+    background-color: var(--primary-hover-color);
+}
+
+button.primary:disabled, .button.primary:disabled, .pagination li.primary:disabled, button.primary.disabled, .button.primary.disabled, .pagination li.primary.disabled,
+button.active:disabled, .button.active:disabled, .pagination li.active:disabled,
+button.active.disabled, .button.active.disabled, .pagination li.active.disabled {
+    background-color: var(--primary-disabled-bg-color);
+    color: var(--primary-disabled-color);
+}
+
+#voice-search-button {
+    transition: outline .2s;
+}
+
+#voice-search-button.primary {
+    animation-name: ripple;
+    animation-duration: 2s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+button i, .button i, .pagination li i {
+    pointer-events: none;
+}
+
 input, .input {
-    --default-bg-color: #3D3D3D; /* background color */
-    --default-color: white; /* text color */
+    --default-bg-color: #3D3D3D;
+    --default-color: white;
     background-color: var(--default-bg-color);
     color: var(--default-color);
     border: none;
@@ -109,63 +89,59 @@ input, .input {
     padding: 0.5rem 1rem;
     font-size: 1rem;
     font-family: inherit;
-
     padding-block: 1rem;
-
-
-    &::-webkit-search-decoration,
-    &::-webkit-search-cancel-button,
-    &::-webkit-search-results-button,
-    &::-webkit-search-results-decoration {
-        -webkit-appearance: none;
-    }
 }
 
-/* Styles for the floating input effect */
+input::-webkit-search-decoration,
+input::-webkit-search-cancel-button,
+input::-webkit-search-results-button,
+input::-webkit-search-results-decoration,
+.input::-webkit-search-decoration,
+.input::-webkit-search-cancel-button,
+.input::-webkit-search-results-button,
+.input::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+}
+
 .floating-input {
     position: relative;
     margin: 1rem 0;
-    /* Styles for the input box */
+}
 
-    input {
-        width: 100%;
-        max-width: -webkit-fill-available;
-        max-width: -moz-available;
-        max-width: fill-available;
-        padding-block: 1rem;
+.floating-input input {
+    width: 100%;
+    max-width: -webkit-fill-available;
+    max-width: -moz-available;
+    max-width: fill-available;
+    padding-block: 1rem;
+}
 
-        &::placeholder {
-            opacity: 0;
-        }
-    }
+.floating-input input::placeholder {
+    opacity: 0;
+}
 
-    /* Styles for the label */
+.floating-input label {
+    position: absolute;
+    transform: translateY(-20%);
+    top: 0;
+    font-size: .7rem;
+    left: 0;
+    padding: 0.5rem 1rem;
+    transition: top, left, padding, transform, font-size;
+    transition-duration: .2s;
+    color: var(--default-color);
+    background-color: var(--default-bg-color);
+    opacity: .7;
+    cursor: text;
+    font-weight: 700;
+}
 
-    label {
-        position: absolute;
-        transform: translateY(-20%);
-        top: 0;
-        font-size: .7rem;
-        left: 0;
-        padding: 0.5rem 1rem;
-        transition: top, left, padding, transform, font-size;
-        transition-duration: .2s;
-        color: var(--default-color);
-        background-color: var(--default-bg-color);
-        opacity: .7;
-        cursor: text;
-        font-weight: 700;
-    }
-
-    /* Styles for the label when the input is not empty */
-
-    input:placeholder-shown ~ label {
-        top: 50%;
-        transform: translateY(calc(-100% + 1rem));
-        opacity: .5;
-        font-size: 1rem;
-        font-weight: normal;
-    }
+.floating-input input:placeholder-shown ~ label {
+    top: 50%;
+    transform: translateY(calc(-100% + 1rem));
+    opacity: .5;
+    font-size: 1rem;
+    font-weight: normal;
 }
 
 .label {
@@ -181,7 +157,6 @@ input, .input {
     z-index: 999999;
 }
 
-
 .dropdown-items {
     position: fixed;
     display: inline-block;
@@ -191,65 +166,59 @@ input, .input {
     outline: none;
     border: none;
     z-index: 999999;
-
     background-color: #373737;
     color: white;
     box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
-
     min-width: 160px;
     border-radius: 12px;
     opacity: 0;
     transition: opacity .1s;
+}
 
-    .dropdown-item {
-        padding: 12px 16px;
-        margin: 5px;
-        text-decoration: none;
-        display: block;
-        transition: background-color .2s;
-        cursor: pointer;
-        border-radius: 100px;
+.dropdown-items .dropdown-item {
+    padding: 12px 16px;
+    margin: 5px;
+    text-decoration: none;
+    display: block;
+    transition: background-color .2s;
+    cursor: pointer;
+    border-radius: 100px;
+}
 
-        &:hover {
-            background-color: #555;
-        }
-    }
+.dropdown-items .dropdown-item:hover {
+    background-color: #555;
 }
 
 ul {
     list-style: none;
 }
 
-
 .pagination {
     text-wrap: nowrap;
     flex-wrap: nowrap;
+}
 
-    .paginationjs-page {
-        aspect-ratio: 1;
-        height: 1rem;
-    }
+.pagination .paginationjs-page {
+    aspect-ratio: 1;
+    height: 1rem;
+}
 
+.pagination li:hover a {
+    color: black;
+}
 
-    li {
-        &:hover a {
-            color: black;
-        }
+.pagination li.active a {
+    color: black;
+}
 
-        &.active a {
-            color: black;
-        }
+.pagination li a {
+    color: white;
+}
 
-        a {
-            color: white;
-        }
-
-        &.paginationjs-ellipsis.disabled {
-            opacity: .5;
-            color: white;
-            background-color: #282828;
-        }
-    }
+.pagination li.paginationjs-ellipsis.disabled {
+    opacity: .5;
+    color: white;
+    background-color: #282828;
 }
 
 @keyframes ripple {
@@ -269,7 +238,6 @@ ul {
     pointer-events: none;
 }
 
-
 toggle {
     position: relative;
     display: flex;
@@ -287,47 +255,46 @@ toggle {
     max-width: calc(100% - 2rem);
     padding: 1rem;
     border-radius: 105px;
-
-    &::before {
-        content: '';
-        position: absolute;
-        right: 1rem;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        width: 50px;
-        height: 25px;
-        border-radius: 100px;
-        background-color: hsla(0, 0%, 60%, 0.5);
-    }
-
-    &::after {
-        content: '';
-        position: absolute;
-        right: calc(3px + 1rem);
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        width: 20px;
-        height: 20px;
-        border-radius: 100px;
-        background-color: var(--primary);
-        transform: translateX(calc(-100% - 3px));
-        transition: transform;
-        transition-duration: 200ms;
-    }
-
-    &[value=true]::after {
-        transform: translateX(0);
-    }
-
-    &:hover {
-        background-color: hsla(0, 0%, 45%, 0.5);
-    }
 }
 
+toggle::before {
+    content: '';
+    position: absolute;
+    right: 1rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 25px;
+    border-radius: 100px;
+    background-color: hsla(0, 0%, 60%, 0.5);
+}
+
+toggle::after {
+    content: '';
+    position: absolute;
+    right: calc(3px + 1rem);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 100px;
+    background-color: var(--primary);
+    transform: translateX(calc(-100% - 3px));
+    transition: transform;
+    transition-duration: 200ms;
+}
+
+toggle[value=true]::after {
+    transform: translateX(0);
+}
+
+toggle:hover {
+    background-color: hsla(0, 0%, 45%, 0.5);
+}
 
 [toggle-hidden] {
     background-color: #272727;
@@ -347,23 +314,22 @@ toggle {
     cursor: pointer;
     width: 90%;
     margin-inline: auto;
-
     box-shadow: inset 0 0 0 0 transparent;
     transition: background-color, box-shadow, border;
     transition-duration: .2s;
+}
 
-    &::before {
-        content: "Drag & Drop";
-        font-weight: 600;
-        font-size: 2rem;
-    }
+.drag-drop-area::before {
+    content: "Drag & Drop";
+    font-weight: 600;
+    font-size: 2rem;
+}
 
-    &.dragover {
-        border-width: 0;
-        background-color: white;
-        color: black;
-        box-shadow: inset 0 0 20px 0 black;
-    }
+.drag-drop-area.dragover {
+    border-width: 0;
+    background-color: white;
+    color: black;
+    box-shadow: inset 0 0 20px 0 black;
 }
 
 a:hover {
