@@ -1,3 +1,24 @@
+# Version 0.1.2
+
+## New Features
+
+- "Added new utility for column name mapping": A new utiltiy tool has been added for easier mapping of column names
+- "Added 'options_utility' module in main.rs": A new 'options_utility' module has been introduced in the main.rs
+- "Added column mapping functionality to application": The application now supports column mapping functionality
+- "Added new URL rewrites and CORS headers to nginx config": Additional URL rewrites and CORS headers have been added to the nginx configuration
+
+## Refactorings and optimizations
+
+- "Refactored CSS selectors for improved readability": The CSS selectors have been refactoring for readability improvements
+- "Refactored CSS for cleaner styling and specificity": The CSS codebase has been refactored to enhance the styling specificity and to keep the codebase cleaner
+- "Refactor database-options-manager.js for code optimization": The code of database-options-manager.js has been refactored for optimal performance
+- "Refactored 'mardens-price' logic and changed print implementation": The logic of 'mardens-price' has been refactored and print implementation changed
+- "Refactored column-mapping script to separate file": The column-mapping script has been refactored into a separate file
+
+## Removed
+
+- "Removed unused CSS files": Unused css files have been removed from codebase
+
 # Version 0.1.0:
 Date: _07/03/2024_
 ## Added
