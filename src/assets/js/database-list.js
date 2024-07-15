@@ -249,19 +249,26 @@ export default class DatabaseList
                                 if (attributes.includes("mp"))
                                 {
                                     mp = text;
-                                    if (this.options["mardens-price"] !== undefined && this.options["mardens-price"] !== null)
+                                    try
                                     {
-                                        const all = this.options["mardens-price"].filter(m => m.column === "All")[0];
-                                        const mpOption = this.options["mardens-price"].filter(m => m.column === column.real_name)[0] ?? all;
-                                        if (mpOption !== undefined)
+
+                                        if (this.options["mardens-price"] !== undefined && this.options["mardens-price"] !== null && this.options["mardens-price"].length > 0)
                                         {
-                                            const mpValue = parseFloat(mpOption.mp);
-                                            const priceValue = parseFloat(retail);
-                                            const percent = mpOption.percent / 100;
-                                            text = (priceValue * (1 - percent)).toFixed(2);
+                                            const all = this.options["mardens-price"].filter(m => m.column === "All")[0];
+                                            const mpOption = this.options["mardens-price"].filter(m => m.column === column.real_name)[0] ?? all;
+                                            if (mpOption !== undefined)
+                                            {
+                                                const mpValue = parseFloat(mpOption.mp);
+                                                const priceValue = parseFloat(retail);
+                                                const percent = mpOption.percent / 100;
+                                                mp = text = (priceValue * (1 - percent)).toFixed(2);
+                                            }
+                                        }else{
+                                            mp = text = parseFloat(mp).toFixed(2);
                                         }
-
-
+                                    } catch (e)
+                                    {
+                                        console.error(e);
                                     }
                                 }
 
@@ -328,23 +335,23 @@ export default class DatabaseList
                     url.searchParams.append("mp", mp);
                 }
 
-                $.get(url.toString())
-                 .then(data =>
-                       {
-                           const printWindow = window.open("", "PRINT", "height=400,width=600");
-                           printWindow.document.write(data);
-                           setTimeout(() =>
-                                      {
-                                          try
-                                          {
-                                              printWindow.print();
-                                          } catch (e)
-                                          {
-                                              console.error(e);
-                                          }
-                                          printWindow.close();
-                                      }, 100);
-                       });
+                const printWindow = window.open(url.toString(), "PRINT", "height=400,width=600");
+                // $.get(url.toString())
+                //  .then(data =>
+                //        {
+                //            printWindow.document.write(data);
+                //            setTimeout(() =>
+                //                       {
+                //                           try
+                //                           {
+                //                               printWindow.print();
+                //                           } catch (e)
+                //                           {
+                //                               console.error(e);
+                //                           }
+                //                            printWindow.close();
+                //                       }, 100);
+                //        });
             });
 
 
