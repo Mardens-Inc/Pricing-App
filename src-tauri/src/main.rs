@@ -8,7 +8,7 @@ use crate::updater::install_update;
 // mod config;
 mod update_manager;
 mod updater;
-
+mod options_utility;
 
 fn main() {
     if install_update() {
@@ -21,6 +21,7 @@ fn main() {
             // config::save,
             // config::load,
             // config::save_default,
+            options_utility::map_columns,
             updater::download_update,
             updater::get_current_version,
             updater::install_update,
