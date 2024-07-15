@@ -581,14 +581,11 @@ async function initCreation(html)
                 //     json.push(obj);
                 // });
 
-                const json = Papa.parse(csv, {
-                    header: true, delimiter: ",", skipEmptyLines: true
-                }).data;
 
                 window.localStorage.setItem("loadedDatabase", response["id"]);
                 try
                 {
-                    await batchAddRecords(json);
+                    await batchAddRecords(csvJSON);
                     window.location.reload();
                 } catch (e)
                 {
@@ -634,8 +631,8 @@ async function save(id)
                 "year": $("input#print-year").val() ?? "",
                 "department": $("input#print-department").val() ?? "",
                 "route": currentOptions?.options["print-form"]?.route ?? "",
-                "show-retail": $("toggle#print-show-retail").attr("value") ?? false,
-                "show-mp": $("toggle#print-show-mp").attr("value") ?? false
+                "show-retail": currentOptions.options["print-form"]["show-retail"] ?? true,
+                "show-mp": currentOptions.options["print-form"]["show-mp"] ?? true
             },
             "mardens-price": currentOptions.options["mardens-price"] ?? [],
             "columns": currentOptions.options.columns.filter(c => c !== undefined && c !== null)
@@ -905,18 +902,15 @@ async function buildPrintSection()
         const printLabelInput = $("#print-label").parent();
         const printYearInput = $("#print-year").parent();
         const departmentInput = $("#print-department").parent();
-        const showRetailToggle = $("#print-show-retail");
-        const showMPToggle = $("#print-show-mp");
+        const showRetailToggle = $("toggle#print-show-retail");
+        const showMPToggle = $("toggle#print-show-mp");
 
 
-        if (currentOptions.options["print-form"] !== undefined && currentOptions?.options["print-form"].enabled)
-        {
-            printLabelInput.find("input").val(currentOptions?.options["print-form"]["label"] ?? "");
-            printYearInput.find("input").val(currentOptions?.options["print-form"]["year"] ?? "");
-            departmentInput.find("input").val(currentOptions?.options["print-form"]["department"] ?? "");
-            showRetailToggle.attr("value", currentOptions?.options["print-form"]["show-retail"] ?? "false");
-            showMPToggle.attr("value", currentOptions?.options["print-form"]["show-mp"] ?? "false");
-        }
+        printLabelInput.find("input").val(currentOptions?.options["print-form"]["label"] ?? "");
+        printYearInput.find("input").val(currentOptions?.options["print-form"]["year"] ?? "");
+        departmentInput.find("input").val(currentOptions?.options["print-form"]["department"] ?? "");
+        showRetailToggle.attr("value", currentOptions?.options["print-form"]["show-retail"] ?? "false");
+        showMPToggle.attr("value", currentOptions?.options["print-form"]["show-mp"] ?? "false");
 
 
         printLabelInput.on("input", (e) =>
@@ -987,15 +981,20 @@ async function buildPrintSection()
             printLabelInput.hide();
             printYearInput.hide();
             departmentInput.hide();
+            showMPToggle.hide();
+            showRetailToggle.hide();
 
             currentOptions.options["print-form"].route = route;
 
             switch (route)
             {
-                case "/percent":
+                case "/mp":
                     departmentInput.show();
-                    printLabelInput.show();
                     printYearInput.show();
+                    showMPToggle.attr("value", "true");
+                    showRetailToggle.attr("value", "true");
+                    currentOptions.options["print-form"]["show-mp"] = true;
+                    currentOptions.options["print-form"]["show-retail"] = true;
                     break;
                 case "/amazon/white":
                     departmentInput.show();
@@ -1010,8 +1009,6 @@ async function buildPrintSection()
 
 
         }
-
-
     } catch (e)
     {
         console.error("An error occurred while loading the print options");
