@@ -7,133 +7,129 @@
     max-height: calc(100vh - 276px);
     min-height: 100px;
     overflow-y: auto;
+}
 
-    table {
-        --columnSize: 150px;
+.list table {
+    --columnSize: 150px;
+}
 
-        thead {
-            display: flex;
+.list table thead {
+    display: flex;
+}
 
-            th {
-                text-align: left;
-                padding-block: 1rem;
-                margin-inline: 1rem;
-                font-size: 1.2rem;
-                font-weight: 400;
-                min-width: 50px;
-                width: var(--columnSize);
-                max-width: var(--columnSize);
-                flex-grow: 1;
-            }
-        }
+.list table thead th {
+    text-align: left;
+    padding-block: 1rem;
+    margin-inline: 1rem;
+    font-size: 1.2rem;
+    font-weight: 400;
+    min-width: 50px;
+    width: var(--columnSize);
+    max-width: var(--columnSize);
+    flex-grow: 1;
+}
 
-        tbody {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
+.list table tbody {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
 
-            td {
-                display: flex;
-                justify-content: start;
-                align-items: center;
-                flex-grow: 1;
-                margin-left: 1rem;
-                min-width: 50px;
-                width: 50px;
-                max-width: var(--columnSize);
-                overflow: scroll;
+.list table tbody td {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    flex-grow: 1;
+    margin-left: 1rem;
+    min-width: 50px;
+    width: 50px;
+    max-width: var(--columnSize);
+    overflow: scroll;
+}
 
-                &.description {
-                    align-items: start;
-                    overflow: scroll;
-                    margin-block: auto;
-                    max-height: 50px;
-                    padding-right: 10px;
-                }
+.list table tbody td.description {
+    align-items: start;
+    overflow: scroll;
+    margin-block: auto;
+    max-height: 50px;
+    padding-right: 10px;
+}
 
-                &.extra {
-                    justify-content: end;
-                    width: auto;
-                }
+.list table tbody td.extra {
+    justify-content: end;
+    width: auto;
+}
 
-                &.price {
-                    color: red;
-                    font-style: italic;
-                }
+.list table tbody td.price {
+    color: red;
+    font-style: italic;
+}
 
-                &.mp {
-                    color: var(--primary);
-                    font-weight: 700;
-                    font-style: italic;
-                }
-            }
-        }
-    }
+.list table tbody td.mp {
+    color: var(--primary);
+    font-weight: 700;
+    font-style: italic;
+}
 
-    .list-item {
-        border-radius: 100px;
-        background-color: #131313;
-        display: flex;
-        align-content: center;
-        height: 50px;
-        min-height: 50px;
-        max-height: 50px;
-        padding: 10px;
-        font-size: 1rem;
-        margin: 5px 0;
+.list .list-item {
+    border-radius: 100px;
+    background-color: #131313;
+    display: flex;
+    align-content: center;
+    height: 50px;
+    min-height: 50px;
+    max-height: 50px;
+    padding: 10px;
+    font-size: 1rem;
+    margin: 5px 0;
+    transition: background-color .1s;
+}
 
-        transition: background-color .1s;
+.list .list-item[filemaker="true"] {
+    opacity: .5;
+}
 
-        &[filemaker="true"] {
-            opacity: .5;
-        }
+.list .list-item .title {
+    margin-inline: 1rem;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
 
-        .title {
-            margin-inline: 1rem;
-            display: flex;
-            align-items: center;
-            width: 100%;
+.list .list-item .title .extra {
+    opacity: .5;
+    font-size: .9rem;
+    padding-left: 1rem;
+}
 
-            .extra {
-                opacity: .5;
-                font-size: .9rem;
-                padding-left: 1rem;
-            }
-        }
+.list .list-item img {
+    border-radius: 100px;
+    aspect-ratio: 1;
+    object-fit: contain;
+    object-position: center;
+    width: 50px;
+    height: 50px;
+}
 
-        img {
-            border-radius: 100px;
-            aspect-ratio: 1;
-            object-fit: contain;
-            object-position: center;
-            width: 50px;
-            height: 50px;
-        }
+.list .list-item button {
+    height: 100%;
+    aspect-ratio: 1;
+    margin-block: 0;
+}
 
-        button {
-            height: 100%;
-            aspect-ratio: 1;
-            margin-block: 0;
+.list .list-item button img {
+    height: 1rem;
+}
 
-            img {
-                height: 1rem;
-            }
-        }
+.list .list-item:hover {
+    background-color: #1E1E1E;
+    cursor: pointer;
+}
 
-        &:hover {
-            background-color: #1E1E1E;
-            cursor: pointer;
-        }
+.list .list-item.selected {
+    background-color: #6a7b68;
+}
 
-        &.selected {
-            background-color: #6a7b68;
-
-            &:hover {
-                background-color: #778d75;
-            }
-        }
-
-
-    }
-
+.list .list-item.selected:hover {
+    background-color: #778d75;
 }
