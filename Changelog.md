@@ -1,3 +1,29 @@
+# Version 0.1.3:
+Date: _07/30/2024_
+
+## New
+
+### Enable devtools feature in Tauri dependency
+Commit ID: e647cc7ff2eb1cc3cfd8a57aac9f48984908b659
+
+The "devtools" feature was added to the Tauri dependency in the Cargo.toml. This change aims to facilitate better debugging and development by providing access to developer tools.
+
+## Fixes
+
+### Refactor CSS to scope styles within the .list class
+Commit ID: 3494838012a5934bc33b96a075b282fda9fbbab5
+
+CSS selectors were updated to encapsulate styles within the .list class. This ensures better modularity and prevents style leakage. Rules for table elements and list items were adjusted to maintain consistent appearance and behavior.
+
+## Removed
+
+### Add downloads directory to .gitignore
+Commit ID: 9ef2cd7ac9476e3c8480218c5f5262793f5a2e86
+
+The downloads directory is now ignored to prevent unnecessary files from being tracked in the repository. This keeps the repository clean and free from transient files.
+
+---
+
 # Version 0.1.2:
 Date: _07/15/2024_
 
