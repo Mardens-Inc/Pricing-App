@@ -14,8 +14,7 @@ import {alert, confirm, openPopup} from "./popups.js";
  *
  * @class
  */
-export default class DatabaseList
-{
+export default class DatabaseList {
     function;
 
     /**
@@ -25,36 +24,30 @@ export default class DatabaseList
      *
      * @return {void}
      */
-    constructor(id)
-    {
+    constructor(id) {
         this.list = $(".list");
         this.list.empty();
         this.items = [];
         this.id = id;
     }
 
-    static async create()
-    {
+    static async create() {
         if (!auth.isLoggedIn) return;
         const db = new DatabaseList(null);
         db.list.empty();
-        db.list.append(await buildOptionsForm(null, async () =>
-        {
+        db.list.append(await buildOptionsForm(null, async () => {
             window.location.reload();
         }));
         $(document).trigger("load");
     }
 
-    async load()
-    {
+    async load() {
         startLoading({fullscreen: true});
         const {name, location, po, image, options, posted} = await this.getListHeader();
-        if (image !== "")
-        {
+        if (image !== "") {
             img.attr("src", image);
             img.css("border-radius", "12px");
-        } else
-        {
+        } else {
             img.attr("src", "assets/images/icon.svg");
         }
         this.options = options;
@@ -64,38 +57,28 @@ export default class DatabaseList
         this.list.html("");
         $(".pagination").html("");
         $("#search").val("");
-        try
-        {
+        try {
             await this.loadView("", true);
-        } catch (e)
-        {
+        } catch (e) {
             console.error(e);
         }
 
         this.importing = false;
-        if (this.id !== null)
-        {
-            if (this.items.length === 0)
-            {
+        if (this.id !== null) {
+            if (this.items.length === 0) {
                 this.importing = true;
-                if (options.hasOwnProperty("from_filemaker"))
-                {
-                    if (auth.isLoggedIn && auth.getUserProfile().admin)
-                    {
+                if (options.hasOwnProperty("from_filemaker")) {
+                    if (auth.isLoggedIn && auth.getUserProfile().admin) {
                         this.list.append(await buildImportFilemakerForm());
-                    } else
-                    {
-                        alert("This database is empty, and you do not have permission to import data.<br>Please contact an administrator for assistance.", () =>
-                        {
+                    } else {
+                        alert("This database is empty, and you do not have permission to import data.<br>Please contact an administrator for assistance.", () => {
                             window.localStorage.removeItem("loadedDatabase");
                             window.location.reload();
                         });
                     }
                 }
-            } else
-            {
-                if (options.hasOwnProperty("from_filemaker"))
-                {
+            } else {
+                if (options.hasOwnProperty("from_filemaker")) {
                     await this.edit();
                 }
             }
@@ -113,11 +96,9 @@ export default class DatabaseList
      *
      * @return {Promise<void>} - A promise that resolves once the view is loaded and displayed.
      */
-    async loadView(query, force = false)
-    {
+    async loadView(query, force = false) {
         const newList = await this.getListItems(query);
-        if (force || newList !== this.items)
-        {
+        if (force || newList !== this.items) {
             this.items = newList;
             await this.buildList();
         }
@@ -129,10 +110,8 @@ export default class DatabaseList
      * @param {string} query - The search query.
      * @return {Promise<Array>} - A promise that resolves to an array of items matching the search query.
      */
-    async search(query)
-    {
-        if (!this.importing)
-        {
+    async search(query) {
+        if (!this.importing) {
             // $("#search").val(query);
             await this.loadView(query, true);
             $(document).trigger("load");
@@ -154,16 +133,12 @@ export default class DatabaseList
      * getListItems();
      * // Returns a promise that resolves with the complete list of items.
      */
-    async getListItems(query = "")
-    {
+    async getListItems(query = "") {
         if (this.id === null) return [];
         let newList = [];
-        try
-        {
-            if (query !== null && query !== undefined && query !== "")
-            {
-                try
-                {
+        try {
+            if (query !== null && query !== undefined && query !== "") {
+                try {
                     const searchColumns = this.options.columns.filter(c => c.attributes.includes("search"));
                     const primaryKey = this.options.columns.filter(c => c.attributes.includes("primary"))[0];
                     query = query.toLowerCase().replace(/^0+/, ""); // convert to lowercase and remove leading zeros
@@ -179,28 +154,25 @@ export default class DatabaseList
                     };
 
                     newList = await $.ajax({
-                                               url: url,
-                                               method: "POST",
-                                               data: JSON.stringify(searchQuery),
-                                               contentType: "application/json",
-                                               headers: {"Accept": "application/json"}
-                                           });
+                        url: url,
+                        method: "POST",
+                        data: JSON.stringify(searchQuery),
+                        contentType: "application/json",
+                        headers: {"Accept": "application/json"}
+                    });
                     newList = newList["items"];
-                } catch (e)
-                {
+                } catch (e) {
                     console.error(e);
                     return [];
                 }
 
 
-            } else
-            {
+            } else {
                 const url = `${baseURL}/api/location/${this.id}/`;
                 newList = await $.ajax({url: url, method: "GET"});
                 newList = newList["results"]["items"];
             }
-        } catch (e)
-        {
+        } catch (e) {
             console.error(`Error fetching items for location ${this.id}`);
             console.error(e);
         }
@@ -217,170 +189,121 @@ export default class DatabaseList
      *
      * @returns {Promise<void>} A promise that resolves when the list is built.
      */
-    async buildList()
-    {
+    async buildList() {
         if (this.options.columns === undefined) return;
         this.options.columns = this.options.columns.filter(c => c !== null && c !== undefined);
         const table = this.buildColumns();
         table.css("--columnSize", `${(1 / (this.options.columns.filter(i => i.visible).length + 1)) * 100}%`);
         const tbody = $("<tbody>");
-        for (const item of this.items)
-        {
+        for (const item of this.items) {
             const tr = $(`<tr id='${item.id}' class='list-item'>`);
             let mp = null;
             let retail = null;
             let mpCategory = null;
-            try
-            {
-                for (const column of this.options.columns)
-                {
-                    if (column.visible)
-                    {
+            try {
+                for (const column of this.options.columns) {
+                    if (column.visible) {
                         const attributes = column.attributes ?? [];
                         let text = item[column.real_name] ?? "";
-                        if (attributes.includes("price") || attributes.includes("mp"))
-                        {
-                            try
-                            {
+                        if (attributes.includes("price") || attributes.includes("mp")) {
+                            try {
                                 text = text.replace(/[^0-9.]/g, "");
                                 text = text === "" ? "0" : text;
                                 text = parseFloat(text).toFixed(2);
 
-                                if (attributes.includes("mp"))
-                                {
+                                if (attributes.includes("mp")) {
                                     mp = text;
-                                    try
-                                    {
+                                    try {
 
-                                        if (this.options["mardens-price"] !== undefined && this.options["mardens-price"] !== null && this.options["mardens-price"].length > 0)
-                                        {
+                                        if (this.options["mardens-price"] !== undefined && this.options["mardens-price"] !== null && this.options["mardens-price"].length > 0) {
                                             const all = this.options["mardens-price"].filter(m => m.column === "All")[0];
                                             const mpOption = this.options["mardens-price"].filter(m => m.column === column.real_name)[0] ?? all;
-                                            if (mpOption !== undefined)
-                                            {
+                                            if (mpOption !== undefined) {
                                                 const mpValue = parseFloat(mpOption.mp);
                                                 const priceValue = parseFloat(retail);
                                                 const percent = mpOption.percent / 100;
                                                 mp = text = (priceValue * (1 - percent)).toFixed(2);
                                             }
-                                        }else{
+                                        } else {
                                             mp = text = parseFloat(mp).toFixed(2);
                                         }
-                                    } catch (e)
-                                    {
+                                    } catch (e) {
                                         console.error(e);
                                     }
                                 }
 
-                                if (attributes.includes("mp-category"))
-                                {
+                                if (attributes.includes("mp-category")) {
                                     mpCategory = text;
                                 }
 
                                 if (attributes.includes("price")) retail = text;
 
                                 text = `$${text}`;
-                            } catch (e)
-                            {
+                            } catch (e) {
                                 console.error(e);
                             }
-                        } else if (attributes.includes("quantity"))
-                        {
+                        } else if (attributes.includes("quantity")) {
                             text = text.replace(/[^0-9-]/g, "");
                             text = text === "" ? "0" : text;
                             text = parseInt(text);
                         }
 
                         const td = $("<td>").html(text === "" ? "-" : text);
-                        for (const attribute of attributes)
-                        {
+                        for (const attribute of attributes) {
                             td.addClass(attribute);
                         }
                         tr.append(td);
                     }
                 }
-            } catch (e)
-            {
+            } catch (e) {
                 console.error(e);
             }
             const extra = $("<td></td>");
             extra.addClass("extra");
             const extraButton = $(`<button title="More Options..."><i class='fa fa-ellipsis-vertical'></i></button>`);
             const printButton = $(`<button title="Print"><i class='fa fa-print'></i></button>`);
-            printButton.on("click", () =>
-            {
+            printButton.on("click", () => {
                 const printForm = this.options["print-form"];
                 console.log(this.options["print-form"]);
-                const url = new URL(`${baseURL}/api/tag-pricer${printForm.route}`);
-                if (printForm.label !== undefined && printForm.label !== null && printForm.label !== "")
-                {
+                const url = new URL(`${baseURL}/api/tag-pricer/general`);
+                if (printForm.label !== undefined && printForm.label !== null && printForm.label !== "") {
                     url.searchParams.append("label", printForm.label);
                 }
-                if (printForm.year !== undefined && printForm.year !== null)
-                {
+                if (printForm.year !== undefined && printForm.year !== null) {
                     url.searchParams.append("year", printForm.year.toString());
                 }
-                if (printForm.department !== undefined && printForm.department !== null && printForm.department !== "")
-                {
-                    url.searchParams.append("department", printForm.department);
+                if (printForm.department !== undefined && printForm.department !== null && printForm.department !== "") {
+                    url.searchParams.append("department", printForm.department.id);
                 }
 
-                if (printForm["show-retail"])
-                {
-                    url.searchParams.append("price", retail);
-                }
-
-                if (printForm["show-mp"])
-                {
-                    url.searchParams.append("mp", mp);
-                }
+                if(retail != null)
+                url.searchParams.append("price", retail);
+                if(mp != null)
+                url.searchParams.append("mp", mp);
 
                 const printWindow = window.open(url.toString(), "PRINT", "height=400,width=600");
-                // $.get(url.toString())
-                //  .then(data =>
-                //        {
-                //            printWindow.document.write(data);
-                //            setTimeout(() =>
-                //                       {
-                //                           try
-                //                           {
-                //                               printWindow.print();
-                //                           } catch (e)
-                //                           {
-                //                               console.error(e);
-                //                           }
-                //                            printWindow.close();
-                //                       }, 100);
-                //        });
             });
 
 
             const showExtraButton = auth.isLoggedIn;
-            extraButton.on("click", async () =>
-            {
+            extraButton.on("click", async () => {
                 const itemHistory = await getHistory(this.id, item.id);
                 openDropdown(extraButton, {
-                    "View History": () =>
-                    {
+                    "View History": () => {
                         openPopup("history", {history: itemHistory});
                     },
-                    "Copy": () =>
-                    {
+                    "Copy": () => {
                         navigator.clipboard.writeText(JSON.stringify(item, null, 2));
                     },
-                    "Delete": () =>
-                    {
-                        confirm("Are you sure you want to delete this item?", "Delete Item", "Cancel", async (value) =>
-                        {
+                    "Delete": () => {
+                        confirm("Are you sure you want to delete this item?", "Delete Item", "Cancel", async (value) => {
                             if (!value) return;
                             startLoading({fullscreen: true, message: "Deleting..."});
-                            try
-                            {
+                            try {
                                 // await $.ajax({url: `${baseURL}/api/location/${this.id}/${item.id}`, method: "DELETE"});
                                 await deleteRecord(item.id);
                                 await this.loadView("", true);
-                            } catch (e)
-                            {
+                            } catch (e) {
                                 console.error(e);
                                 alert("An error occurred while trying to delete the item.");
                             }
@@ -389,17 +312,13 @@ export default class DatabaseList
                     }
                 }, {"View History": itemHistory !== undefined && itemHistory.length > 0});
             });
-            try
-            {
-                if (this.options["allow-inventorying"])
-                {
-                    tr.on("click", e =>
-                    {
+            try {
+                if (this.options["allow-inventorying"]) {
+                    tr.on("click", e => {
                         if (e.target.tagName === "BUTTON") return;
                         tbody.find(`tr:not(#${item.id})`).removeClass("selected");
 
-                        if (tr.hasClass("selected"))
-                        {
+                        if (tr.hasClass("selected")) {
                             tr.removeClass("selected");
                             $(document).trigger("item-selected", null);
                             localStorage.removeItem("selectedItem");
@@ -411,16 +330,13 @@ export default class DatabaseList
                         $(document).trigger("item-selected", item);
                     });
                 }
-            } catch (e)
-            {
+            } catch (e) {
                 console.error(e);
             }
-            if (this.options["print-form"].enabled)
-            {
+            if (this.options["print-form"].enabled) {
                 extra.append(printButton);
             }
-            if (showExtraButton && auth.isLoggedIn && auth.getUserProfile().admin)
-            {
+            if (showExtraButton && auth.isLoggedIn && auth.getUserProfile().admin) {
                 extra.append(extraButton);
             }
             tr.append(extra);
@@ -430,13 +346,10 @@ export default class DatabaseList
         table.append(tbody);
         this.list.append(table);
         console.log(this.items);
-        if (this.options["allow-inventorying"] && auth.isLoggedIn)
-        {
-            if (this.options.columns.filter(i => i.attributes.includes("quantity")).length === 0)
-            {
+        if (this.options["allow-inventorying"] && auth.isLoggedIn) {
+            if (this.options.columns.filter(i => i.attributes.includes("quantity")).length === 0) {
                 this.list.append(await buildInventoryingForm(this.options["allow-additions"], this.options.columns, this.options["add-if-missing"], this.options["voice-search"]));
-            } else
-            {
+            } else {
                 this.list.append(await buildInventoryingFormWithQuantity(this.options["allow-additions"], this.options.columns, this.options["add-if-missing"], this.options["remove-if-zero"], this.options["voice-search"]));
             }
 
@@ -445,18 +358,15 @@ export default class DatabaseList
         $(document).trigger("load");
     }
 
-    buildColumns()
-    {
+    buildColumns() {
 
         const table = $("<table class='fill col'></table>");
-        try
-        {
+        try {
             if (this.options.columns === undefined) return table;
             const columns = this.options.columns.filter(c => c !== null && c !== undefined && c.visible);
             const thead = $("<thead>");
 
-            for (const column of columns)
-            {
+            for (const column of columns) {
                 if (column === null || column === undefined) continue;
                 const th = $("<th>").html(column.name);
                 thead.append(th);
@@ -465,8 +375,7 @@ export default class DatabaseList
             thead.append($("<th class='extra'>"));
 
             table.append(thead);
-        } catch (e)
-        {
+        } catch (e) {
             console.error("Error building columns");
             console.error(e);
         }
@@ -479,10 +388,8 @@ export default class DatabaseList
      *
      * @return {Promise<ListHeading>} - A promise that resolves to an object containing the header information.
      */
-    async getListHeader()
-    {
-        if (this.id === null)
-        {
+    async getListHeader() {
+        if (this.id === null) {
             return {
                 name: "",
                 location: "",
@@ -501,13 +408,12 @@ export default class DatabaseList
      *
      * @return {void}
      */
-    async exportCSV()
-    {
+    async exportCSV() {
         startLoading({fullscreen: true, message: "Exporting..."});
         const csv = (await $.get({
-                                     url: `${baseURL}/api/location/${this.id}/export`,
-                                     headers: {"Accept": "text/csv"}
-                                 })).toString();
+            url: `${baseURL}/api/location/${this.id}/export`,
+            headers: {"Accept": "text/csv"}
+        })).toString();
         const headers = await this.getListHeader();
         const name = `${headers.name}-${headers.po}-${this.id}.csv`;
         download(name, csv);
@@ -515,11 +421,9 @@ export default class DatabaseList
 
     }
 
-    async edit()
-    {
+    async edit() {
         this.list.empty();
-        this.list.append(await buildOptionsForm(this.id, async () =>
-        {
+        this.list.append(await buildOptionsForm(this.id, async () => {
             window.location.reload();
         }));
 
