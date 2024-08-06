@@ -817,7 +817,7 @@ async function buildPrintSection(html) {
         .on("click", e => {
             openDropdown(e.currentTarget, departments.reduce((acc, dept) => {
                 acc[dept.name] = () => {
-                    departmentDropdown.find("span").html(dept.name);
+                    departmentDropdown.html(dept.name);
                     if (dept.id === 0) delete printOptions.department;
                     else printOptions.department = dept;
                 };
@@ -830,7 +830,7 @@ async function buildPrintSection(html) {
         .on("click", e => {
             openDropdown(e.currentTarget, labels.reduce((acc, label) => {
                 acc[label] = () => {
-                    labelDropdown.find("span").html(label);
+                    labelDropdown.html(label);
                     printOptions.label = label;
                 };
                 return acc;
@@ -842,7 +842,7 @@ async function buildPrintSection(html) {
         .on("click", e => {
             openDropdown(e.currentTarget, colors.reduce((acc, color) => {
                 acc[color] = () => {
-                    colorDropdown.find("span").html(color);
+                    colorDropdown.html(color);
                     if (color === "No Color") delete printOptions.color;
                     else printOptions.color = color;
                 };
@@ -856,7 +856,7 @@ async function buildPrintSection(html) {
         .on("click", e => {
             openDropdown(e.currentTarget, stickers.reduce((acc, sticker) => {
                 acc[`${sticker.name} (${sticker.width}in x ${sticker.height}in)`] = () => {
-                    stickerDropdown.find("span").html(sticker.name);
+                    stickerDropdown.html(sticker.name);
                     printOptions.sticker = sticker;
                 };
                 return acc;
