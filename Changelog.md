@@ -1,3 +1,16 @@
+
+# Version 0.1.4:
+Date: _08/06/2024_
+
+## Updated
+
+* **Refactor print form section UI**: The user interface for printing form sections has been refactored, improving the overall layout and design.
+
+* **Refactor function block styles**: Styles associated with function blocks have been refactored to ensure a more consistent and clean aesthetic.
+
+* **Refactored DatabaseList class for better readability**: The `DatabaseList` class has undergone a refactor to improve readability and maintainability of the code.
+
+
 # Version 0.1.3:
 Date: _07/30/2024_
 
