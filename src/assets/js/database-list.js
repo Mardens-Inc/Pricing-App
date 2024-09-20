@@ -200,6 +200,7 @@ export default class DatabaseList {
             let mp = null;
             let retail = null;
             let mpCategory = null;
+            let dept = null;
             try {
                 for (const column of this.options.columns) {
                     if (column.visible) {
@@ -247,12 +248,41 @@ export default class DatabaseList {
                             text = text === "" ? "0" : text;
                             text = parseInt(text);
                         }
+                        if (attributes.includes("department")) {
+                            const departmentDropdown = $(`
+                                                <button id="department-dropdown-button-${item.id}" class="department-dropdown-button fill horizontal" style="height: 50px;">
+                                                    <span class="fill horizontal" style="padding-right: 2rem">Department</span>
+                                                    <i class="fa fa-chevron-down"></i>
+                                                </button>
+                                                `)
+                                .on("click", e => {
+                                    openDropdown(e.currentTarget, [{id: 0, name: "No Dept."}, {id: 1, name: "General"},
+                                        {id: 2, name: "Clothing"}, {id: 3, name: "Furniture"}, {id: 4, name: "Grocery Taxable"},
+                                        {id: 5, name: "Shoes"}, {id: 6, name: "Fabric"}, {id: 7, name: "Flooring/Carpet"},
+                                        {id: 8, name: "Hardware"}, {id: 9, name: "Special Sales"},
+                                        {id: 14, name: "Grocery Non-Taxable"}].reduce((acc, dept) => {
+                                        acc[`${dept.id} - ${dept.name}`] = () => {
+                                            departmentDropdown.html(dept.name);
+                                            departmentDropdown.attr('data-dept', dept.id);
+                                            departmentDropdown.attr('data-deptname', dept.name);
+                                        };
+                                        return acc;
+                                    }, {}));
+                                });
+                            departmentDropdown.find("span").html(departmentDropdown.attr('data-deptname') ?? "Department")
+                            const td = $("<td>").append(departmentDropdown);
+                            for (const attribute of attributes) {
+                                td.addClass(attribute);
+                            }
+                            tr.append(td);
+                        } else {
 
-                        const td = $("<td>").html(text === "" ? "-" : text);
-                        for (const attribute of attributes) {
-                            td.addClass(attribute);
+                            const td = $("<td>").html(text === "" ? "-" : text);
+                            for (const attribute of attributes) {
+                                td.addClass(attribute);
+                            }
+                            tr.append(td);
                         }
-                        tr.append(td);
                     }
                 }
             } catch (e) {
@@ -265,6 +295,7 @@ export default class DatabaseList {
             if (this.options["print-form"].percentages && Array.isArray(this.options["print-form"].percentages) && this.options["print-form"].percentages.length > 0) {
                 for (const percentage of this.options["print-form"].percentages) {
                     const percentButton = $(`<button title="Print ${percentage}% Off"><span class="badge">${percentage}%</span></button>`);
+
                     percentButton.on("click", () => {
                         const printForm = this.options["print-form"];
                         const url = new URL(`https://pricetagger.mardens.com/api/`);
@@ -279,6 +310,17 @@ export default class DatabaseList {
                         }
                         if (printForm.color !== undefined && printForm.color !== null && printForm.color !== "") {
                             url.searchParams.append("color", printForm.color);
+                        }
+                        if (dept !== null) {
+                            url.searchParams.append("department", dept);
+                        }
+
+
+                        const departmentDropdown = tr.find(`#department-dropdown-button-${item.id}`);
+                        if (departmentDropdown && departmentDropdown.length > 0) {
+                            const departmentId = departmentDropdown.attr('data-dept');
+                            if (departmentId !== undefined && departmentId !== null)
+                                url.searchParams.append("department", departmentId);
                         }
 
                         if (retail != null) {
@@ -307,6 +349,9 @@ export default class DatabaseList {
                     }
                     if (printForm.color !== undefined && printForm.color !== null && printForm.color !== "") {
                         url.searchParams.append("color", printForm.color);
+                    }
+                    if (dept !== null) {
+                        url.searchParams.append("department", dept);
                     }
 
 
