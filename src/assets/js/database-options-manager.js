@@ -238,6 +238,11 @@ function createColumnList(html) {
             unique: true,
             "description": "Mark this as the description column, this will be used for voice search.<br><b>There can only be one description column.</b>"
         }, {
+            name: "department",
+            icon: "fa-solid fa-shop",
+            unique: true,
+            "description": "Mark this as the department column, which will be used in printing.<br><b>There can only be one department column.</b>"
+        }, {
             name: "mp",
             icon: "fa-solid fa-percent",
             unique: true,
