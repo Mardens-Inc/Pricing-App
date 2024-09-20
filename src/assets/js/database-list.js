@@ -261,28 +261,63 @@ export default class DatabaseList {
             const extra = $("<td></td>");
             extra.addClass("extra");
             const extraButton = $(`<button title="More Options..."><i class='fa fa-ellipsis-vertical'></i></button>`);
-            const printButton = $(`<button title="Print"><i class='fa fa-print'></i></button>`);
-            printButton.on("click", () => {
-                const printForm = this.options["print-form"];
-                console.log(this.options["print-form"]);
-                const url = new URL(`${baseURL}/api/tag-pricer/general`);
-                if (printForm.label !== undefined && printForm.label !== null && printForm.label !== "") {
-                    url.searchParams.append("label", printForm.label);
-                }
-                if (printForm.year !== undefined && printForm.year !== null) {
-                    url.searchParams.append("year", printForm.year.toString());
-                }
-                if (printForm.department !== undefined && printForm.department !== null && printForm.department !== "") {
-                    url.searchParams.append("department", printForm.department.id);
-                }
+            let printButton = null;
+            if (this.options["print-form"].percentages && Array.isArray(this.options["print-form"].percentages) && this.options["print-form"].percentages.length > 0) {
+                for (const percentage of this.options["print-form"].percentages) {
+                    const percentButton = $(`<button title="Print ${percentage}% Off"><span class="badge">${percentage}%</span></button>`);
+                    percentButton.on("click", () => {
+                        const printForm = this.options["print-form"];
+                        const url = new URL(`https://pricetagger.mardens.com/api/`);
+                        if (printForm.label !== undefined && printForm.label !== null && printForm.label !== "") {
+                            url.searchParams.append("label", printForm.label);
+                        }
+                        if (printForm.year !== undefined && printForm.year !== null) {
+                            url.searchParams.append("year", printForm.year.toString());
+                        }
+                        if (printForm.department !== undefined && printForm.department !== null && printForm.department !== "") {
+                            url.searchParams.append("department", printForm.department.id);
+                        }
+                        if (printForm.color !== undefined && printForm.color !== null && printForm.color !== "") {
+                            url.searchParams.append("color", printForm.color);
+                        }
 
-                if(retail != null)
-                url.searchParams.append("price", retail);
-                if(mp != null)
-                url.searchParams.append("mp", mp);
+                        if (retail != null) {
+                            url.searchParams.append("price", retail);
+                            console.log(retail, percentage)
+                            mp = parseFloat(retail).toFixed(2) * (1 - percentage / 100);
+                            url.searchParams.append("mp", mp);
+                        }
+                        const printWindow = window.open(url.toString(), "PRINT", "height=400,width=600");
+                    });
+                    extra.append(percentButton);
+                }
+            } else {
+                printButton = $(`<button title="Print"><i class='fa fa-print'></i></button>`);
+                printButton.on("click", () => {
+                    const printForm = this.options["print-form"];
+                    const url = new URL(`https://pricetagger.mardens.com/api/`);
+                    if (printForm.label !== undefined && printForm.label !== null && printForm.label !== "") {
+                        url.searchParams.append("label", printForm.label);
+                    }
+                    if (printForm.year !== undefined && printForm.year !== null) {
+                        url.searchParams.append("year", printForm.year.toString());
+                    }
+                    if (printForm.department !== undefined && printForm.department !== null && printForm.department !== "") {
+                        url.searchParams.append("department", printForm.department.id);
+                    }
+                    if (printForm.color !== undefined && printForm.color !== null && printForm.color !== "") {
+                        url.searchParams.append("color", printForm.color);
+                    }
 
-                const printWindow = window.open(url.toString(), "PRINT", "height=400,width=600");
-            });
+
+                    if (retail != null)
+                        url.searchParams.append("price", retail);
+                    if (mp != null)
+                        url.searchParams.append("mp", mp);
+
+                    const printWindow = window.open(url.toString(), "PRINT", "height=400,width=600");
+                });
+            }
 
 
             const showExtraButton = auth.isLoggedIn;
@@ -333,7 +368,7 @@ export default class DatabaseList {
             } catch (e) {
                 console.error(e);
             }
-            if (this.options["print-form"].enabled) {
+            if (this.options["print-form"].enabled && printButton != null) {
                 extra.append(printButton);
             }
             if (showExtraButton && auth.isLoggedIn && auth.getUserProfile().admin) {
@@ -345,7 +380,6 @@ export default class DatabaseList {
         this.list.empty();
         table.append(tbody);
         this.list.append(table);
-        console.log(this.items);
         if (this.options["allow-inventorying"] && auth.isLoggedIn) {
             if (this.options.columns.filter(i => i.attributes.includes("quantity")).length === 0) {
                 this.list.append(await buildInventoryingForm(this.options["allow-additions"], this.options.columns, this.options["add-if-missing"], this.options["voice-search"]));
