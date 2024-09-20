@@ -219,33 +219,40 @@ async function buildInventoryingFormWithQuantity(allowAdditions, columns, addIfM
                     await addRecord([data]);
                 }
             } else {
-                const data = {};
-                for (const column of columns) {
-                    if (column.attributes.includes('primary') || column.attributes.includes('quantity') || column.attributes.includes('readonly')) continue;
-                    data[column.real_name] = additionSection.find(`input[name="${column.name}"]`).val();
-                }
-                data[primaryKey] = primaryInput.find("input").val();
-                data[quantityKey] = quantityValue;
+                if (allowAdditions) {
 
-                try {
-                    let history = await getHistory(window.localStorage.getItem("loadedDatabase"), selectedItem["id"]);
-                    if (history.length === 0) {
-                        let ogData = {...selectedItem};
-                        delete ogData["id"];
-                        delete ogData["date"];
-                        delete ogData["last_modified_date"];
-                        await addHistory(window.localStorage.getItem("loadedDatabase"), selectedItem["id"], ActionType.CREATE, ogData);
+                    const data = {};
+                    for (const column of columns) {
+                        if (column.attributes.includes('primary') || column.attributes.includes('quantity') || column.attributes.includes('readonly')) continue;
+                        if (additionSection.find(`input[name="${column.name}"]`).length !== 0)
+                            data[column.real_name] = additionSection.find(`input[name="${column.name}"]`).val();
                     }
-                    await updateRecord(selectedItem["id"], data);
-                } catch (e) {
-                    const response = e.responseJSON ?? e.responseText ?? e;
-                    console.error(e);
-                    console.log(response);
-                    alert(`Failed to add/update item, please contact IT/Support<br><p class="error">Error: ${response.error ?? "No error message was provided!"}</p>`, null, null);
-                }
+                    data[primaryKey] = primaryInput.find("input").val();
+                    data[quantityKey] = quantityValue;
 
+                    try {
+                        let history = await getHistory(window.localStorage.getItem("loadedDatabase"), selectedItem["id"]);
+                        if (history.length === 0) {
+                            let ogData = {...selectedItem};
+                            delete ogData["id"];
+                            delete ogData["date"];
+                            delete ogData["last_modified_date"];
+                            await addHistory(window.localStorage.getItem("loadedDatabase"), selectedItem["id"], ActionType.CREATE, ogData);
+                        }
+                        await updateRecord(selectedItem["id"], data);
+                    } catch (e) {
+                        const response = e.responseJSON ?? e.responseText ?? e;
+                        console.error(e);
+                        console.log(response);
+                        alert(`Failed to add/update item, please contact IT/Support<br><p class="error">Error: ${response.error ?? "No error message was provided!"}</p>`, null, null);
+                    }
+
+                } else {
+                    selectedItem[quantityKey] = quantityValue;
+                    await updateRecord(selectedItem["id"], selectedItem);
+                }
+                $(document).trigger("search", primaryInput.find("input").val());
             }
-            $(document).trigger("search", primaryInput.find("input").val());
 
             stopLoading();
         });
