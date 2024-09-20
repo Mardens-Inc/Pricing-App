@@ -563,7 +563,7 @@ async function save(id) {
             "remove-if-zero": $("toggle#remove-if-zero").attr("value") === "true" ?? false,
             "voice-search": $("toggle#voice-search").attr("value") === "true" ?? false,
             "print-form": {...currentOptions.options["print-form"], "enabled": $("toggle#print").attr("value") === "true" ?? false},
-            "mardens-price": currentOptions.options["mardens-price"] ?? [],
+            "mardens-price": $("toggle#dynamically-generate-mardens-price").attr("value") === "true" ? (currentOptions.options["mardens-price"] ?? []) : [],
             "columns": currentOptions.options.columns.filter(c => c !== undefined && c !== null)
         }
     };
