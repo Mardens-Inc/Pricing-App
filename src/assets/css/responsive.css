@@ -1,0 +1,12 @@
+@media (max-width: 918px)
+{
+    nav #actions-area{
+        display: none;
+    }
+    nav #hero img{
+        display: none;
+    }
+    nav #hero .title{
+        width: 100px;
+    }
+}
