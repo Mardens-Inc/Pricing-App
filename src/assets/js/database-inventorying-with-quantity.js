@@ -67,15 +67,42 @@ async function buildInventoryingFormWithQuantity(allowAdditions, columns, addIfM
 
         const submitButton = $(`<div class="button fill primary center horizontal vertical">Update</div>`);
         const addToggle = $(`<toggle id="add-item" value="false">Add?</toggle>`);
-        const additionSection = $(`<section id="addition-section" class="col fill" toggle-hidden="add-item"></section>`);
+        const additionSection = $(`<section id="addition-section" class="col fill"></section>`);
+        // const additionSection = $(`<section id="addition-section" class="col fill" toggle-hidden="add-item"></section>`);
         for (const column of columns) {
             if (column.attributes.includes('primary') || column.attributes.includes('quantity') || column.attributes.includes('readonly')) continue;
-            const input = $(`
+            console.log(column);
+            if (column.attributes.includes("department")) {
+                const departmentDropdown = $(`
+                                                <button class="${column.name}-dropdown-button fill horizontal" style="height: 50px;">
+                                                    <span class="fill horizontal" style="padding-right: 2rem">Department</span>
+                                                    <i class="fa fa-chevron-down"></i>
+                                                </button>
+                                                `)
+                    .on("click", e => {
+                        openDropdown(e.currentTarget, [{id: 0, name: "No Dept."}, {id: 1, name: "General"},
+                            {id: 2, name: "Clothing"}, {id: 3, name: "Furniture"}, {id: 4, name: "Grocery Taxable"},
+                            {id: 5, name: "Shoes"}, {id: 6, name: "Fabric"}, {id: 7, name: "Flooring/Carpet"},
+                            {id: 8, name: "Hardware"}, {id: 9, name: "Special Sales"},
+                            {id: 14, name: "Grocery Non-Taxable"}].reduce((acc, dept) => {
+                            acc[`${dept.id} - ${dept.name}`] = () => {
+                                departmentDropdown.html(dept.name);
+                                departmentDropdown.attr('data-dept', dept.id);
+                                departmentDropdown.attr('data-deptname', dept.name);
+                            };
+                            return acc;
+                        }, {}));
+                    });
+                departmentDropdown.find("span").html(departmentDropdown.attr('data-deptname') ?? "Department")
+                additionSection.append(departmentDropdown);
+            } else {
+                const input = $(`
                 <div class="floating-input">
                     <input type="text" id="${column.name}" name="${column.name}" placeholder="" autocomplete="off">
                     <label for="${column.name}">${column.name}</label>
                 </div>`);
-            additionSection.append(input);
+                additionSection.append(input);
+            }
         }
 
         inventoryingForm.append(primaryInput);
@@ -212,7 +239,11 @@ async function buildInventoryingFormWithQuantity(allowAdditions, columns, addIfM
                     const data = {};
                     for (const column of columns) {
                         if (column.attributes.includes('primary') || column.attributes.includes('quantity') || column.attributes.includes('readonly')) continue;
-                        data[column.real_name] = additionSection.find(`input[name="${column.name}"]`).val();
+                        if (column.attributes.includes("department")) {
+                            data[column.real_name] = additionSection.find(`.${column.name}-dropdown-button`).attr("data-dept")
+                        } else {
+                            data[column.real_name] = additionSection.find(`input[name="${column.name}"]`).val();
+                        }
                     }
                     data[primaryKey] = primaryInput.find("input").val();
                     data[quantityKey] = quantityValue;
@@ -224,8 +255,12 @@ async function buildInventoryingFormWithQuantity(allowAdditions, columns, addIfM
                     const data = {};
                     for (const column of columns) {
                         if (column.attributes.includes('primary') || column.attributes.includes('quantity') || column.attributes.includes('readonly')) continue;
-                        if (additionSection.find(`input[name="${column.name}"]`).length !== 0)
-                            data[column.real_name] = additionSection.find(`input[name="${column.name}"]`).val();
+                        if (column.attributes.includes("department")) {
+                            data[column.real_name] = additionSection.find(`.${column.name}-dropdown-button`).attr("data-dept")
+                        } else {
+                            if (additionSection.find(`input[name="${column.name}"]`).length !== 0)
+                                data[column.real_name] = additionSection.find(`input[name="${column.name}"]`).val();
+                        }
                     }
                     data[primaryKey] = primaryInput.find("input").val();
                     data[quantityKey] = quantityValue;
@@ -251,9 +286,9 @@ async function buildInventoryingFormWithQuantity(allowAdditions, columns, addIfM
                     selectedItem[quantityKey] = quantityValue;
                     await updateRecord(selectedItem["id"], selectedItem);
                 }
-                $(document).trigger("search", primaryInput.find("input").val());
             }
 
+            $(document).trigger("search", primaryInput.find("input").val());
             stopLoading();
         });
 
