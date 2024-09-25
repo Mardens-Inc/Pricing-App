@@ -194,6 +194,7 @@ export default class DatabaseList {
         this.options.columns = this.options.columns.filter(c => c !== null && c !== undefined);
         const table = this.buildColumns();
         table.css("--columnSize", `${(1 / (this.options.columns.filter(i => i.visible).length + 1)) * 100}%`);
+        console.log(this.options)
         const tbody = $("<tbody>");
         for (const item of this.items) {
             const tr = $(`<tr id='${item.id}' class='list-item'>`);
@@ -248,7 +249,7 @@ export default class DatabaseList {
                             text = text === "" ? "0" : text;
                             text = parseInt(text);
                         }
-                        if (attributes.includes("department")) {
+                        if (attributes.includes("department") && this.options["print-form"]?.enabled && this.options["print-form"]?.department?.id === -1) {
                             const departmentDropdown = $(`
                                                 <button id="department-dropdown-button-${item.id}" class="department-dropdown-button fill horizontal" style="height: 50px;">
                                                     <span class="fill horizontal" style="padding-right: 2rem">Department</span>
@@ -311,10 +312,17 @@ export default class DatabaseList {
                         if (printForm.color !== undefined && printForm.color !== null && printForm.color !== "") {
                             url.searchParams.append("color", printForm.color);
                         }
-                        if (dept !== null) {
+                        const deptartmentColumn = $(`#${item.id} td.department`);
+                        if (dept !== null || deptartmentColumn) {
+                            console.log(deptartmentColumn.val())
                             url.searchParams.append("department", dept);
                         }
 
+                        if (printForm["show-price-label"]) {
+                            url.searchParams.append("showPriceLabel", "")
+                        }
+
+                        url.searchParams.append("v", new Date().getTime())
 
                         const departmentDropdown = tr.find(`#department-dropdown-button-${item.id}`);
                         if (departmentDropdown && departmentDropdown.length > 0) {
@@ -354,11 +362,31 @@ export default class DatabaseList {
                         url.searchParams.append("department", dept);
                     }
 
+                    if (printForm["show-price-label"]) {
+                        url.searchParams.append("showPriceLabel", "")
+                    }
 
                     if (retail != null)
                         url.searchParams.append("price", retail);
                     if (mp != null)
                         url.searchParams.append("mp", mp);
+
+                    url.searchParams.append("v", new Date().getTime())
+
+
+                    const departmentDropdown = tr.find(`#department-dropdown-button-${item.id}`);
+                    const deptartmentColumn = $(`#${item.id} td.department`);
+                    if (dept !== null || (deptartmentColumn && departmentDropdown.length === 0)) {
+                        dept = deptartmentColumn.text();
+                        console.log(deptartmentColumn.text())
+                        url.searchParams.append("department", dept);
+                    }
+
+                    if (departmentDropdown && departmentDropdown.length > 0) {
+                        const departmentId = departmentDropdown.attr('data-dept');
+                        if (departmentId !== undefined && departmentId !== null)
+                            url.searchParams.append("department", departmentId);
+                    }
 
                     const printWindow = window.open(url.toString(), "PRINT", "height=400,width=600");
                 });
