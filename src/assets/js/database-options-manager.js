@@ -151,6 +151,7 @@ function setDefaultOptionValues(html) {
     html.find("toggle#add-if-missing").attr("value", currentOptions?.options["add-if-missing"] ?? "false");
     html.find("toggle#remove-if-zero").attr("value", currentOptions?.options["remove-if-zero"] ?? "false");
     html.find("toggle#voice-search").attr("value", currentOptions.options["voice-search"] ?? "false");
+    html.find("toggle#show-price-label").attr("value", currentOptions.options["print-form"]?.["show-price-label"] ?? "true");
 
 }
 
@@ -486,7 +487,8 @@ async function initCreation(html) {
                 "year": $("input#print-year").val() ?? "",
                 "price-column": $("input#print-price-column").val() ?? "",
                 "retail-price-column": $("input#print-retail-price-column").val() ?? "",
-                "show-retail": $("toggle#print-show-retail").attr("value") ?? false
+                "show-retail": $("toggle#print-show-retail").attr("value") ?? false,
+                "show-price-label": $("toggle#show-price-label").attr("value") ?? true
             },
             "mardens-price": $("input#mardens-price").val() ?? "",
             "columns": currentOptions.options.columns
@@ -531,12 +533,14 @@ async function initCreation(html) {
 
 
                 window.localStorage.setItem("loadedDatabase", response["id"]);
-                try {
-                    await batchAddRecords(csvJSON);
-                    window.location.reload();
-                } catch (e) {
-                    console.error(e);
-                    alert(`An error occurred while uploading the CSV file.<br>Please try again or contact support.<br>${e}`);
+                if (csvJSON && csvJSON.length > 0) {
+                    try {
+                        await batchAddRecords(csvJSON);
+                        window.location.reload();
+                    } catch (e) {
+                        console.error(e);
+                        alert(`An error occurred while uploading the CSV file.<br>Please try again or contact support.<br>${e}`);
+                    }
                 }
             } else {
                 console.error(response);
@@ -801,7 +805,7 @@ async function buildPrintSection(html) {
 
     console.log(printOptions)
 
-    const departments = [{id: 0, name: "No Dept."}, {id: 1, name: "General"},
+    const departments = [{id: -1, name: "Use Department Column"}, {id: 0, name: "No Dept."}, {id: 1, name: "General"},
         {id: 2, name: "Clothing"}, {id: 3, name: "Furniture"}, {id: 4, name: "Grocery Taxable"},
         {id: 5, name: "Shoes"}, {id: 6, name: "Fabric"}, {id: 7, name: "Flooring/Carpet"},
         {id: 8, name: "Hardware"}, {id: 9, name: "Special Sales"},
@@ -874,6 +878,13 @@ async function buildPrintSection(html) {
         .on("input", e => {
             printOptions.year = parseInt($(e.currentTarget).val());
         })
+
+    printOptions["show-price-label"] = html.find("toggle#show-price-label").attr('value') == "true";
+
+    const showPriceLabel = html.find("toggle#show-price-label").on("toggle", (e,v)=>{
+        printOptions["show-price-label"] = v.value;
+    })
+
 }
 
 export {buildOptionsForm};
