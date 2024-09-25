@@ -133,7 +133,6 @@ $(directory).on("unloadExternalView", (event, id) =>
 
 $(document).on("search", async (event, data) =>
 {
-    // $("#search").val(data);
     if (database !== null)
     {
         await database.search(data);
