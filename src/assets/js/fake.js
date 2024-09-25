@@ -38,6 +38,7 @@
  * @property {string} route
  * @property {boolean} show-retail
  * @property {boolean} show-mp
+ * @property {boolean} show-price-label
  */
 
 
