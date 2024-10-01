@@ -5,10 +5,12 @@ import $ from "jquery";
 import {NextUIProvider} from "@nextui-org/react";
 
 import "./assets/scss/index.scss";
-import Home from "./assets/pages/Home.tsx";
-import About from "./assets/pages/About.tsx";
 import Navigation from "./assets/components/Navigation.tsx";
 import {applyTheme} from "./assets/ts/Theme.ts";
+import DatabaseList from "./assets/pages/DatabaseList.tsx";
+
+export const isProduction = window.location.hostname === "pricing-new.mardens.com";
+export const baseUrl = isProduction ? "" : "http://pricing.local";
 
 
 ReactDOM.createRoot($("#root")[0]!).render(
@@ -27,10 +29,7 @@ export function MainContentRenderer()
         <NextUIProvider navigate={navigate}>
             <Navigation/>
             <Routes>
-                <Route>
-                    <Route path="/" element={<Home/>}/>
-                    <Route path="/about" element={<About/>}/>
-                </Route>
+                <Route path="/" element={<DatabaseList/>}/>
             </Routes>
         </NextUIProvider>
     );
