@@ -1,7 +1,7 @@
 import {useNavigate, useParams} from "react-router-dom";
 import {Button, Input} from "@nextui-org/react";
 import IconList from "../components/Options/IconList.tsx";
-import FileUploadInput from "../components/FileUploadInput.tsx";
+import FileUploadInput from "../components/Options/FileUploadInput.tsx";
 import {useAuth} from "../components/AuthProvider.tsx";
 import {isProduction} from "../../main.tsx";
 import ColumnsList from "../components/Options/ColumnsList.tsx";
