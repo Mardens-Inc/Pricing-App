@@ -7,16 +7,19 @@ import {NextUIProvider} from "@nextui-org/react";
 import "./assets/scss/index.scss";
 import Navigation from "./assets/components/Navigation.tsx";
 import {applyTheme} from "./assets/ts/Theme.ts";
-import DatabaseList from "./assets/pages/DatabaseList.tsx";
+import DatabaseListPage from "./assets/pages/DatabaseListPage.tsx";
+import {AuthProvider} from "./assets/components/AuthProvider.tsx";
+import DatabaseOptionsPage from "./assets/pages/DatabaseOptionsPage.tsx";
 
 export const isProduction = window.location.hostname === "pricing-new.mardens.com";
 export const baseUrl = isProduction ? "" : "http://pricing.local";
 
-
 ReactDOM.createRoot($("#root")[0]!).render(
     <React.StrictMode>
         <BrowserRouter>
-            <MainContentRenderer/>
+            <AuthProvider>
+                <MainContentRenderer/>
+            </AuthProvider>
         </BrowserRouter>
     </React.StrictMode>
 );
@@ -29,7 +32,8 @@ export function MainContentRenderer()
         <NextUIProvider navigate={navigate}>
             <Navigation/>
             <Routes>
-                <Route path="/" element={<DatabaseList/>}/>
+                <Route path="/" element={<DatabaseListPage/>}/>
+                <Route path="/new" element={<DatabaseOptionsPage/>}/>
             </Routes>
         </NextUIProvider>
     );
