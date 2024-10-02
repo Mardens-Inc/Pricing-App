@@ -6,7 +6,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEdit, faEllipsisH} from "@fortawesome/free-solid-svg-icons";
 import Logo from "../images/Logo.svg.tsx";
 
-export default function DatabaseList()
+export default function DatabaseListPage()
 {
     const [items, setItems] = useState<DatabaseItem[]>([]);
     const [page, setPage] = useState(1);
@@ -84,7 +84,20 @@ export default function DatabaseList()
                             <TableCell>{item.name}</TableCell>
                             <TableCell>{item.location || "Unknown"}</TableCell>
                             <TableCell>{item.po || "No PO Found"}</TableCell>
-                            <TableCell>{item.post_date}</TableCell>
+                            <TableCell>
+                                {
+                                    new Intl.DateTimeFormat(
+                                        "en-us",
+                                        {
+                                            month: "short",
+                                            day: "2-digit", weekday: "short",
+                                            year: "numeric", hourCycle: "h12",
+                                            hour: "2-digit",
+                                            minute: "2-digit"
+                                        }
+                                    ).format(new Date(item.post_date))
+                                }
+                            </TableCell>
                             <TableCell>
                                 <div className={"gap-2 flex flex-row"}>
                                     <Tooltip content={`Edit '${item.name}'`} closeDelay={0}>
