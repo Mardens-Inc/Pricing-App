@@ -25,11 +25,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({children}) =>
                     setIsLoggedIn(response);
                 } else
                 {
-                    console.log(response);
-                    if (response)
-                    {
-                        setIsLoggedIn(true);
-                    }
+                    if (response) setIsLoggedIn(true);
                 }
             });
     }, [auth]);
