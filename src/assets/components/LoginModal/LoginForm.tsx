@@ -2,7 +2,7 @@ import {Button, Checkbox, Input, Link, ModalBody, ModalFooter, Tooltip} from "@n
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEnvelope, faEye, faEyeSlash} from "@fortawesome/free-solid-svg-icons";
 import React, {useState} from "react";
-import {useAuth} from "../AuthProvider.tsx";
+import {useAuth} from "../../providers/AuthProvider.tsx";
 
 
 export default function LoginForm({onClose}: { onClose: () => void })
