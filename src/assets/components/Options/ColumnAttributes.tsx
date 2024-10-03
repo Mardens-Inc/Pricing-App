@@ -92,7 +92,7 @@ export default function ColumnAttributes(props: ColumnAttributesProps)
     return (
         <div className="attributes flex flex-row gap-1">
             {attributes.map((attribute) => (
-                <Tooltip content={attribute.description} closeDelay={0}>
+                <Tooltip content={attribute.description} closeDelay={0} classNames={{base: "pointer-events-none"}}>
                     <Button
                         key={attribute.key}
                         className={"w-12 h-12 min-w-0 opacity-50 hover:opacity-100 transition-all data-[selected=true]:opacity-100 data-[selected=true]:!bg-primary/30"}
