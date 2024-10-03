@@ -7,10 +7,12 @@ import {applyTheme, getCurrentTheme, Theme} from "../ts/Theme.ts";
 import {useEffect, useState} from "react";
 import LoginModal from "./LoginModal/LoginModal.tsx";
 import AlertModal from "./AlertModal.tsx";
-import {useAuth} from "./AuthProvider.tsx";
+import {useAuth} from "../providers/AuthProvider.tsx";
+import {useSearch} from "../providers/SearchProvider.tsx";
 
 export default function Navigation()
 {
+    const {search, setSearch} = useSearch();
     const {auth, isLoggedIn, setIsLoggedIn} = useAuth();
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [isLogoutAlertOpen, setIsLogoutAlertOpen] = useState(false);
@@ -65,6 +67,8 @@ export default function Navigation()
                         classNames={{
                             inputWrapper: "h-12"
                         }}
+                        value={search}
+                        onValueChange={setSearch}
                     />
                     <Tooltip content={"Voice Search"}>
                         <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"}>
