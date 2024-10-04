@@ -66,15 +66,70 @@ export interface DatabaseData
     options: DatabaseOptions;
     post_date: string;
     columns: string[];
-    results: DatabaseResults|null;
+    results: DatabaseResults | null;
 }
 
 
 export default class DatabaseRecords
 {
+
+    /**
+     * Performs a search query against a database.
+     *
+     * @param {string} id - The identifier for the database location.
+     * @param {string} query - The search query string.
+     * @param {string[]} columns - Array of column names to include in the result.
+     * @param {number} limit - The maximum number of results to return.
+     * @param {number} offset - The offset from the start of the results.
+     * @param {boolean} ascending - Whether to sort the results in ascending order.
+     * @param {string} sort - The column name to sort the results by.
+     * @param {AbortSignal} signal - Signal object that allows the request to be aborted.
+     * @return {Promise<DatabaseResults>} A promise that resolves to the search results.
+     */
+    static async search(id: string, query: string, columns: string[], limit: number, offset: number, ascending: boolean, sort: string, signal: AbortSignal): Promise<DatabaseResults>
+    {
+        const body = JSON.stringify({query, columns, limit, offset, asc: ascending, sort});
+
+        try
+        {
+            const response = await fetch(`${baseUrl}/api/location/${id}/search`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: body,
+                signal: signal
+            });
+
+            if (!response.ok)
+            {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return response.json();
+        } catch (error: any)
+        {
+            if (error.name === "AbortError")
+            {
+                console.log("Fetch aborted");
+            } else
+            {
+                console.error("Fetch error:", error);
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * Fetches data for a specific location with optional headings.
+     *
+     * @param {string} id - The unique identifier for the location.
+     * @param {boolean} headings - If true, include headings in the data.
+     * @return {Promise<DatabaseData>} A promise that resolves to the location data.
+     */
     static async data(id: string, headings: boolean): Promise<DatabaseData>
     {
-        return $.get(`${baseUrl}/api/location/${id}/${headings ? "headings=true" : ""}`);
+        return $.get(`${baseUrl}/api/location/${id}/${headings ? "?headings=true" : ""}`);
     }
 
 }
