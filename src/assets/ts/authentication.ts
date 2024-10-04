@@ -12,6 +12,12 @@ export interface LoginResponse
     token: string | null;
 }
 
+export interface RegistrationResponse{
+    success: boolean;
+    message: string;
+    user: string;
+}
+
 /**
  * Represents a class for authentication.
  * @class
@@ -142,7 +148,7 @@ export default class Authentication
      * @returns {Promise<Object|undefined>} - A promise that resolves to the registration response data
      * if successful, or rejects with an error if registration fails.
      */
-    public async register(username: string, password: string): Promise<Object | undefined>
+    public async register(username: string, password: string): Promise<RegistrationResponse | undefined>
     {
         const formData = new FormData();
         formData.append("username", username);
