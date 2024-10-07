@@ -86,7 +86,7 @@ export default class DatabaseRecords
      * @param {AbortSignal} signal - Signal object that allows the request to be aborted.
      * @return {Promise<DatabaseResults>} A promise that resolves to the search results.
      */
-    static async search(id: string, query: string, columns: string[], limit: number, offset: number, ascending: boolean, sort: string, signal: AbortSignal): Promise<DatabaseResults>
+    static async search(id: string, query: string, columns: string[], limit: number, offset: number, ascending: boolean, sort: string, signal: AbortSignal): Promise<DatabaseResults | null>
     {
         const body = JSON.stringify({query, columns, limit, offset, asc: ascending, sort});
 
@@ -115,9 +115,10 @@ export default class DatabaseRecords
             } else
             {
                 console.error("Fetch error:", error);
+                throw error;
             }
-            throw error;
         }
+        return null;
     }
 
     /**
