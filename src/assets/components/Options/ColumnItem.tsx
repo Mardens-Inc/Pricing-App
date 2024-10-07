@@ -3,7 +3,7 @@ import React, {useEffect, useRef, useState} from "react";
 import {Button, cn, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Tooltip} from "@nextui-org/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEllipsisV} from "@fortawesome/free-solid-svg-icons";
-import ColumnAttributes, {ColumnAttribute} from "./ColumnAttributes.tsx";
+import ColumnAttributes from "./ColumnAttributes.tsx";
 import $ from "jquery";
 
 interface ColumnItemProps extends React.HTMLAttributes<HTMLDivElement>
@@ -11,13 +11,14 @@ interface ColumnItemProps extends React.HTMLAttributes<HTMLDivElement>
     id: string;
     text: string;
     onNameChange?: (name: string) => void;
+    selectedAttributes?: string[];
 }
 
 
 export default function ColumnItem(props: ColumnItemProps)
 {
     const {attributes, listeners, setNodeRef, transform, transition} = useSortable({id: props.id});
-    const [selectedAttributes, setSelectedAttributes] = useState<ColumnAttribute[]>([]);
+    const [selectedAttributes, setSelectedAttributes] = useState<string[]>(props.selectedAttributes ?? []);
 
     const [isEditingDisplayName, setIsEditingDisplayName] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -44,6 +45,14 @@ export default function ColumnItem(props: ColumnItemProps)
             }, 200);
         }
     }, [isEditingDisplayName]);
+
+    useEffect(() =>
+    {
+        setSelectedAttributes(props.selectedAttributes ?? []);
+        console.log("Super duper fun time: ", props.selectedAttributes);
+    }, [props.selectedAttributes]);
+        console.log("Super duper fun time 2.0: ", props.selectedAttributes);
+
     return (
         <div ref={setNodeRef} style={style} {...attributes} {...listeners}
              className={cn("rounded-md h-16 bg-foreground/10 backdrop-blur-lg p-4 flex flex-row items-center aria-[pressed]:z-10", props.className)}
@@ -57,8 +66,8 @@ export default function ColumnItem(props: ColumnItemProps)
                 />
             ) : (<p className={"mr-auto"} onDoubleClick={() => setIsEditingDisplayName(true)}>{props.text}</p>)}
             <ColumnAttributes
-                value={selectedAttributes}
-                onChange={setSelectedAttributes}
+                selected={selectedAttributes}
+                onSelectionChange={setSelectedAttributes}
             />
             <div className={"flex flex-row gap-2"}>
                 <Dropdown>
