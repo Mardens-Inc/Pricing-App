@@ -3,7 +3,7 @@ import {baseUrl} from "../../../main.tsx";
 import $ from "jquery";
 import {cn, Image, Skeleton} from "@nextui-org/react";
 
-interface Icon
+export interface Icon
 {
     name: string;
     url: string;
@@ -14,6 +14,7 @@ interface IconListProps
 {
     onSelect?: (icon: Icon | null) => void;
     value?: Icon;
+    url?: string;
 }
 
 export default function IconList(props: IconListProps)
@@ -25,9 +26,26 @@ export default function IconList(props: IconListProps)
     {
         setIsLoading(true);
         const url = `${baseUrl}/api/locations/images`;
-        $.get(url).then((data) =>
+        $.get(url).then((data: Icon[]) =>
         {
-            setIcons(data as Icon[]);
+            setIcons(data);
+            if (props.url)
+            {
+                const url = new URL(props.url);
+                url.search = "";
+                const icon = data.find((icon) =>
+                {
+                    const iconUrl = new URL(icon.url);
+                    iconUrl.search = "";
+                    return iconUrl.toString() === url.toString();
+                });
+                console.log("Default Selected Icon: ", icon);
+                if (icon)
+                {
+                    setSelected(icon);
+                    if (props.onSelect) props.onSelect(icon);
+                }
+            }
             setIsLoading(false);
         });
     }, []);
