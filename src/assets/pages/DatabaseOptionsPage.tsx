@@ -8,12 +8,20 @@ import ColumnsList from "../components/Options/ColumnsList.tsx";
 import AllowInventorying from "../components/Options/AllowInventorying.tsx";
 import CanPrintLabel from "../components/Options/CanPrintLabel.tsx";
 import ExtendedSwitch from "../components/Extends/ExtendedSwitch.tsx";
+import {useEffect, useState} from "react";
+import DatabaseRecords, {Column, DatabaseData} from "../ts/DatabaseRecords.ts";
 
 export default function DatabaseOptionsPage()
 {
     const navigate = useNavigate();
     const {isLoggedIn, auth} = useAuth();
     const id = useParams().id;
+    const [options, setOptions] = useState<DatabaseData | null>(null);
+    const [name, setName] = useState<string>("");
+    const [location, setLocation] = useState<string>("");
+    const [po, setPO] = useState<string>("");
+    const [image, setImage] = useState<string>("");
+    const [columns, setColumns] = useState<Column[]>([]);
 
     if (isProduction)
     {
@@ -25,7 +33,23 @@ export default function DatabaseOptionsPage()
     }
 
     const isNew: boolean = !id; // If the id is not null, then it is not a new database.
-    console.log("isNew", isNew, id);
+
+    if (!isNew)
+    {
+        useEffect(() =>
+        {
+            DatabaseRecords.data(id!, true).then(data =>
+            {
+                setOptions(data);
+                setName(data.name);
+                setLocation(data.location);
+                setPO(data.po);
+                setImage(data.image);
+                setColumns(data.options.columns);
+                console.log("Loading database options: ", data);
+            });
+        }, []);
+    }
 
 
     return (
@@ -33,13 +57,15 @@ export default function DatabaseOptionsPage()
             <div className={"flex flex-col pb-[128px] mx-8 gap-4"}>
                 <h1 className={"text-3xl m-4 font-bold"}>{isNew ? "New Database" : "Edit Database"}</h1>
                 <FileUploadInput/>
-                <IconList/>
+                <IconList url={image}/>
                 <div className={"flex flex-col gap-4"}>
                     <Input
                         label={"Database Name"}
                         placeholder={"Enter the name of the database"}
                         radius={"full"}
                         autoComplete={"off"}
+                        value={name}
+                        onValueChange={setName}
                     />
                     <div className={"flex flex-row gap-4"}>
                         <Input
@@ -47,17 +73,21 @@ export default function DatabaseOptionsPage()
                             placeholder={"Enter the location of the database"}
                             radius={"full"}
                             autoComplete={"off"}
+                            value={location}
+                            onValueChange={setLocation}
                         />
                         <Input
                             label={"Database PO#"}
                             placeholder={"Enter the PO# of the database"}
                             radius={"full"}
                             autoComplete={"off"}
+                            value={po}
+                            onValueChange={setPO}
                         />
                     </div>
                 </div>
 
-                <ColumnsList/>
+                <ColumnsList columns={columns}/>
                 <h3 className={"text-2xl"}>Extra Options</h3>
                 <AllowInventorying/>
                 <CanPrintLabel/>
