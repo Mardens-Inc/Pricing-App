@@ -7,6 +7,7 @@ import {faEdit, faEllipsisH} from "@fortawesome/free-solid-svg-icons";
 import Logo from "../images/Logo.svg.tsx";
 import {useNavigate} from "react-router-dom";
 import {useSearch} from "../providers/SearchProvider.tsx";
+import {useAuth} from "../providers/AuthProvider.tsx";
 
 export default function DatabaseListPage()
 {
@@ -17,14 +18,14 @@ export default function DatabaseListPage()
     const itemsPerPage = 20;
     const navigate = useNavigate();
     const {search} = useSearch();
+    const {auth, isLoggedIn} = useAuth();
     useEffect(() =>
     {
         setLoading(true);
         dbList.get().then((databases) =>
         {
-            console.log("Databases:", databases);
             setItems(databases);
-            setCurrentItems(databases.splice(0, itemsPerPage));
+            setCurrentItems(databases.slice(0, itemsPerPage));
             setPage(1);
             setLoading(false);
         }).catch((error) =>
@@ -33,7 +34,9 @@ export default function DatabaseListPage()
             setLoading(false);
             alert("Failed to load database list.");
         });
+
     }, []);
+
 
     useEffect(() =>
     {
@@ -46,7 +49,7 @@ export default function DatabaseListPage()
         if (!search)
         {
             console.log("No search");
-            return setCurrentItems(items.splice(0, itemsPerPage));
+            return setCurrentItems(items.slice(0, itemsPerPage));
         }
         console.log("Search", search, items.filter((item) => `${item.name} ${item.po} ${item.location}`.toLowerCase().includes(search.toLowerCase())));
         return setCurrentItems(items.filter((item) => `${item.name} ${item.po} ${item.location}`.toLowerCase().includes(search.toLowerCase())).splice(0, itemsPerPage));
@@ -56,9 +59,12 @@ export default function DatabaseListPage()
         <Table
             removeWrapper
             hideHeader
+            isStriped
             className={"w-auto mx-8 mt-4"}
             classNames={{
-                tr: "dark:hover:bg-white/5 hover:bg-black/5 cursor-pointer transition-colors"
+                tr: "hover:bg-foreground/5 cursor-pointer transition-colors",
+                td: "dark:group-data-[odd=true]:before:bg-default-100/10",
+                th: "dark:bg-background/50 backdrop-blur-md saturation-150 dark:brightness-150 mx-2"
             }}
             onSortChange={(descriptor) =>
             {
@@ -123,25 +129,27 @@ export default function DatabaseListPage()
                             </TableCell>
                             <TableCell className={"w-0"}>
                                 <div className={"gap-2 flex flex-row"}>
-                                    <Tooltip content={`Edit '${item.name}'`} closeDelay={0} classNames={{base: "pointer-events-none"}}>
-                                        <Button radius={"full"} className={"min-w-0 p-0 w-10 h-10"} as={Link} href={`/${item.id}/edit`}><FontAwesomeIcon icon={faEdit} width={10}/></Button>
-                                    </Tooltip>
-                                    <Dropdown>
-                                        <DropdownTrigger>
-                                            <div>
-                                                <Tooltip content={`More Options`} closeDelay={0} classNames={{base: "pointer-events-none"}}>
-                                                    <Button radius={"full"} className={"min-w-0 p-0 w-10 h-10"} onPressStart={(e) => e.continuePropagation()}>
-                                                        <FontAwesomeIcon icon={faEllipsisH} width={10}/>
-                                                    </Button>
-                                                </Tooltip>
-                                            </div>
-                                        </DropdownTrigger>
-                                        <DropdownMenu>
-                                            <DropdownItem>View History</DropdownItem>
-                                            <DropdownItem as={Link} href={`/${item.id}/edit`} className={"text-inherit"}>Edit</DropdownItem>
-                                            <DropdownItem>Delete</DropdownItem>
-                                        </DropdownMenu>
-                                    </Dropdown>
+                                    {isLoggedIn && auth.getUserProfile().admin ? (<>
+                                        <Tooltip content={`Edit '${item.name}'`} closeDelay={0} classNames={{base: "pointer-events-none"}}>
+                                            <Button radius={"full"} className={"min-w-0 p-0 w-10 h-10"} as={Link} href={`/${item.id}/edit`}><FontAwesomeIcon icon={faEdit} width={10}/></Button>
+                                        </Tooltip>
+                                        <Dropdown>
+                                            <DropdownTrigger>
+                                                <div>
+                                                    <Tooltip content={`More Options`} closeDelay={0} classNames={{base: "pointer-events-none"}}>
+                                                        <Button radius={"full"} className={"min-w-0 p-0 w-10 h-10"} onPressStart={(e) => e.continuePropagation()}>
+                                                            <FontAwesomeIcon icon={faEllipsisH} width={10}/>
+                                                        </Button>
+                                                    </Tooltip>
+                                                </div>
+                                            </DropdownTrigger>
+                                            <DropdownMenu>
+                                                <DropdownItem>View History</DropdownItem>
+                                                <DropdownItem as={Link} href={`/${item.id}/edit`} className={"text-inherit"}>Edit</DropdownItem>
+                                                <DropdownItem>Delete</DropdownItem>
+                                            </DropdownMenu>
+                                        </Dropdown>
+                                    </>) : (<></>)}
                                 </div>
                             </TableCell>
                         </TableRow>
