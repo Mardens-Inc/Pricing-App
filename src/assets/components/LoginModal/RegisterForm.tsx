@@ -1,7 +1,8 @@
 import {Button, Input, ModalBody, ModalFooter} from "@nextui-org/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEnvelope, faEye, faEyeSlash} from "@fortawesome/free-solid-svg-icons";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
+import {useAuth} from "../../providers/AuthProvider.tsx";
 
 export default function RegisterForm({onClose}: { onClose: () => void })
 {
@@ -19,18 +20,73 @@ export default function RegisterForm({onClose}: { onClose: () => void })
     const [passwordsMatch, setPasswordsMatch] = useState(password === confirmPassword);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const {auth, setIsLoggedIn} = useAuth();
 
     useEffect(() =>
     {
-        setHasLowercase(/[a-z]/.test(password));
-        setHasUppercase(/[A-Z]/.test(password));
-        setHasNumber(/[0-9]/.test(password));
-        setHasSpecial(/[!@#$%^&*]/.test(password));
-        setIsCommon(commonPasswords.some(commonPassword => password.includes(commonPassword)));
-        setIsLongEnough(password.length >= 8);
-        setPasswordsMatch(password === confirmPassword);
-        setIsValid(hasLowercase && hasUppercase && hasNumber && hasSpecial && !isCommon && isLongEnough && passwordsMatch);
-    }, [password, confirmPassword]);
+        const isLowercase = /[a-z]/.test(password);
+        const isUppercase = /[A-Z]/.test(password);
+        const isNumber = /[0-9]/.test(password);
+        const isSpecial = /[!@#$%^&*]/.test(password);
+        const isPasswordCommon = commonPasswords.some(commonPassword => password.includes(commonPassword));
+        const isPasswordLongEnough = password.length >= 8;
+        const matches = password === confirmPassword;
+
+        setHasLowercase(isLowercase);
+        setHasUppercase(isUppercase);
+        setHasNumber(isNumber);
+        setHasSpecial(isSpecial);
+        setIsCommon(isPasswordCommon);
+        setIsLongEnough(isPasswordLongEnough);
+        setPasswordsMatch(matches);
+        setIsValid(username !== "" && isLowercase && isUppercase && isNumber && isSpecial && !isPasswordCommon && isPasswordLongEnough && matches);
+    }, [username, password, confirmPassword]);
+
+    const register = async () =>
+    {
+        try
+        {
+            const response = await auth.register(username, password);
+            if (!response)
+            {
+                setError("An error occurred while registering.");
+                return;
+            }
+
+            if (response.success)
+            {
+                const loginResponse = await auth.loginWithToken(response.user);
+                if (loginResponse)
+                {
+                    setIsLoggedIn(true);
+                    onClose();
+                } else
+                {
+                    setError("An error occurred while logging in.");
+                }
+
+                onClose();
+            } else
+            {
+                setError(response.message);
+            }
+
+
+        } catch (e: any | Error)
+        {
+            setError(e.message);
+        }
+    };
+
+    const handleKeyUp = async (e: React.KeyboardEvent<HTMLInputElement>) =>
+    {
+        if (isValid && e.key === "Enter")
+        {
+            await register();
+        }
+
+    };
 
 
     return (
@@ -47,6 +103,7 @@ export default function RegisterForm({onClose}: { onClose: () => void })
                     isRequired
                     value={username}
                     onValueChange={setUsername}
+                    onKeyUp={handleKeyUp}
                 />
                 <Input
                     endContent={
@@ -59,6 +116,7 @@ export default function RegisterForm({onClose}: { onClose: () => void })
                     isRequired
                     value={password}
                     onValueChange={setPassword}
+                    onKeyUp={handleKeyUp}
                 />
                 <Input
                     endContent={
@@ -71,6 +129,7 @@ export default function RegisterForm({onClose}: { onClose: () => void })
                     isRequired
                     value={confirmPassword}
                     onValueChange={setConfirmPassword}
+                    onKeyUp={handleKeyUp}
                 />
 
                 <div id="password-validation">
@@ -83,13 +142,15 @@ export default function RegisterForm({onClose}: { onClose: () => void })
                     <p className={isLongEnough ? "valid text-success" : "invalid text-danger"} id="length">Minimum <b>8 characters</b></p>
                     <p className={passwordsMatch ? "valid text-success" : "invalid text-danger"} id="match">Passwords <b>match</b></p>
                 </div>
+                <p className={"italic text-danger"}>{error}</p>
 
             </ModalBody>
             <ModalFooter>
-                <Button color="danger" variant="flat" onPress={onClose}>
+                <Button color="danger" variant="flat" onPress={onClose} radius={"full"}>
                     Close
                 </Button>
-                <Button color="primary" onPress={onClose} isDisabled={!isValid}>
+
+                <Button color="primary" onPress={register} isDisabled={!isValid} radius={"full"}>
                     Register
                 </Button>
             </ModalFooter>
