@@ -22,20 +22,49 @@ export default function DatabaseViewPage()
     const [columns, setColumns] = useState<Column[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [data, setData] = useState<DatabaseData | null>(null);
+    const [searchColumns, setSearchColumns] = useState<string[]>([]);
+    const [primaryKey, setPrimaryKey] = useState<string>("");
+
+    let abortController = new AbortController();
+    let signal = abortController.signal;
 
     useEffect(() =>
     {
-        DatabaseRecords.data(id, false)
-            .then(items =>
-            {
-                setData(items);
-                if (items.columns)
-                    setColumns(items.options.columns);
-                if (items.results?.items)
-                    setItems(items.results?.items);
-            })
-            .finally(() => setIsLoading(false));
-    }, []);
+        if (!search)
+        {
+            // Perform the main data fetch without search
+            DatabaseRecords.data(id, false)
+                .then(items =>
+                {
+                    setData(items);
+                    console.log(items);
+                    setSearchColumns(items.options.columns.filter(i => i.attributes.includes("search")).flatMap(i => i.real_name));
+                    setPrimaryKey(items.options.columns.find(i => i.attributes.includes("primary"))?.real_name ?? "id");
+
+                    if (items.columns) setColumns(items.options.columns);
+                    if (items.results?.items) setItems(items.results?.items);
+                })
+                .finally(() => setIsLoading(false));
+        } else
+        {
+            setIsLoading(true);
+            DatabaseRecords.search(id, search, searchColumns, 100, 0, true, primaryKey, signal)
+                .then((results) =>
+                {
+                    if (results?.items)
+                        setItems(results.items);
+                    else
+                        setItems([]);
+                })
+                .finally(() => setIsLoading(false));
+        }
+
+        return () =>
+        {
+            // Abort the fetch on component unmount or dependency change
+            abortController.abort();
+        };
+    }, [search]);
 
 
     return isLoading ? (<div className={"w-full h-[calc(100dvh_/_2)] min-h-40 flex justify-center items-center"}><Spinner label={"Loading database"} size={"lg"}/></div>)
@@ -65,12 +94,8 @@ export default function DatabaseViewPage()
                     {
                         console.log(descriptor);
                     }}
+
                 >
-
-                    {/*
-                     group-data-[odd=true]:before:bg-default-100 group-data-[odd=true]:before:opacity-100 group-data-[odd=true]:before:-z-10 first:before:rounded-s-lg last:before:rounded-e-lg text-start group-data-[odd=true]:data-[selected=true]:before:bg-default/60 data-[price]:!text-danger data-[mp]:!text-success data-[price]:!font-bold data-[mp]:!font-bold
-
-                     */}
 
                     <TableHeader>
                         {[...columns.filter(c => c.visible).map((column) =>
@@ -79,7 +104,7 @@ export default function DatabaseViewPage()
 
                     </TableHeader>
 
-                    <TableBody>
+                    <TableBody emptyContent={<p>No Results Found!</p>}>
                         {items.map((row) =>
                             <TableRow key={row.id}>
 
