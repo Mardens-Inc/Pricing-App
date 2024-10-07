@@ -130,10 +130,10 @@ export default function LoginForm({onClose}: { onClose: () => void })
                 <p className={"text-danger"}>{error}</p>
             </ModalBody>
             <ModalFooter>
-                <Button color="danger" variant="flat" onClick={onClose}>
+                <Button color="danger" variant="flat" onClick={onClose} radius={"full"}>
                     Close
                 </Button>
-                <Button color="primary" isLoading={loading} isDisabled={!username || !password} onClick={login}>
+                <Button color="primary" isLoading={loading} isDisabled={!username || !password} onClick={login} radius={"full"}>
                     Log in
                 </Button>
             </ModalFooter>
