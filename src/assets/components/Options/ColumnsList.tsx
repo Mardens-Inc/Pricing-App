@@ -5,20 +5,22 @@ import ColumnItem from "./ColumnItem.tsx";
 import {useEffect, useState} from "react";
 import {closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors} from "@dnd-kit/core";
 import {arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy} from "@dnd-kit/sortable";
+import {Column} from "../../ts/DatabaseRecords.ts";
 
-interface Item
+interface Item extends Column
 {
     id: number;
-    text: string;
 }
 
-export default function ColumnsList()
+interface ColumnListProps
 {
-    const [items, setItems] = useState<Item[]>([
-        {id: 1, text: "Item 1"},
-        {id: 2, text: "Item 2"},
-        {id: 3, text: "Item 3"}
-    ]);
+    columns: Column[];
+}
+
+export default function ColumnsList(props: ColumnListProps)
+{
+    const [items, setItems] = useState<Item[]>(props.columns.map((column, index) => ({...column, id: index})));
+    console.log("Items: ", props.columns);
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -45,8 +47,8 @@ export default function ColumnsList()
 
     useEffect(() =>
     {
-        console.log("Items changed", items);
-    }, [items]);
+        setItems(props.columns.map((column, index) => ({...column, id: index})));
+    }, [props.columns]);
 
     return (
         <div className={"flex flex-col"}>
@@ -69,7 +71,7 @@ export default function ColumnsList()
                         strategy={verticalListSortingStrategy}
                     >
                         {items.map(item => (
-                            <ColumnItem key={item.id} id={item.id.toString()} text={item.text}/>
+                            <ColumnItem key={item.id} id={item.id.toString()} text={item.name}/>
                         ))}
                     </SortableContext>
                 </DndContext>
