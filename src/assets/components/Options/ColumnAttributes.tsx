@@ -14,8 +14,8 @@ export interface ColumnAttribute
 
 interface ColumnAttributesProps
 {
-    value?: ColumnAttribute[];
-    onChange?: (attribute: ColumnAttribute[]) => void;
+    selected?: string[];
+    onSelectionChange?: (attribute: string[]) => void;
 }
 
 export default function ColumnAttributes(props: ColumnAttributesProps)
@@ -27,19 +27,19 @@ export default function ColumnAttributes(props: ColumnAttributesProps)
                 <p>Mark this item as the primary key, which will be used to uniquely identify each item.<br/><b>There can only be one primary key.</b></p>
             ),
             icon: faKey,
-            selected: props.value?.some(attr => attr.key === "primaryKey" && attr.selected) ?? false
+            selected: props.selected?.some(attr => attr === "primaryKey") ?? false
         },
         {
             key: "price",
             description: "Mark this item as a price column, which will be used to format it as currency.",
             icon: faTag,
-            selected: props.value?.some(attr => attr.key === "price" && attr.selected) ?? false
+            selected: props.selected?.some(attr => attr === "price") ?? false
         },
         {
             key: "search",
             description: "Mark this item as a search column, which will be used to search for items.",
             icon: faMagnifyingGlass,
-            selected: props.value?.some(attr => attr.key === "search" && attr.selected) ?? false
+            selected: props.selected?.some(attr => attr === "search") ?? false
         },
         {
             key: "quantity",
@@ -47,7 +47,7 @@ export default function ColumnAttributes(props: ColumnAttributesProps)
                 <p>Mark this item as a quantity column, which will be used to calculate the total price of an item and incrementing and decrementing inventory.<br/><b>There can only be one quantity column.</b></p>
             ),
             icon: fa1,
-            selected: props.value?.some(attr => attr.key === "quantity" && attr.selected) ?? false
+            selected: props.selected?.some(attr => attr === "quantity") ?? false
         },
         {
             key: "description",
@@ -55,7 +55,7 @@ export default function ColumnAttributes(props: ColumnAttributesProps)
                 <p>Mark this as the description column, this will be used for voice search.<br/><b>There can only be one description column.</b></p>
             ),
             icon: faAlignJustify,
-            selected: props.value?.some(attr => attr.key === "description" && attr.selected) ?? false
+            selected: props.selected?.some(attr => attr === "description") ?? false
         },
         {
             key: "department",
@@ -63,7 +63,7 @@ export default function ColumnAttributes(props: ColumnAttributesProps)
                 <p>Mark this as the department column, which will be used in printing.<br/><b>There can only be one department column.</b></p>
             ),
             icon: faShop,
-            selected: props.value?.some(attr => attr.key === "department" && attr.selected) ?? false
+            selected: props.selected?.some(attr => attr === "department") ?? false
         },
         {
             key: "mardensPrice",
@@ -71,7 +71,7 @@ export default function ColumnAttributes(props: ColumnAttributesProps)
                 <p>Mark this as the Marden's Price column.<br/><b>There can only be one Marden's Price column.</b></p>
             ),
             icon: faPercent,
-            selected: props.value?.some(attr => attr.key === "mardensPrice" && attr.selected) ?? false
+            selected: props.selected?.some(attr => attr === "mardensPrice") ?? false
         },
         {
             key: "category",
@@ -79,15 +79,17 @@ export default function ColumnAttributes(props: ColumnAttributesProps)
                 <p>Mark this column for use in the <b>Dynamically Generate Mardens Price</b> section.<br/><b>There can only be one category column.</b></p>
             ),
             icon: faLayerGroup,
-            selected: props.value?.some(attr => attr.key === "category" && attr.selected) ?? false
+            selected: props.selected?.some(attr => attr === "category") ?? false
         },
         {
             key: "readonly",
             description: "Mark this item as readonly, which will prevent it from being edited and remove it from the addition form.",
             icon: faLock,
-            selected: props.value?.some(attr => attr.key === "readonly" && attr.selected) ?? false
+            selected: props.selected?.some(attr => attr === "readonly") ?? false
         }
     ];
+
+    console.log("Attributes: ", attributes);
 
     return (
         <div className="attributes flex flex-row gap-1">
@@ -101,12 +103,12 @@ export default function ColumnAttributes(props: ColumnAttributesProps)
                         data-selected={attribute.selected}
                         onClick={() =>
                         {
-                            if (props.onChange)
+                            if (props.onSelectionChange)
                             {
                                 const newAttributes = [...attributes];
                                 const index = newAttributes.findIndex((a) => a.key === attribute.key);
                                 newAttributes[index].selected = !newAttributes[index].selected;
-                                props.onChange(newAttributes);
+                                props.onSelectionChange(newAttributes.flatMap((a) => a.selected ? [a.key] : []));
                             }
                         }}
                     >
