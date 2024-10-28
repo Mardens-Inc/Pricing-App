@@ -1,8 +1,9 @@
 import {defineConfig} from "vite";
 import react from "@vitejs/plugin-react";
+import wasm from "vite-plugin-wasm";
 
 export default defineConfig({
-    plugins: [react()],
+    plugins: [react(), wasm()],
     esbuild: {
         legalComments: "none",
         supported: {
@@ -11,13 +12,21 @@ export default defineConfig({
     },
     clearScreen: false,
     server: {
-        port: 1420,
+        host: true,
+        port: 3000,
         strictPort: true,
+        hmr: {
+            protocol: "ws",
+            host: "localhost",
+            port: 3000,
+            clientPort: 3000,
+            overlay: true
+        },
         watch: {
             ignored: ["**/src-*/**"]
         }
     },
     build: {
-        outDir: "dist/wwwroot",
+        outDir: "target/wwwroot"
     }
 });
