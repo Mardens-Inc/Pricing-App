@@ -8,29 +8,22 @@
 	"repository": "https://github.com/Mardens-Inc/Pricing-App",
 	"type": "module",
 	"scripts": {
-		"build api": "cargo build --release",
-		"run api": "cargo run --bin project_name",
-		"dev": "vite",
-		"build frontend": "tsc && vite build",
-		"lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-		"preview": "vite preview",
-		"build and preview": "npm run build && npm run preview",
-		"publish": "node scripts/publish.js",
-		"run": "node scripts/run.js",
-		"watch api": "cargo watch -x \"run --bin pricing-app\" -C dist -N --why -w ../src-actix/",
-		"watch frontend": "vite build --watch"
+		"dev": "node scripts/dev.js",
+		"build-api": "cargo build --release",
+		"run-api": "cargo run --bin pricing-app",
+		"build-frontend": "tsc && vite build",
+		"watch-api": "cargo watch -x \"run --bin pricing-app\" -C target/dev-env -N --why -w ../../src-actix",
+		"build": "npm run build-frontend && npm run build-api"
 	},
 	"dependencies": {
 		"@dnd-kit/core": "^6.1.0",
 		"@dnd-kit/sortable": "^8.0.0",
-		"@fortawesome/fontawesome-free": "^6.6.0",
-		"@fortawesome/fontawesome-svg-core": "^6.6.0",
 		"@fortawesome/free-brands-svg-icons": "^6.6.0",
 		"@fortawesome/free-regular-svg-icons": "^6.6.0",
 		"@fortawesome/free-solid-svg-icons": "^6.6.0",
 		"@fortawesome/react-fontawesome": "^0.2.2",
-		"@nextui-org/react": "^2.4.6",
-		"framer-motion": "^11.3.27",
+		"@nextui-org/react": "^2.4.8",
+		"framer-motion": "^11.11.4",
 		"jquery": "^3.7.1",
 		"react": "^18.3.1",
 		"react-dom": "^18.3.1",
@@ -43,6 +36,7 @@
 		"@typescript-eslint/eslint-plugin": "^8.1.0",
 		"@typescript-eslint/parser": "^8.1.0",
 		"@vitejs/plugin-react": "^4.3.1",
+		"@wixc3/react-board": "^4.3.2",
 		"archiver": "^7.0.1",
 		"autoprefixer": "^10.4.20",
 		"basic-ftp": "^5.0.5",
@@ -54,6 +48,7 @@
 		"sass-loader": "^16.0.0",
 		"tailwindcss": "^3.4.10",
 		"typescript": "^5.5.4",
-		"vite": "^5.4.0"
+		"vite": "^5.4.0",
+		"vite-plugin-wasm": "^3.3.0"
 	}
 }
