@@ -1,26 +1,34 @@
-import {Navbar, NavbarBrand, NavbarContent, NavbarItem} from "@nextui-org/navbar";
 import Logo from "../images/Logo.svg.tsx";
-import {Button, Input, Link, Tooltip} from "@nextui-org/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faLock, faMicrophone, faMoon, faPlus, faSignOut, faSun} from "@fortawesome/free-solid-svg-icons";
+import {faCloudDownload, faEdit, faLock, faMicrophone, faMoon, faPlus, faSignOut, faSun} from "@fortawesome/free-solid-svg-icons";
 import {applyTheme, getCurrentTheme, Theme} from "../ts/Theme.ts";
 import {useEffect, useState} from "react";
 import LoginModal from "./LoginModal/LoginModal.tsx";
 import AlertModal from "./AlertModal.tsx";
 import {useAuth} from "../providers/AuthProvider.tsx";
 import {useSearch} from "../providers/SearchProvider.tsx";
+import {useDatabaseView} from "../providers/DatabaseViewProvider.tsx";
+import DatabaseRecords from "../ts/DatabaseRecords.ts";
+import {Button, Input, Link, Navbar, NavbarBrand, NavbarContent, NavbarItem, Tooltip} from "@nextui-org/react";
 
 export default function Navigation()
 {
+    const id = useDatabaseView().databaseId;
     const {search, setSearch} = useSearch();
     const {auth, isLoggedIn, setIsLoggedIn} = useAuth();
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [isLogoutAlertOpen, setIsLogoutAlertOpen] = useState(false);
     const [darkMode, setDarkMode] = useState(getCurrentTheme() === Theme.dark);
+    const [isLoadingExport, setIsLoadingExport] = useState(false);
     useEffect(() =>
     {
         applyTheme(darkMode ? Theme.dark : Theme.light);
     }, [darkMode]);
+
+    useEffect(() =>
+    {
+        console.log("Nav Id: ", id);
+    }, [id]);
 
 
     return (
@@ -80,13 +88,41 @@ export default function Navigation()
                     {isLoggedIn ? (
                         <div className={"flex flex-row gap-2"}>
                             {auth.getUserProfile().admin && (
-                                <NavbarItem>
-                                    <Tooltip content={"Add new database"}>
-                                        <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} as={Link} href={"/new"}>
-                                            <FontAwesomeIcon icon={faPlus}/>
-                                        </Button>
-                                    </Tooltip>
-                                </NavbarItem>
+                                <>
+                                    {id != undefined ? (
+                                        <>
+                                            <NavbarItem>
+                                                <Tooltip content={"Edit database"}>
+                                                    <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} as={Link} href={`/${id}/edit`}>
+                                                        <FontAwesomeIcon icon={faEdit}/>
+                                                    </Button>
+                                                </Tooltip>
+                                            </NavbarItem>
+                                            <NavbarItem>
+                                                <Tooltip content={"Export database"}>
+                                                    <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} isLoading={isLoadingExport} onClick={async () =>
+                                                    {
+                                                        setIsLoadingExport(true);
+                                                        await DatabaseRecords.export(id);
+                                                        setIsLoadingExport(false);
+                                                    }}>
+                                                        {!isLoadingExport && (
+                                                            <FontAwesomeIcon icon={faCloudDownload}/>
+                                                        )}
+                                                    </Button>
+                                                </Tooltip>
+                                            </NavbarItem>
+                                        </>
+                                    ) : (
+                                        <NavbarItem>
+                                            <Tooltip content={"Add new database"}>
+                                                <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} as={Link} href={"/new"}>
+                                                    <FontAwesomeIcon icon={faPlus}/>
+                                                </Button>
+                                            </Tooltip>
+                                        </NavbarItem>
+                                    )}
+                                </>
                             )}
                             <NavbarItem>
                                 <Tooltip content={"Logout"}>
