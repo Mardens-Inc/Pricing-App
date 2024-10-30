@@ -1,4 +1,4 @@
-import DatabaseItem from "./DatabaseItem.ts";
+import {DatabaseItem} from "./DatabaseManagement.ts";
 import $ from "jquery";
 import {baseUrl} from "../../main.tsx";
 
