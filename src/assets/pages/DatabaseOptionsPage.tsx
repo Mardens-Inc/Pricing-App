@@ -1,15 +1,15 @@
 import {useNavigate, useParams} from "react-router-dom";
-import {Button, Input, Link} from "@nextui-org/react";
 import IconList from "../components/Options/IconList.tsx";
 import FileUploadInput from "../components/Options/FileUploadInput.tsx";
 import {useAuth} from "../providers/AuthProvider.tsx";
-import {isProduction} from "../../main.tsx";
+import {isProduction, setTitle} from "../../main.tsx";
 import ColumnsList from "../components/Options/ColumnsList.tsx";
 import AllowInventorying from "../components/Options/AllowInventorying.tsx";
 import CanPrintLabel from "../components/Options/CanPrintLabel.tsx";
 import ExtendedSwitch from "../components/Extends/ExtendedSwitch.tsx";
 import {useEffect, useState} from "react";
 import DatabaseRecords, {Column, DatabaseData} from "../ts/DatabaseRecords.ts";
+import {Button, Input, Link} from "@nextui-org/react";
 
 export default function DatabaseOptionsPage()
 {
@@ -23,6 +23,10 @@ export default function DatabaseOptionsPage()
     const [image, setImage] = useState<string>("");
     const [columns, setColumns] = useState<Column[]>([]);
 
+    if (id)
+        setTitle(options?.name ? `Edit ${options.name}` : "Edit Database");
+    else
+        setTitle("New Database");
     if (isProduction)
     {
         if (!isLoggedIn || !auth.getUserProfile().admin)
