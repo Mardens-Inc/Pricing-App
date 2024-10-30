@@ -1,13 +1,14 @@
-import DatabaseItem from "../ts/DatabaseItem.ts";
 import {default as dbList} from "../ts/DatabaseList.ts";
 import {useEffect, useState} from "react";
-import {Avatar, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Link, Pagination, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip} from "@nextui-org/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEdit, faEllipsisH} from "@fortawesome/free-solid-svg-icons";
 import Logo from "../images/Logo.svg.tsx";
 import {useNavigate} from "react-router-dom";
 import {useSearch} from "../providers/SearchProvider.tsx";
 import {useAuth} from "../providers/AuthProvider.tsx";
+import {useDatabaseView} from "../providers/DatabaseViewProvider.tsx";
+import {DatabaseItem} from "../ts/DatabaseManagement.ts";
+import {Avatar, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Link, Pagination, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip} from "@nextui-org/react";
 
 export default function DatabaseListPage()
 {
@@ -19,6 +20,7 @@ export default function DatabaseListPage()
     const navigate = useNavigate();
     const {search} = useSearch();
     const {auth, isLoggedIn} = useAuth();
+    useDatabaseView().setDatabaseId(undefined);
     useEffect(() =>
     {
         setLoading(true);
@@ -45,13 +47,11 @@ export default function DatabaseListPage()
             console.log("No items");
             return;
         }
-        console.log("Items", items);
         if (!search)
         {
             console.log("No search");
             return setCurrentItems(items.slice(0, itemsPerPage));
         }
-        console.log("Search", search, items.filter((item) => `${item.name} ${item.po} ${item.location}`.toLowerCase().includes(search.toLowerCase())));
         return setCurrentItems(items.filter((item) => `${item.name} ${item.po} ${item.location}`.toLowerCase().includes(search.toLowerCase())).splice(0, itemsPerPage));
     }, [search]);
 
