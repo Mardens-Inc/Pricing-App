@@ -1,8 +1,8 @@
-import {Button, Checkbox, Input, Link, ModalBody, ModalFooter, Tooltip} from "@nextui-org/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEnvelope, faEye, faEyeSlash} from "@fortawesome/free-solid-svg-icons";
 import React, {useState} from "react";
 import {useAuth} from "../../providers/AuthProvider.tsx";
+import {Button, Checkbox, Input, Link, ModalBody, ModalFooter, Tooltip} from "@nextui-org/react";
 
 
 export default function LoginForm({onClose}: { onClose: () => void })
@@ -35,7 +35,6 @@ export default function LoginForm({onClose}: { onClose: () => void })
         try
         {
             const response = await auth.login(username, password, expiration);
-            console.log(response);
 
             if (response.success)
             {
