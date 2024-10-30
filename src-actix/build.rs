@@ -1,16 +1,14 @@
-use std::{env};
-use std::process::Command;
-
+use npm_rs::{NodeEnv, NpmEnv};
+use std::fs;
 fn main() {
-	// Run `npm run build frontend`
-	let status = Command::new("npm")
-		.arg("run")
-		.arg("build frontend")
-		.current_dir(env::current_dir().unwrap())
-		.status()
-		.expect("Failed to execute npm 'build frontend'");
+	fs::create_dir_all("target/dev-env").expect("failed to create target directory");
+	fs::create_dir_all("target/wwwroot").expect("failed to create wwwroot directory");
 
-	if !status.success() {
-		panic!("npm 'build frontend' failed!");
-	}
+	// Run `npm run build frontend`
+	NpmEnv::default()
+		.with_node_env(&NodeEnv::Production)
+		.init_env()
+		.run("build frontend")
+		.exec()
+		.expect("Failed to execute npm run 'build frontend'");
 }
