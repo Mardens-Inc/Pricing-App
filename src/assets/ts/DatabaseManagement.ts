@@ -29,7 +29,7 @@ export interface Options
     "allow-inventorying": boolean;
 }
 
-export default interface DatabaseItem
+export interface DatabaseItem
 {
     id: string;
     name: string;
