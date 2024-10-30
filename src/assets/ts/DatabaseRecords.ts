@@ -1,5 +1,6 @@
 import {baseUrl} from "../../main.tsx";
 import $ from "jquery";
+import {download} from "./FileSystem.ts";
 
 export interface DatabaseOptions
 {
@@ -131,6 +132,17 @@ export default class DatabaseRecords
     static async data(id: string, headings: boolean): Promise<DatabaseData>
     {
         return $.get(`${baseUrl}/api/location/${id}/${headings ? "?headings=true" : ""}`);
+    }
+
+    static async export(id: string): Promise<void>
+    {
+        const csv = (await $.get({
+            url: `${baseUrl}/api/location/${id}/export`,
+            headers: {"Accept": "text/csv"}
+        })).toString();
+        const headers = await this.data(id, true);
+        const name = `${headers.name}-${headers.po}-${id}.csv`;
+        download(name, csv);
     }
 
 }
