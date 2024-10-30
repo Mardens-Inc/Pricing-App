@@ -1,4 +1,3 @@
-import {Button, Tooltip} from "@nextui-org/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEllipsisV, faPlus} from "@fortawesome/free-solid-svg-icons";
 import ColumnItem from "./ColumnItem.tsx";
@@ -6,8 +5,10 @@ import {useEffect, useState} from "react";
 import {closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors} from "@dnd-kit/core";
 import {arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy} from "@dnd-kit/sortable";
 import {Column} from "../../ts/DatabaseRecords.ts";
+import {enforceAttributesSingleSelectionMode} from "./ColumnAttributes.tsx";
+import {Button, Tooltip} from "@nextui-org/react";
 
-interface Item extends Column
+export interface IndexedColumnItem extends Column
 {
     id: number;
 }
@@ -19,7 +20,7 @@ interface ColumnListProps
 
 export default function ColumnsList(props: ColumnListProps)
 {
-    const [items, setItems] = useState<Item[]>(props.columns.map((column, index) => ({...column, id: index})));
+    const [items, setItems] = useState<IndexedColumnItem[]>(props.columns.map((column, index) => ({...column, id: index})));
     console.log("Items: ", props.columns);
 
     const sensors = useSensors(
@@ -50,6 +51,7 @@ export default function ColumnsList(props: ColumnListProps)
         setItems(props.columns.map((column, index) => ({...column, id: index})));
     }, [props.columns]);
 
+
     return (
         <div className={"flex flex-col"}>
             <div className={"flex flex-row items-center"}>
@@ -71,7 +73,14 @@ export default function ColumnsList(props: ColumnListProps)
                         strategy={verticalListSortingStrategy}
                     >
                         {items.map(item => (
-                            <ColumnItem key={item.id} id={item.id.toString()} text={item.name}/>
+                            <ColumnItem key={item.id} id={item.id.toString()} column={item} onColumnChange={column =>
+                            {
+                                const index = items.findIndex(i => i.id === item.id);
+                                const newItems = [...items];
+                                newItems[index] = {...column, id: item.id};
+                                setItems(enforceAttributesSingleSelectionMode(newItems));
+                                console.log("Column changed: ", column);
+                            }}/>
                         ))}
                     </SortableContext>
                 </DndContext>
@@ -79,4 +88,3 @@ export default function ColumnsList(props: ColumnListProps)
         </div>
     );
 }
-
