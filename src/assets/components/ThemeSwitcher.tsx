@@ -1,7 +1,7 @@
-import {Switch} from "@nextui-org/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faMoon, faSun} from "@fortawesome/free-solid-svg-icons";
 import {applyTheme, getCurrentTheme, Theme} from "../ts/Theme.ts";
+import {Switch} from "@nextui-org/react";
 
 export default function ThemeSwitcher()
 {
