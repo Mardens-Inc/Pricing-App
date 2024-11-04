@@ -1,20 +1,20 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-
 use crate::updater::install_update;
 
 // mod print_manager;
 // mod config;
+mod options_utility;
 mod update_manager;
 mod updater;
-mod options_utility;
 
 fn main() {
     if install_update() {
         return;
     }
     tauri::Builder::default()
+        .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
             // print_manager::get_printers,
             // print_manager::print,
