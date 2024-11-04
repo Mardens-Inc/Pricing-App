@@ -1,6 +1,6 @@
 [package]
 name = "pricing-app"
-version = "0.2.3"
+version = "0.2.6"
 description = "A pricing and inventory app for Mardens Inc"
 authors = ["Drew Chase"]
 edition = "2021"
@@ -9,19 +9,19 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1.5", features = [] }
+tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "1.5", features = ["shell-open", "devtools"] }
+tauri = { version = "2", features = [ "devtools"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 printers = "2.0.0"
 winapi = { version = "0.3.9", features = ["ntdef", "winspool"] }
 reqwest = "0.12.2"
 zip = "0.6.6"
+tauri-plugin-shell = "2"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
 # DO NOT REMOVE!!
 custom-protocol = ["tauri/custom-protocol"]
-
