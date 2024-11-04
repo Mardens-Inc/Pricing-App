@@ -49,16 +49,25 @@
 </nav>
 
 <main>
+    <div class="row vertical center">
+        <div id="year-input-field" class="floating-input" style="display: none;">
+            <input autocomplete="off" id="year-input" placeholder="Enter print year" type="number">
+            <label for="year-input">Year</label>
+        </div>
+        <button id="page-color-dropdown-button" class="fill horizontal" style="height: 50px; display: none;">
+            <span class="fill horizontal" style="padding-right: 2rem">Color</span>
+            <i class="fa fa-chevron-down"></i>
+        </button>
+    </div>
     <div class="list col">
 
     </div>
-
     <div class="pagination center horizontal">
     </div>
 </main>
 
 <script>
-    const baseURL = window.location.protocol === "https:" ? "https://pricing-new.mardens.com" : "http://pricing.local";
+    const baseURL = true ? "https://pricing-new.mardens.com" : "http://pricing.local";
 </script>
 <script src="assets/js/element-label.js"></script>
 <script src="assets/js/element-dropdown.js"></script>
