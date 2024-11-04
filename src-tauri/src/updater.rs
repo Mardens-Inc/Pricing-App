@@ -9,7 +9,6 @@ pub fn get_current_version() -> String {
     return env!("CARGO_PKG_VERSION").to_string();
 }
 
-
 async fn get_versions() -> Vec<String> {
     let url = "https://pricing-new.mardens.com/api/clients/versions";
     if let Ok(body) = reqwest::get(url).await.unwrap().text().await {
@@ -54,8 +53,7 @@ pub async fn download_update() -> bool {
     return false;
 }
 
-async fn download_updater() -> bool
-{
+async fn download_updater() -> bool {
     println!("Downloading updater...");
     let url = "https://pricing-new.mardens.com/api/clients/updater";
     if let Ok(response) = reqwest::get(url).await {
@@ -76,7 +74,8 @@ pub fn install_update() -> bool {
             .args(&["tmp.exe", "pricing-app.exe"])
             .stdout(Stdio::null())
             .stderr(Stdio::null())
-            .spawn().is_ok();
+            .spawn()
+            .is_ok();
     }
     return false;
 }
