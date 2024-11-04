@@ -39,6 +39,8 @@
  * @property {boolean} show-retail
  * @property {boolean} show-mp
  * @property {boolean} show-price-label
+ * @property {boolean} show-year-dropdown
+ * @property {boolean} show-color-dropdown
  */
 
 
