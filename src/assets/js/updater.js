@@ -18,7 +18,7 @@ if (isDedicatedClient) {
  */
 async function checkForUpdates() {
     if (isDedicatedClient) {
-        const result = await window.__TAURI__.invoke('download_update');
+        const result = await window.__TAURI__.core.invoke('download_update');
         console.log(`Checked for update: ${result ? "Update available" : "No update available"}`);
         return result;
     }
@@ -31,7 +31,7 @@ async function checkForUpdates() {
  */
 async function getCurrentVersion() {
     if (isDedicatedClient)
-        return await window.__TAURI__.invoke('get_current_version');
+        return await window.__TAURI__.core.invoke('get_current_version');
 }
 
 if (isDedicatedClient) {
@@ -42,7 +42,7 @@ if (isDedicatedClient) {
             window.canUpdate = true;
             clearInterval(update);
             alert("An update is available. Please restart the application to apply the update.", () => {
-                window.__TAURI__.invoke('install_update');
+                window.__TAURI__.core.invoke('install_update');
             })
         }
     });
