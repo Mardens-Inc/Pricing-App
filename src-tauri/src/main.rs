@@ -6,7 +6,6 @@ use crate::updater::install_update;
 // mod print_manager;
 // mod config;
 mod options_utility;
-mod update_manager;
 mod updater;
 
 fn main() {
