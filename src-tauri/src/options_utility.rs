@@ -1,7 +1,5 @@
 use serde_json::{Map, Value};
 
-
-
 /// Maps the original column names to the new ones for a given vector of Maps.
 ///
 /// # Arguments
@@ -40,7 +38,11 @@ use serde_json::{Map, Value};
 /// let result = map_columns(original_columns, new_columns, items);
 /// ```
 #[tauri::command]
-pub fn map_columns(original_columns: Vec<String>, new_columns: Vec<String>, items: Vec<Map<String, Value>>) -> Result<Vec<Map<String, Value>>, String> {
+pub fn map_columns(
+    original_columns: Vec<String>,
+    new_columns: Vec<String>,
+    items: Vec<Map<String, Value>>,
+) -> Result<Vec<Map<String, Value>>, String> {
     if original_columns.len() != new_columns.len() {
         return Err("Original and new columns must have the same length".to_string());
     }
