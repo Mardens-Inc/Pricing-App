@@ -64,7 +64,7 @@ async function buildSelectPrintersSection(html, settings) {
 async function loadSettings() {
     if (!isDedicatedClient) return null;
     return null;
-    const settings = await window.__TAURI__.invoke("load");
+    const settings = await window.__TAURI__.core.invoke("load");
     console.log(settings);
     window.localStorage.setItem("settings", JSON.stringify(settings));
     return settings;
@@ -77,14 +77,14 @@ async function loadSettings() {
  */
 async function getPrinters() {
     if (!isDedicatedClient) return [];
-    const printers = await window.__TAURI__.invoke("get_printers");
+    const printers = await window.__TAURI__.core.invoke("get_printers");
     console.log(printers);
     return printers;
 }
 
 async function saveSettings(settings) {
     if (!isDedicatedClient) return;
-    await window.__TAURI__.invoke("save", {config: settings});
+    await window.__TAURI__.core.invoke("save", {config: settings});
     window.localStorage.setItem("settings", JSON.stringify(settings));
 }
 
