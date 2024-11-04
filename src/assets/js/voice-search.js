@@ -26,12 +26,20 @@ $(document).on('keydown', e => {
 })
 
 $("#voice-search-button").on('click', () => {
-    let voice = new Voice(/[^a-zA-Z0-9]/g);
+    let voice = new Voice(/[^0-9]/g);
     if (voice.unsupported) {
         alert(`Your browser does not support voice recognition`);
         return;
     }
     const button = $("#voice-search-button");
+
+    let updateCheck = setInterval(() => {
+        if (!button.hasClass("primary")) {
+            voice.stop();
+            clearInterval(updateCheck);
+        }
+    }, 500);
+
     if (button.hasClass("primary")) {
         button.removeClass("primary");
         voice.stop();
@@ -44,13 +52,16 @@ $("#voice-search-button").on('click', () => {
         searchInput.val(transcript)
     });
     $(voice).on("result", async (event, transcript) => {
-        button.removeClass("primary");
-        voice.stop();
+        if (!button.hasClass("primary")) {
+            voice.stop();
+        }
     });
     $(voice).on("end", async (event) => {
-        button.removeClass("primary");
-        voice.stop();
+        if (!button.hasClass("primary")) {
+            voice.stop();
+        }
     });
+
 
     voice.start();
 })
