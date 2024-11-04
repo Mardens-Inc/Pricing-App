@@ -1,42 +1,33 @@
 {
-	"build": {
-		"devPath": "../src",
-		"distDir": "../src",
-		"withGlobalTauri": true
-	},
-	"package": {
-	},
-	"tauri": {
-		"allowlist": {
-			"all": false,
-			"shell": {
-				"all": false,
-				"open": true
-			}
-		},
-		"windows": [
-			{
-				"fullscreen": false,
-				"resizable": true,
-				"title": "Pricing App",
-				"width": 1280,
-				"height": 720,
-				"minWidth": 1280,
-				"minHeight": 720,
-				"fileDropEnabled": false
-			}
-		],
-		"security": {
-			"csp": null
-		},
-		"bundle": {
-			"active": true,
-			"targets": "all",
-			"identifier": "com.mardens.pricing-app",
-			"icon": [
-				"../src/assets/images/icon.png",
-				"../src/assets/images/icon.ico"
-			]
-		}
-	}
+  "build": {
+    "frontendDist": "../src"
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "../src/assets/images/icon.png",
+      "../src/assets/images/icon.ico"
+    ]
+  },
+  "identifier": "com.mardens.pricing-app",
+  "plugins": {},
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "fullscreen": false,
+        "resizable": true,
+        "title": "Pricing App",
+        "width": 1280,
+        "height": 720,
+        "minWidth": 1280,
+        "minHeight": 720,
+        "dragDropEnabled": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  }
 }
