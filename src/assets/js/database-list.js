@@ -8,6 +8,7 @@ import {buildImportFilemakerForm} from "./import-filemaker.js";
 import {startLoading, stopLoading} from "./loading.js";
 import {deleteRecord} from "./location.js";
 import {alert, confirm, openPopup} from "./popups.js";
+import {getSelectedColor, getSelectedYear} from "./page-navigation.js";
 
 /**
  * Represents a list of items in a database.
@@ -51,9 +52,21 @@ export default class DatabaseList {
             img.attr("src", "assets/images/icon.svg");
         }
         this.options = options;
+
+
+        $("#year-input-field").css("display", options["print-form"]["show-year-dropdown"] ? "" : "none")
+            .find('input').val(+getSelectedYear())
+        $("#page-color-dropdown-button").css("display", options["print-form"]["show-color-dropdown"] ? "" : "none")
+            .find("span").html(getSelectedColor() || "Color");
+
+
         title.html(name);
         subtitle.html(`${location} - ${po}`).css("display", "");
         backButton.css("display", "");
+        backButton.on('click', () => {
+            $("#year-input-field").css("display", "none")
+            $("#page-color-dropdown-button").css("display", "none")
+        })
         this.list.html("");
         $(".pagination").html("");
         $("#search").val("");
@@ -225,6 +238,8 @@ export default class DatabaseList {
                                                 const priceValue = parseFloat(retail);
                                                 const percent = mpOption.percent / 100;
                                                 mp = text = (priceValue * (1 - percent)).toFixed(2);
+                                            } else {
+                                                mp = text = parseFloat(mp).toFixed(2);
                                             }
                                         } else {
                                             mp = text = parseFloat(mp).toFixed(2);
@@ -349,14 +364,20 @@ export default class DatabaseList {
                     if (printForm.label !== undefined && printForm.label !== null && printForm.label !== "") {
                         url.searchParams.append("label", printForm.label);
                     }
-                    if (printForm.year !== undefined && printForm.year !== null) {
+                    if (printForm.year !== undefined && printForm.year !== null && printForm.year !== "") {
                         url.searchParams.append("year", printForm.year.toString());
+                    }
+                    if (printForm["show-year-dropdown"] && getSelectedYear() !== "") {
+                        url.searchParams.append("year", getSelectedYear());
                     }
                     if (printForm.department !== undefined && printForm.department !== null && printForm.department !== "") {
                         url.searchParams.append("department", printForm.department.id);
                     }
                     if (printForm.color !== undefined && printForm.color !== null && printForm.color !== "") {
                         url.searchParams.append("color", printForm.color);
+                    } else if (printForm["show-color-dropdown"] && getSelectedColor() !== "") {
+                        url.searchParams.append("color", getSelectedColor());
+
                     }
                     if (dept !== null) {
                         url.searchParams.append("department", dept);
