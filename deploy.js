@@ -5,7 +5,7 @@ build().then(file => upload(file)).then(success => {
 async function build() {
     const path = require("path");
     console.log('Building the project...');
-    const command = "cargo tauri build -b none";
+    const command = "cargo tauri build";
     const {exec} = require('child_process');
     // run the command and wait for it to finish
     const process = exec(command, (error, stdout, stderr) => {
