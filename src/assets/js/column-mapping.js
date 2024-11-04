@@ -64,7 +64,7 @@ $(document).on("loadPopup", async (element, data) =>
 
         try
         {
-            json = await window.__TAURI__.invoke("map_columns", {
+            json = await window.__TAURI__.core.invoke("map_columns", {
                 originalColumns: original_columns,
                 newColumns: mapped_columns,
                 items: data.json
