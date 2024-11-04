@@ -172,7 +172,9 @@ async function buildInventoryingFormWithQuantity(allowAdditions, columns, addIfM
 
         submitButton.on('click', async () => {
             startLoading({fullscreen: true, message: "Adding/Updating..."})
+            // window.localStorage.removeItem("selectedItem");
             let selectedItem = window.localStorage.getItem("selectedItem");
+            console.log("Selected Item before processing:", selectedItem);
 
             if (selectedItem === null || selectedItem === undefined) {
                 if (primaryInput.find("input").val() === "" || quantityInput.find("input").val() === "") {
@@ -189,14 +191,13 @@ async function buildInventoryingFormWithQuantity(allowAdditions, columns, addIfM
                     }))["items"];
                     if (searchResults.length > 0) {
                         selectedItem = searchResults[0];
-                        console.log(selectedItem)
-                        // fill in the rest of the form
+                        console.log("Search found selected item:", selectedItem);
+
                         for (const column of columns) {
                             if (column.attributes.includes('primary') ||
                                 column.attributes.includes('quantity') ||
                                 column.attributes.includes('readonly') ||
                                 additionSection.find(`#${column.name}`).val() !== "") continue;
-
                             additionSection.find(`input[name="${column.name}"]`).val(searchResults[0][column.name]);
                         }
                     } else {
@@ -207,6 +208,7 @@ async function buildInventoryingFormWithQuantity(allowAdditions, columns, addIfM
                 const url = `${baseURL}/api/location/${window.localStorage.getItem("loadedDatabase")}/${selectedItem}`;
                 try {
                     selectedItem = await $.ajax({url, method: "GET", headers: {"Accept": "application/json"}});
+                    console.log("Selected item after fetching details:", selectedItem);
                 } catch (e) {
                     console.error(e);
                     alert(`Unable to get selected item from the server, please contact IT/Support<br>${e.error ?? "No error message was provided!"}`, null, null);
@@ -215,9 +217,11 @@ async function buildInventoryingFormWithQuantity(allowAdditions, columns, addIfM
             }
 
             const isNewItem = (selectedItem === null || selectedItem === undefined) && (addToggle.attr('value') === "true" || addIfMissing);
-            // only set the quantity if the user is adding a new item or the user has toggled the add button
+            console.log("Is New Item:", isNewItem);
+
             const setQuantity = isNewItem || addToggle.attr('value') === "true" || selectedItem[quantityKey] === null || selectedItem[quantityKey] === undefined;
             const quantityValue = processQuantityInput(quantityInput.find("input"), setQuantity, Number.parseInt(setQuantity ? null : selectedItem[quantityKey]));
+            console.log("Quantity Value to Set:", quantityValue);
 
             if (removeIfZero && quantityValue <= 0) {
                 confirm("Are you sure you want to remove this item?", "Delete", "Cancel", async (value) => {
@@ -251,7 +255,6 @@ async function buildInventoryingFormWithQuantity(allowAdditions, columns, addIfM
                 }
             } else {
                 if (allowAdditions) {
-
                     const data = {};
                     for (const column of columns) {
                         if (column.attributes.includes('primary') || column.attributes.includes('quantity') || column.attributes.includes('readonly')) continue;
@@ -264,7 +267,6 @@ async function buildInventoryingFormWithQuantity(allowAdditions, columns, addIfM
                     }
                     data[primaryKey] = primaryInput.find("input").val();
                     data[quantityKey] = quantityValue;
-
                     try {
                         let history = await getHistory(window.localStorage.getItem("loadedDatabase"), selectedItem["id"]);
                         if (history.length === 0) {
@@ -281,7 +283,6 @@ async function buildInventoryingFormWithQuantity(allowAdditions, columns, addIfM
                         console.log(response);
                         alert(`Failed to add/update item, please contact IT/Support<br><p class="error">Error: ${response.error ?? "No error message was provided!"}</p>`, null, null);
                     }
-
                 } else {
                     selectedItem[quantityKey] = quantityValue;
                     await updateRecord(selectedItem["id"], selectedItem);
