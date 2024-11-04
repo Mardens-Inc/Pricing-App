@@ -2,6 +2,11 @@ import {startLoading, stopLoading} from "./loading.js";
 import {batchAddRecords} from "./location.js";
 import {alert, closePopup, openPopup} from "./popups.js";
 
+export const colors = ["No Color", "Peach", "Rose", "Light Purple", "Purple", "Dark Purple",
+    "Light Blue", "Blue", "Dark Blue", "Aqua", "Brown", "Dark Brown", "Mint",
+    "Green", "Dark Green", "Yellow", "Dark Yellow", "Light Pink", "Pink",
+    "Dark Gray", "Teal", "Gray"];
+
 let dragDropArea;
 let csvJSON = null;
 /**+
@@ -814,10 +819,7 @@ async function buildPrintSection(html) {
         "Drug Store Price", "Book Store Price", "Holiday Stock", "Supply Store Price",
         "Rug Store Price", "Garden Center Price", "Club Price", "Gift Shop Price",
         "Sporting Goods Store"];
-    const colors = ["No Color", "Peach", "Rose", "Light Purple", "Purple", "Dark Purple",
-        "Light Blue", "Blue", "Dark Blue", "Aqua", "Brown", "Dark Brown", "Mint",
-        "Green", "Dark Green", "Yellow", "Dark Yellow", "Light Pink", "Pink",
-        "Dark Gray", "Teal", "Gray"];
+
 
     const stickers = [{width: 1, height: 0.75, name: "Colored"},
         {width: 0.8, height: 0.5, name: "Orange"}, {width: 1.25, height: 1, name: "Large"}];
@@ -881,10 +883,21 @@ async function buildPrintSection(html) {
 
     printOptions["show-price-label"] = html.find("toggle#show-price-label").attr('value') == "true";
 
-    const showPriceLabel = html.find("toggle#show-price-label").on("toggle", (e,v)=>{
+    const showPriceLabel = html.find("toggle#show-price-label").on("toggle", (e, v) => {
         printOptions["show-price-label"] = v.value;
     })
 
+    const showColorDropdown = html.find("toggle#show-color-dropdown").on("toggle", (e, v) => {
+        printOptions["show-color-dropdown"] = v.value;
+    });
+
+    showColorDropdown.attr("value", (printOptions["show-color-dropdown"] ?? false).toString());
+
+    const showYearInput = html.find("toggle#show-year-input").on("toggle", (e, v) => {
+        printOptions["show-year-dropdown"] = v.value;
+    });
+
+    showYearInput.attr("value", (printOptions["show-year-dropdown"] ?? false).toString());
 }
 
 export {buildOptionsForm};
