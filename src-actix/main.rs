@@ -25,10 +25,10 @@ async fn main() -> std::io::Result<()> {
 		"production"
 	};
 
-	match all_databases::initialize_database().await {
-		Ok(_) => info!("Locations database initialized"),
-		Err(e) => info!("Error initializing the locations database: {}", e)
-	}
+//	match all_databases::initialize_database().await {
+//		Ok(_) => info!("Locations database initialized"),
+//		Err(e) => info!("Error initializing the locations database: {}", e)
+//	}
 
 	info!("Starting {} server at http://127.0.0.1:{}", config, port);
 
