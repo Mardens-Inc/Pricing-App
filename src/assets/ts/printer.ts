@@ -12,6 +12,7 @@ interface Department
 }
 
 export const Departments: Department[] = [
+    {id: -1, name: "Use Department Column"},
     {id: 0, name: "No Dept."},
     {id: 1, name: "General"},
     {id: 2, name: "Clothing"},
