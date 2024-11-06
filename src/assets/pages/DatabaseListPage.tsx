@@ -9,6 +9,8 @@ import {useAuth} from "../providers/AuthProvider.tsx";
 import {useDatabaseView} from "../providers/DatabaseViewProvider.tsx";
 import {DatabaseItem} from "../ts/DatabaseManagement.ts";
 import {Avatar, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Link, Pagination, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip} from "@nextui-org/react";
+import $ from "jquery";
+
 
 export default function DatabaseListPage()
 {
@@ -16,18 +18,26 @@ export default function DatabaseListPage()
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [currentItems, setCurrentItems] = useState<DatabaseItem[]>([]);
-    const itemsPerPage = 20;
+    const [itemsPerPage, setItemsPerPage] = useState<number>(10);
     const navigate = useNavigate();
     const {search} = useSearch();
     const {auth, isLoggedIn} = useAuth();
     useDatabaseView().setDatabaseId(undefined);
     useEffect(() =>
     {
+        setItemsPerPage(calculateItemsPerPage());
+
+        $(window)
+            .off("resize")
+            .on("resize", () =>
+            {
+                setItemsPerPage(calculateItemsPerPage());
+            });
+
         setLoading(true);
         dbList.get().then((databases) =>
         {
             setItems(databases);
-            setCurrentItems(databases.slice(0, itemsPerPage));
             setPage(1);
             setLoading(false);
         }).catch((error) =>
@@ -35,10 +45,18 @@ export default function DatabaseListPage()
             console.error(error);
             setLoading(false);
             alert("Failed to load database list.");
+        }).finally(() =>
+        {
+            setItemsPerPage(calculateItemsPerPage());
         });
 
     }, []);
 
+    useEffect(() =>
+    {
+        console.log("Items per page changed", itemsPerPage);
+        setCurrentItems(items.slice(0, itemsPerPage));
+    }, [itemsPerPage, items]);
 
     useEffect(() =>
     {
@@ -54,6 +72,16 @@ export default function DatabaseListPage()
         }
         return setCurrentItems(items.filter((item) => `${item.name} ${item.po} ${item.location}`.toLowerCase().includes(search.toLowerCase())).splice(0, itemsPerPage));
     }, [search]);
+
+    // Calculate the items per page based on the height of the row item and the height of the tables available space
+    const calculateItemsPerPage = () =>
+    {
+        const viewportHeight = $(window).height() ?? 0;
+        const tableHeight = viewportHeight - 150;
+        const rowHeight = 56;
+        console.log("Table Height", tableHeight, "Row Height", rowHeight, "Body Height", viewportHeight);
+        return Math.max(Math.floor(tableHeight / rowHeight), 2);
+    };
 
     return (
         <Table
@@ -103,10 +131,10 @@ export default function DatabaseListPage()
                 loadingContent={<Spinner size={"lg"} label={"Loading database list..."}/>}
                 emptyContent={"No databases found."}
             >
-                {currentItems.map((item) =>
+                {currentItems.map((item, index) =>
                 {
                     return (
-                        <TableRow key={item.id} onClick={() => navigate(`/${item.id}`)}>
+                        <TableRow key={item.id + index.toString()} onClick={() => navigate(`/${item.id}`)}>
                             <TableCell className={"w-12"}>
                                 {item.image ? <Avatar src={item.image} alt={item.name}/> : <Logo size={40}/>}
                             </TableCell>
