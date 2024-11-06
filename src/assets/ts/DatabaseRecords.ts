@@ -27,12 +27,14 @@ export interface PrintForm
     year: string;
     label: string;
     enabled: boolean;
-    department: Department;
+    department?: Department;
     percentages: string[];
     "show-retail": boolean;
     "price-column": string;
     "show-price-label": boolean;
     "retail-price-column": string;
+    "show-year-dropdown": boolean;
+    "show-color-dropdown": boolean;
 }
 
 export interface Department
