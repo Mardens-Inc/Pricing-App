@@ -20,7 +20,7 @@ include_dir = "0.7.4"
 walkdir = "2.5.0"
 awc = "3.1.0"
 log = "0.4.22"
-sqlx = { version = "0.8.2", features = ["mysql", "chrono"] }
+sqlx = { version = "0.8.2", features = ["default", "mysql", "sqlite", "derive", "chrono", "runtime-tokio"] }
 reqwest = "0.12.9"
 hash-ids = "0.3.1"
 crypto = { path = "./src-actix/crypto" }
