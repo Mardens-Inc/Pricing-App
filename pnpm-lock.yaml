@@ -45,6 +45,9 @@ importers:
         specifier: ^6.26.0
         version: 6.26.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
+      '@types/dom-speech-recognition':
+        specifier: ^0.0.4
+        version: 0.0.4
       '@types/jquery':
         specifier: ^3.5.30
         version: 3.5.31
@@ -1618,6 +1621,9 @@ packages:
 
   '@types/babel__traverse@7.20.6':
     resolution: {integrity: sha512-r1bzfrm0tomOI8g1SzvCaQHo6Lcv6zu0EA+W2kHrt8dyrHQxGzBBL4kdkzIS+jBMV+EYcMAEAqXqYaLJq5rOZg==}
+
+  '@types/dom-speech-recognition@0.0.4':
+    resolution: {integrity: sha512-zf2GwV/G6TdaLwpLDcGTIkHnXf8JEf/viMux+khqKQKDa8/8BAUtXXZS563GnvJ4Fg0PBLGAaFf2GekEVSZ6GQ==}
 
   '@types/estree@1.0.6':
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
@@ -5279,6 +5285,8 @@ snapshots:
   '@types/babel__traverse@7.20.6':
     dependencies:
       '@babel/types': 7.25.7
+
+  '@types/dom-speech-recognition@0.0.4': {}
 
   '@types/estree@1.0.6': {}
 
