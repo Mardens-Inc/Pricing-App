@@ -20,8 +20,11 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "allowUnusedLabels": true,
+    "allowUnusedLabels": true
   },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": [
+	  "src",
+	  "node_modules/.pnpm/@types+dom-speech-recognition@0.0.4/node_modules/@types/dom-speech-recognition/index.d.ts"
+  ],
+	"references": [{ "path": "./tsconfig.node.json" }]
 }
