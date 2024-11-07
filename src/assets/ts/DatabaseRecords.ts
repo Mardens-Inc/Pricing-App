@@ -28,7 +28,7 @@ export interface PrintForm
     label: string;
     enabled: boolean;
     department?: Department;
-    percentages: string[];
+    percentages?: string[];
     "show-retail": boolean;
     "price-column": string;
     "show-price-label": boolean;
