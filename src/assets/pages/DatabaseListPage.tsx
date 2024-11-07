@@ -10,10 +10,12 @@ import {useDatabaseView} from "../providers/DatabaseViewProvider.tsx";
 import {DatabaseItem} from "../ts/DatabaseManagement.ts";
 import {Avatar, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Link, Pagination, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip} from "@nextui-org/react";
 import $ from "jquery";
+import {setTitle} from "../../main.tsx";
 
 
 export default function DatabaseListPage()
 {
+    setTitle();
     const [items, setItems] = useState<DatabaseItem[]>([]);
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
