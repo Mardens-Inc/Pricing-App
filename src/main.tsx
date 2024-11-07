@@ -17,7 +17,7 @@ import {NextUIProvider} from "@nextui-org/react";
 export const isProduction = window.location.hostname === "pricing-new.mardens.com";
 export const baseUrl =  "https://pricing-new.mardens.com";//isProduction ? "" : "http://pricing.local";
 
-export const setTitle = (title: string) => document.title = `${title ? `${title} - ` : ""}New Pricing Database`;
+export const setTitle = (title?: string) => document.title = `${title ? `${title} - ` : ""}New Pricing Database`;
 
 ReactDOM.createRoot($("#root")[0]!).render(
     <React.StrictMode>
