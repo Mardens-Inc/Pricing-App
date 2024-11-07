@@ -1,12 +1,12 @@
-import {Button, cn, getKeyValue, Select, SelectItem, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip} from "@nextui-org/react";
+import {Button, cn, getKeyValue, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from "@nextui-org/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faEllipsisV, faPrint} from "@fortawesome/free-solid-svg-icons";
+import {faEllipsisV} from "@fortawesome/free-solid-svg-icons";
 import {useSearch} from "../../providers/SearchProvider.tsx";
 import {useEffect, useState} from "react";
-import DatabaseRecords, {Column, DatabaseOptions, PrintForm} from "../../ts/DatabaseRecords.ts";
+import DatabaseRecords, {Column, DatabaseOptions} from "../../ts/DatabaseRecords.ts";
 import {useNavigate, useParams} from "react-router-dom";
-import {Departments} from "../../ts/printer.ts";
-import $ from "jquery";
+import DepartmentDropdown from "./TableComponents/DepartmentDropdown.tsx";
+import PrintButton from "./TableComponents/PrintButton.tsx";
 
 interface InventoryTableProps
 {
@@ -14,7 +14,7 @@ interface InventoryTableProps
     options: DatabaseOptions;
 }
 
-type RowValue = {
+export type RowValue = {
     value: string;
     attributes: string[];
 }
@@ -153,39 +153,7 @@ export default function InventoryTable(props: InventoryTableProps)
 
                                     if (props.options["print-form"].department?.id === -1 && column.attributes.includes("department"))
                                     {
-                                        value = (
-                                            <Select
-                                                key={`${row.id}-dept-selector`}
-                                                label={"Department"}
-                                                placeholder={"Select a department to print"}
-                                                radius={"full"}
-                                                classNames={{}}
-                                                onSelectionChange={selection =>
-                                                {
-                                                    const dept = Departments.find(i => i.id === +(
-                                                        ([...selection][0] as string)
-                                                            .replace(`${row.id}-`, "")
-                                                            .trim()
-                                                    ))?.id ?? -1;
-                                                    $(`tr#${row.id}`).attr("data-department", dept);
-                                                }}
-                                            >
-                                                {
-                                                    Departments
-                                                        .filter(i => i.id > 0)
-                                                        .map(
-                                                            dept =>
-                                                                <SelectItem
-                                                                    key={`${row.id}-${dept.id}`}
-                                                                    value={dept.name}
-                                                                    textValue={dept.name}
-                                                                >
-                                                                    {dept.id} - {dept.name}
-                                                                </SelectItem>
-                                                        )
-                                                }
-                                            </Select>
-                                        );
+                                        value = <DepartmentDropdown id={row.id}/>;
                                     }
 
                                     return (<TableCell key={column.name} {...column.attributes.reduce((acc, attr) => ({...acc, [`data-${attr}`]: true}), {})}>{value}</TableCell>);
@@ -194,13 +162,9 @@ export default function InventoryTable(props: InventoryTableProps)
                                     <TableCell key={`${row.id}-actions`}>
                                         <div className={"flex flex-row gap-2"}>
                                             {props.options["print-form"].enabled &&
-                                                <Tooltip content={"Print"} classNames={{base: "pointer-events-none"}} closeDelay={0}>
-                                                    <Button radius={"full"} className={"min-w-0 w-12 h-12"} onClick={() =>
-                                                    {
-                                                        const rowData = columns.map(c => ({value: getKeyValue(row, c.real_name), attributes: c.attributes})) as RowValue[];
-                                                        PrintData(id, rowData, props.options["print-form"], +($(`tr#${row.id}`).attr("data-department") ?? -1));
-                                                    }}><FontAwesomeIcon icon={faPrint}/></Button>
-                                                </Tooltip>
+                                                <>
+                                                    <PrintButton databaseId={id} row={row} columns={columns} printOptions={props.options["print-form"]}/>
+                                                </>
                                             }
                                             <Button radius={"full"} className={"min-w-0 w-12 h-12"}><FontAwesomeIcon icon={faEllipsisV}/></Button>
                                         </div>
@@ -216,29 +180,3 @@ export default function InventoryTable(props: InventoryTableProps)
     );
 }
 
-function PrintData(id: string, values: RowValue[], printOptions: PrintForm, department?: number)
-{
-    const uri: URL = new URL("https://pricetagger.mardens.com/api/");
-
-    let price = values.find(v => v.attributes.includes("price"));
-    if (price) uri.searchParams.append("price", price.value.replace(/[^0-9.]/g, ""));
-
-    let mp = values.find(v => v.attributes.includes("mp"));
-    if (mp) uri.searchParams.append("mp", mp.value.replace(/[^0-9.]/g, ""));
-
-    if (printOptions.department && printOptions.department.id > 0) uri.searchParams.append("department", printOptions.department.id.toString());
-    if (printOptions.label) uri.searchParams.append("label", printOptions.label);
-    if (printOptions.year) uri.searchParams.append("year", printOptions.year);
-    if (printOptions["show-price-label"]) uri.searchParams.append("showPriceLabel", "");
-
-    const databasePrintYear = localStorage.getItem(`print-year-${id}`);
-    const databasePrintColor = localStorage.getItem(`print-color-${id}`);
-    if (databasePrintYear) uri.searchParams.append("year", databasePrintYear);
-    if (databasePrintColor) uri.searchParams.append("color", databasePrintColor);
-
-    if (department && department > 0) uri.searchParams.append("department", department.toString());
-
-    uri.searchParams.append("v", Date.now().toString()); // Add a version to prevent caching
-
-    window.open(uri.toString(), "_blank", "toolbar=no,scrollbars=no,resizable=no,width=1020,height=667");
-}
