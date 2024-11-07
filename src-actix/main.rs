@@ -1,18 +1,21 @@
-mod singular_database_endpoint;
-mod all_databases_endpoint;
-mod all_databases;
-mod singular_database;
-
-#[path = "list/list_db.rs"]
-mod list_db;
+mod data_database_connection;
 #[path = "list/list_data.rs"]
 mod list_data;
+#[path = "list/list_db.rs"]
+mod list_db;
 #[path = "list/list_endpoint.rs"]
 mod list_endpoint;
-mod data_database_connection;
+#[path = "inventory/inventory_db.rs"]
+mod inventory_db;
+#[path = "inventory/inventory_endpoint.rs"]
+mod inventory_endpoint;
+#[path = "inventory/inventory_data.rs"]
+mod inventory_data;
 
 use crate::data_database_connection::DatabaseConnectionData;
-use actix_web::{get, middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder};
+use actix_web::{
+	get, middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder,
+};
 use awc::Client;
 use futures_util::stream::StreamExt;
 use include_dir::{include_dir, Dir};
@@ -23,29 +26,25 @@ pub static DEBUG: bool = cfg!(debug_assertions);
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-	std::env::set_var("RUST_LOG", "info");
+	std::env::set_var("RUST_LOG", "debug");
 	env_logger::init();
 
 	let port = 1860; // Port to listen on
 
-
-	let data = if DEBUG {
-		None
-	} else {
-		Some(match DatabaseConnectionData::get().await {
-			Ok(d) => d,
-			Err(err) => {
-				error!("Failed to get database connection data: {}", err);
-				return Ok(());
-			}
-		})
+	let data = match DatabaseConnectionData::get().await {
+		Ok(d) => d,
+		Err(err) => {
+			error!("Failed to get database connection data: {}", err);
+			return Ok(());
+		}
 	};
 
-	let data = data.as_ref();
-	list_db::initialize(data).await.map_err(|err| {
+	list_db::initialize(&data).await.map_err(|err| {
 		error!("Failed to initialize database: {}", err);
 		std::io::Error::new(std::io::ErrorKind::Other, "Failed to initialize database")
 	})?;
+
+	let connection_data_mutex = web::Data::new(std::sync::Arc::new(data));
 
 	let server = HttpServer::new(move || {
 		let app = App::new()
@@ -54,25 +53,44 @@ async fn main() -> std::io::Result<()> {
 				web::JsonConfig::default()
 					.limit(4096)
 					.error_handler(|err, _req| {
+						error!("Failed to parse JSON: {}", err);
 						let error = json!({ "error": format!("{}", err) });
 						actix_web::error::InternalError::from_response(
 							err,
 							HttpResponse::BadRequest().json(error),
-						).into()
-					})
+						)
+							.into()
+					}),
 			)
-			.service(web::scope("api").service(status));
+			// Make sure all errors are returned as JSON
+			.service(
+				web::scope("api")
+					.service(status)
+					.service(
+						web::scope("list")
+							.service(list_endpoint::get_all_locations)
+							.service(list_endpoint::create_location)
+							.service(list_endpoint::delete_location)
+							.app_data(connection_data_mutex.clone()),
+					)
+					.service(
+						web::scope("inventory")
+							.service(inventory_endpoint::get_inventory)
+							.service(inventory_endpoint::get_inventory_headers)
+							.service(inventory_endpoint::get_inventory_options)
+							.service(inventory_endpoint::insert_record)
+							.service(inventory_endpoint::upload_inventory)
+							.app_data(connection_data_mutex.clone()
+							)
+					),
+			);
 
 		// Add conditional routing based on the config
 		if DEBUG {
 			app.default_service(web::route().to(proxy_to_vite))
+			   .service(web::resource("/assets/{file:.*}").route(web::get().to(proxy_to_vite)))
 			   .service(
-				   web::resource("/assets/{file:.*}")
-					   .route(web::get().to(proxy_to_vite))
-			   )
-			   .service(
-				   web::resource("/node_modules/{file:.*}")
-					   .route(web::get().to(proxy_to_vite))
+				   web::resource("/node_modules/{file:.*}").route(web::get().to(proxy_to_vite)),
 			   )
 		} else {
 			app.default_service(web::route().to(index))
@@ -83,10 +101,13 @@ async fn main() -> std::io::Result<()> {
 		.bind(format!("0.0.0.0:{port}", port = port))?
 		.run();
 
-	info!("Starting {} server at http://127.0.0.1:{}", if DEBUG {"development"} else {"production"}, port);
+	info!(
+        "Starting {} server at http://127.0.0.1:{}",
+        if DEBUG { "development" } else { "production" },
+        port
+    );
 	server.await
 }
-
 
 // The maximum payload size allowed for forwarding requests and responses.
 //
@@ -119,7 +140,9 @@ async fn index(_req: HttpRequest) -> Result<impl Responder, Error> {
 		let body = file.contents();
 		return Ok(HttpResponse::Ok().content_type("text/html").body(body));
 	}
-	Err(actix_web::error::ErrorInternalServerError("Failed to find index.html"))
+	Err(actix_web::error::ErrorInternalServerError(
+		"Failed to find index.html",
+	))
 }
 
 // Proxies requests to the Vite development server.
@@ -146,9 +169,7 @@ async fn proxy_to_vite(req: HttpRequest, mut payload: web::Payload) -> Result<Ht
 	while let Some(chunk) = payload.next().await {
 		let chunk = chunk?;
 		if (body_bytes.len() + chunk.len()) > MAX_PAYLOAD_SIZE {
-			return Err(actix_web::error::ErrorPayloadTooLarge(
-				"Payload overflow",
-			));
+			return Err(actix_web::error::ErrorPayloadTooLarge("Payload overflow"));
 		}
 		body_bytes.extend_from_slice(&chunk);
 	}
@@ -214,7 +235,14 @@ pub async fn get_sql_credentials() -> Result<SqlCredentials, Box<dyn std::error:
 	let json: serde_json::Value = serde_json::from_slice(&body)?;
 	let host = json["host"].as_str().ok_or("Missing host")?.to_string();
 	let user = json["user"].as_str().ok_or("Missing user")?.to_string();
-	let password = json["password"].as_str().ok_or("Missing password")?.to_string();
+	let password = json["password"]
+		.as_str()
+		.ok_or("Missing password")?
+		.to_string();
 
-	Ok(SqlCredentials { host, user, password })
+	Ok(SqlCredentials {
+		host,
+		user,
+		password,
+	})
 }
