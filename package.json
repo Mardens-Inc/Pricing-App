@@ -9,7 +9,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "node scripts/dev.js",
-		"build-api": "cargo build --release",
+		"build-api": "wsl cargo build --release",
 		"run-api": "cargo run --bin pricing-app",
 		"build-frontend": "tsc && vite build",
 		"watch-api": "cargo watch -x \"run --bin pricing-app\" -C target/dev-env -N --why -w ../../src-actix",
