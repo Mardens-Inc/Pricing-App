@@ -1,0 +1,20 @@
+meta {
+  name: Create New Location
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/list
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Database Name",
+    "location": "City, USA",
+    "po": "MRD-123456",
+    "image": "amazon"
+  }
+}
