@@ -128,6 +128,7 @@ export default class DatabaseList {
             // $("#search").val(query);
             await this.loadView(query, true);
             $(document).trigger("load");
+            if (this.options["voice-search"]) this.speakResult();
             return this.items;
         }
     }
@@ -207,7 +208,6 @@ export default class DatabaseList {
         this.options.columns = this.options.columns.filter(c => c !== null && c !== undefined);
         const table = this.buildColumns();
         table.css("--columnSize", `${(1 / (this.options.columns.filter(i => i.visible).length + 1)) * 100}%`);
-        console.log(this.options)
         const tbody = $("<tbody>");
         for (const item of this.items) {
             const tr = $(`<tr id='${item.id}' class='list-item'>`);
@@ -508,6 +508,33 @@ export default class DatabaseList {
             console.error(e);
         }
         return table;
+    }
+
+
+    speakResult() {
+        window.speechSynthesis.cancel();
+        const firstItem = this.items[0];
+        console.log(firstItem, this.options.columns);
+        if (firstItem === undefined) return;
+
+        const descriptionColumn = this.options.columns.filter(c => c.attributes.includes("description"))[0];
+        const primaryKeyColumn = this.options.columns.filter(c => c.attributes.includes("primary"))[0];
+        const mardensPriceColumn = this.options.columns.filter(c => c.attributes.includes("mp"))[0];
+        if (descriptionColumn === undefined || primaryKeyColumn === undefined || mardensPriceColumn === undefined) return;
+
+        const description = firstItem[descriptionColumn.real_name];
+        const primaryKey = firstItem[primaryKeyColumn.real_name];
+        const mardensPrice = firstItem[mardensPriceColumn.real_name];
+
+        if (description === undefined || primaryKey === undefined || mardensPrice === undefined) return;
+
+        let speech = new SpeechSynthesisUtterance();
+        speech.lang = "en";
+        speech.text = `${primaryKey} - ${description} for $${mardensPrice}`;
+        speech.volume = 1;
+        speech.rate = 1;
+        speech.pitch = 1;
+        window.speechSynthesis.speak(speech);
     }
 
 
