@@ -4,7 +4,8 @@
 	"description": "",
 	"main": "deploy.js",
 	"scripts": {
-		"deploy": "node deploy.js"
+		"deploy": "node deploy.js",
+		"dev": "cargo tauri dev"
 	},
 	"repository": {
 		"type": "git",
