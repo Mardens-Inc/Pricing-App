@@ -70,6 +70,8 @@ export default class DatabaseList {
         this.list.html("");
         $(".pagination").html("");
         $("#search").val("");
+
+
         try {
             await this.loadView("", true);
         } catch (e) {
@@ -411,6 +413,12 @@ export default class DatabaseList {
 
                     const printWindow = window.open(url.toString(), "PRINT", "height=400,width=600");
                 });
+
+                console.log(this.items.length)
+                if(this.items.length === 1 && localStorage.getItem(`autoPrint-${this.id}`) === "true")
+                {
+                    printButton.click();
+                }
             }
 
 
@@ -472,6 +480,13 @@ export default class DatabaseList {
             tbody.append(tr);
         }
         this.list.empty();
+        if (this.options["print-form"].enabled) {
+            const isAutoPrintEnabled = localStorage.getItem(`autoPrint-${this.id}`) === "true";
+            this.list.append($(`<toggle class='fill' id='export-csv-button' value='${isAutoPrintEnabled}' style="width: 100px; margin-left: auto">Auto Print</toggle>`).on("toggle", async (e, data) => {
+                const value = data.value;
+                localStorage.setItem(`autoPrint-${this.id}`, value);
+            }));
+        }
         table.append(tbody);
         this.list.append(table);
         if (this.options["allow-inventorying"] && auth.isLoggedIn) {
