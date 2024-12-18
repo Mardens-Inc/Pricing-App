@@ -1,0 +1,1 @@
+pwp -j 192.168.21.209 -u administrator -a C:\Users\drew.chase\.ssh\mss-sshkey_ossh.key -s pricing-db --binary pricing-app --build-command "npm run build-frontend && wsl cargo build --release" --build
