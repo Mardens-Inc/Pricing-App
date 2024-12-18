@@ -21,7 +21,7 @@ export default function PrintButton(props: PrintButtonProps)
         return <PrintPercentagesButton {...props}/>;
     return (
         <Tooltip content={"Print"} classNames={{base: "pointer-events-none"}} closeDelay={0}>
-            <Button radius={"full"} className={"min-w-0 w-12 h-12"} onClick={() =>
+            <Button id={`print-button-${props.databaseId}-${props.row.id}`} radius={"full"} className={"min-w-0 w-12 h-12"} data-print-form onClick={() =>
             {
                 const rowData = props.columns.map(c => ({value: getKeyValue(props.row, c.real_name), attributes: c.attributes})) as RowValue[];
                 OpenPrintWindow(props.databaseId, rowData, props.printOptions, +($(`tr#${props.row.id}`).attr("data-department") ?? -1));
