@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="e5f5371d-36ad-489c-a117-e8e486a4212f" name="Ubuntu Server">
+        <fileTransfer accessType="SFTP" host="pricing-new.mardens.com" port="22" sshConfigId="e326df71-6237-44f7-b51e-20b6c509f360" sshConfig="administrator@pricing-new.mardens.com:22 key" keyPair="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
