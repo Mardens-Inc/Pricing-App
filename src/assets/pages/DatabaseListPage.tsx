@@ -114,9 +114,6 @@ export default function DatabaseListPage()
                         showShadow
                         className={"mx-auto"}
                         radius={"full"}
-                        classNames={{
-                            cursor: "text-black"
-                        }}
                     /> : <></>
             }
         >
