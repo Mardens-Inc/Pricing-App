@@ -139,7 +139,7 @@ export default class DatabaseRecords
     static async export(id: string): Promise<void>
     {
         const csv = (await $.get({
-            url: `${baseUrl}/api/location/${id}/export`,
+            url: `/api/inventory/download?id=${id}`,
             headers: {"Accept": "text/csv"}
         })).toString();
         const headers = await this.data(id, true);
