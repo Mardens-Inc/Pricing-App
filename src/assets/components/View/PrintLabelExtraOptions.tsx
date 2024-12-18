@@ -4,7 +4,7 @@ import {useParams} from "react-router-dom";
 import {PrintLabelColors} from "../../ts/printer.ts";
 import ExtendedSwitch from "../Extends/ExtendedSwitch.tsx";
 
-export default function PrintLabelExtraOptions({showColor = true, showYear = true}: { showColor?: boolean, showYear?: boolean })
+export default function PrintLabelExtraOptions({showColor = true, showYear = true, isPrintingEnabled}: { showColor?: boolean, showYear?: boolean, isPrintingEnabled?: boolean })
 {
     const id = useParams().id ?? "";
     const [year, setYear] = useState<string>(localStorage.getItem(`print-year-${id}`) || "");
@@ -64,12 +64,14 @@ export default function PrintLabelExtraOptions({showColor = true, showYear = tru
                 />
             }
 
-            <ExtendedSwitch
-                label={"Auto Print"}
-                description={"Automatically print labels when scanning a barcode."}
-                toggle={autoPrintLabel}
-                onToggle={setAutoPrintLabel}
-            />
+            {isPrintingEnabled &&
+                <ExtendedSwitch
+                    label={"Auto Print"}
+                    description={"Automatically print labels when scanning a barcode."}
+                    toggle={autoPrintLabel}
+                    onToggle={setAutoPrintLabel}
+                />
+            }
         </div>
 
 
