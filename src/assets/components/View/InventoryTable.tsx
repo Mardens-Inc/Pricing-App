@@ -7,6 +7,7 @@ import DatabaseRecords, {Column, DatabaseOptions} from "../../ts/DatabaseRecords
 import {useNavigate, useParams} from "react-router-dom";
 import DepartmentDropdown from "./TableComponents/DepartmentDropdown.tsx";
 import PrintButton from "./TableComponents/PrintButton.tsx";
+import $ from "jquery";
 
 interface InventoryTableProps
 {
@@ -66,8 +67,9 @@ export default function InventoryTable(props: InventoryTableProps)
                 .then((results) =>
                 {
                     if (results?.items)
+                    {
                         setItems(results.items);
-                    else
+                    } else
                         setItems([]);
                 })
                 .finally(() => setIsLoading(false));
@@ -79,6 +81,20 @@ export default function InventoryTable(props: InventoryTableProps)
             abortController.abort();
         };
     }, [search]);
+
+    useEffect(() =>
+    {
+
+        if (localStorage.getItem(`print-auto-print-${id}`) === "true" && items.length === 1)
+        {
+            const firstPrintButton = $(`button[data-print-form]`)[0] as HTMLButtonElement;
+            console.log("Auto Printing", firstPrintButton);
+            if (firstPrintButton)
+            {
+                firstPrintButton.click();
+            }
+        }
+    }, [items]);
 
     if (!id)
     {
