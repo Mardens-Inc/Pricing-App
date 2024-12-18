@@ -1,0 +1,15 @@
+[Unit]
+Description=Pricing Database
+StartLimitIntervalSec=0
+After=network.target
+
+[Service]
+Type=exec
+Restart=always
+RestartSec=1
+User=administrator
+WorkingDirectory=/www/wwwroot/pricing-new.mardens.com/
+ExecStart=/home/administrator/.local/bin/pricing-app
+
+[Install]
+WantedBy=multi-user.target
