@@ -58,6 +58,7 @@ export default function DatabaseViewPage()
                     <PrintLabelExtraOptions
                         showYear={data?.options["print-form"]["show-year-dropdown"] ?? false}
                         showColor={data?.options["print-form"]["show-color-dropdown"] ?? false}
+                        isPrintingEnabled={data?.options["print-form"]["enabled"] ?? false}
                     />
                 </div>
                 <div className={"flex flex-row"}>
