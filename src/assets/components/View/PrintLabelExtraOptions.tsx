@@ -2,12 +2,19 @@ import {Input, Select, SelectItem} from "@nextui-org/react";
 import {useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
 import {PrintLabelColors} from "../../ts/printer.ts";
+import ExtendedSwitch from "../Extends/ExtendedSwitch.tsx";
 
 export default function PrintLabelExtraOptions({showColor = true, showYear = true}: { showColor?: boolean, showYear?: boolean })
 {
     const id = useParams().id ?? "";
     const [year, setYear] = useState<string>(localStorage.getItem(`print-year-${id}`) || "");
     const [color, setColor] = useState<string | null>(localStorage.getItem(`print-color-${id}`));
+    const [autoPrintLabel, setAutoPrintLabel] = useState(localStorage.getItem(`print-auto-print-${id}`) === "true" || false);
+
+    useEffect(() =>
+    {
+        localStorage.setItem(`print-auto-print-${id}`, autoPrintLabel.toString());
+    }, [autoPrintLabel]);
 
     useEffect(() =>
     {
@@ -57,6 +64,14 @@ export default function PrintLabelExtraOptions({showColor = true, showYear = tru
                 />
             }
 
+            <ExtendedSwitch
+                label={"Auto Print"}
+                description={"Automatically print labels when scanning a barcode."}
+                toggle={autoPrintLabel}
+                onToggle={setAutoPrintLabel}
+            />
         </div>
+
+
     );
 }
