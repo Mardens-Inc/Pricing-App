@@ -15,6 +15,8 @@ mod server_information_endpoint;
 
 use crate::data_database_connection::DatabaseConnectionData;
 use crate::server_information_endpoint::get_server_version;
+use actix_files::file_extension_to_mime;
+use actix_web::error::ErrorInternalServerError;
 use actix_web::{
     get, middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder,
 };
@@ -83,6 +85,7 @@ async fn main() -> std::io::Result<()> {
                             .service(inventory_endpoint::get_inventory_options)
                             .service(inventory_endpoint::insert_record)
                             .service(inventory_endpoint::upload_inventory)
+                            .service(inventory_endpoint::download_inventory)
                             .app_data(connection_data_mutex.clone()),
                     ),
             );
@@ -96,7 +99,7 @@ async fn main() -> std::io::Result<()> {
                 )
         } else {
             app.default_service(web::route().to(index))
-                .service(web::resource("/assets/{file:.*}").route(web::get().to(index)))
+                .service(web::scope("assets/{file}").service(assets))
         }
     })
     .workers(4)
@@ -145,9 +148,20 @@ async fn index(_req: HttpRequest) -> Result<impl Responder, Error> {
         let body = file.contents();
         return Ok(HttpResponse::Ok().content_type("text/html").body(body));
     }
-    Err(actix_web::error::ErrorInternalServerError(
-        "Failed to find index.html",
-    ))
+    Err(ErrorInternalServerError("Failed to find index.html"))
+}
+
+#[get("")]
+async fn assets(file: web::Path<String>) -> impl Responder {
+    if let Some(file) = WWWROOT.get_file(format!("assets/{}", file.as_str())) {
+        let body = file.contents();
+        return Ok(HttpResponse::Ok()
+            .content_type(file_extension_to_mime(
+                file.path().extension().unwrap().to_str().unwrap(),
+            ))
+            .body(body));
+    }
+    Err(ErrorInternalServerError(format!("Failed to find {}", file)))
 }
 
 // Proxies requests to the Vite development server.
@@ -213,30 +227,7 @@ async fn proxy_to_vite(req: HttpRequest, mut payload: web::Payload) -> Result<Ht
 
     Ok(res.body(resp_body_bytes))
 }
-pub struct SqlCredentials {
-    pub host: String,
-    pub user: String,
-    pub password: String,
-}
-pub async fn get_sql_credentials() -> Result<SqlCredentials, Box<dyn std::error::Error>> {
-    let url = "https://lib.mardens.com/config.json";
-    let client = Client::new();
-    let mut response = client.get(url).send().await?;
-    let body = response.body().await?;
-    let json: serde_json::Value = serde_json::from_slice(&body)?;
-    let host = json["host"].as_str().ok_or("Missing host")?.to_string();
-    let user = json["user"].as_str().ok_or("Missing user")?.to_string();
-    let password = json["password"]
-        .as_str()
-        .ok_or("Missing password")?
-        .to_string();
 
-    Ok(SqlCredentials {
-        host,
-        user,
-        password,
-    })
-}
 fn start_vite_server() -> Result<Child, Box<dyn std::error::Error>> {
     #[cfg(target_os = "windows")]
     let find_cmd = "where";
