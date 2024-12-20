@@ -1,0 +1,22 @@
+meta {
+  name: Update Column Names
+  type: http
+  seq: 1
+}
+
+patch {
+  url: {{baseUrl}}/inventory/:id/columns/names
+  body: text
+  auth: none
+}
+
+params:path {
+  id: 
+}
+
+body:text {
+  NAME=DISPLAY_NAME
+  NAME=DISPLAY_NAME
+  NAME=DISPLAY_NAME
+  NAME=DISPLAY_NAME
+}
