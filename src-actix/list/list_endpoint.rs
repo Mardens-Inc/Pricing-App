@@ -26,7 +26,7 @@ pub async fn get_all_locations(
 #[post("")]
 pub async fn create_location(
 	data: web::Data<Arc<DatabaseConnectionData>>,
-	body: web::Json<list_data::LocationListItemNoId>
+	body: web::Json<list_data::LocationListItem>
 ) -> impl Responder {
 	let data = data.get_ref().as_ref();
 	match list_db::insert(&body, data).await {
@@ -41,10 +41,10 @@ pub async fn create_location(
 #[delete("/{id}")]
 pub async fn delete_location(
 	data: web::Data<Arc<DatabaseConnectionData>>,
-	id: web::Path<String>,
+	id: web::Path<u64>,
 ) -> impl Responder {
 	let data = data.get_ref().as_ref();
-	let id = id.as_ref();
+	let id = *id.as_ref();
 
 	// Delete from the locations list
 	match list_db::delete(id, data).await {
