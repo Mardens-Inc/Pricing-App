@@ -3,7 +3,6 @@ import {useEffect, useState} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEdit, faEllipsisH} from "@fortawesome/free-solid-svg-icons";
 import Logo from "../images/Logo.svg.tsx";
-import {useNavigate} from "react-router-dom";
 import {useSearch} from "../providers/SearchProvider.tsx";
 import {useAuth} from "../providers/AuthProvider.tsx";
 import {useDatabaseView} from "../providers/DatabaseViewProvider.tsx";
@@ -21,7 +20,6 @@ export default function DatabaseListPage()
     const [loading, setLoading] = useState(false);
     const [currentItems, setCurrentItems] = useState<DatabaseItem[]>([]);
     const [itemsPerPage, setItemsPerPage] = useState<number>(10);
-    const navigate = useNavigate();
     const {search} = useSearch();
     const {auth, isLoggedIn} = useAuth();
     useDatabaseView().setDatabaseId(undefined);
@@ -39,6 +37,7 @@ export default function DatabaseListPage()
         setLoading(true);
         dbList.get().then((databases) =>
         {
+            console.log("Loaded database list", databases);
             setItems(databases);
             setPage(1);
             setLoading(false);
@@ -133,7 +132,7 @@ export default function DatabaseListPage()
                 {currentItems.map((item, index) =>
                 {
                     return (
-                        <TableRow key={item.id + index.toString()} onClick={() => navigate(`/${item.id}`)}>
+                        <TableRow key={item.id + index.toString()} as={Link} href={`/${item.id}`} className={"dark:group-hover:bg-default-100/10"}>
                             <TableCell className={"w-12"}>
                                 {item.image ? <Avatar src={item.image} alt={item.name}/> : <Logo size={40}/>}
                             </TableCell>
