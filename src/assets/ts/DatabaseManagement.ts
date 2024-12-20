@@ -36,6 +36,5 @@ export interface DatabaseItem
     location: string;
     po: string;
     image: string;
-    options: Options;
     post_date: string;
 }
