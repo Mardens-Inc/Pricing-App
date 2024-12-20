@@ -5,6 +5,7 @@ use sqlx::{MySqlPool, Row};
 use std::error::Error;
 
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct OldOptions {
@@ -73,8 +74,8 @@ async fn get_location_options(
         .bind(&location_id)
         .fetch_one(pool)
         .await?;
-    let result: String = row.try_get("options")?;
-    let options: OldOptions = serde_json::from_str(&result)?;
+    let result: Value = row.try_get("options")?;
+    let options: OldOptions = serde_json::from_value(result)?;
     Ok(options)
 }
 
