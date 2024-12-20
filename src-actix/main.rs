@@ -1,17 +1,30 @@
-mod data_database_connection;
+pub mod data_database_connection;
+mod icons_endpoint;
+mod server_information_endpoint;
+
+// Inventory Modules
 #[path = "inventory/inventory_data.rs"]
-mod inventory_data;
+pub mod inventory_data;
 #[path = "inventory/inventory_db.rs"]
-mod inventory_db;
+pub mod inventory_db;
 #[path = "inventory/inventory_endpoint.rs"]
 mod inventory_endpoint;
+
+// Inventory Columns Modules
+#[path = "inventory/columns/columns_data.rs"]
+pub mod columns_data;
+#[path = "inventory/columns/columns_db.rs"]
+pub mod columns_db;
+#[path = "inventory/columns/columns_endpoint.rs"]
+mod columns_endpoint;
+
+// Inventory List Modules
 #[path = "list/list_data.rs"]
-mod list_data;
+pub mod list_data;
 #[path = "list/list_db.rs"]
-mod list_db;
+pub mod list_db;
 #[path = "list/list_endpoint.rs"]
 mod list_endpoint;
-mod server_information_endpoint;
 
 use crate::data_database_connection::DatabaseConnectionData;
 use crate::server_information_endpoint::get_server_version;
@@ -87,6 +100,11 @@ async fn main() -> std::io::Result<()> {
                             .service(inventory_endpoint::upload_inventory)
                             .service(inventory_endpoint::download_inventory)
                             .app_data(connection_data_mutex.clone()),
+                    )
+                    .service(
+                        web::scope("icons")
+                            .service(icons_endpoint::get_icons)
+                            .service(icons_endpoint::get_icon),
                     ),
             );
 
