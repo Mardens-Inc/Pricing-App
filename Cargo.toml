@@ -1,5 +1,5 @@
 [package]
-name = "pricing-app"
+name = "pricing_app"
 version = "1.0.0"
 edition = "2021"
 build = "src-actix/build.rs"
@@ -7,6 +7,16 @@ build = "src-actix/build.rs"
 [[bin]]
 name = "pricing-app"
 path = "src-actix/main.rs"
+
+[lib]
+name = "pricing_app"
+path = "src-actix/main.rs"
+crate-type = ["lib"]
+
+[[example]]
+name = "options_migration_tool"
+path = "tools/options_migration_tool.rs"
+
 
 [dependencies]
 actix-web = { version = "4.9.0" }
@@ -29,6 +39,7 @@ futures = "0.3.31"
 serde_urlencoded = "0.7.1"
 csv = { version = "1.3.1" }
 serde_derive = "1.0.210"
+tokio = { version = "1.40.0", features = ["rt", "rt-multi-thread", "macros"] }
 
 
 [build-dependencies]
