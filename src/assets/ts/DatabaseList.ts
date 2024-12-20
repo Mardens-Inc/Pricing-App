@@ -1,11 +1,19 @@
 import {DatabaseItem} from "./DatabaseManagement.ts";
 import $ from "jquery";
-import {baseUrl} from "../../main.tsx";
+import Icon from "./icons.ts";
 
 export default class DatabaseList
 {
     static async get(): Promise<DatabaseItem[]>
     {
-        return await $.get(`${baseUrl}/api/locations/all`) as DatabaseItem[];
+        let items = await $.get(`/api/list`) as DatabaseItem[];
+        const icons = await Icon.all();
+
+        for (const item of items)
+        {
+            item.image = (await Icon.get(item.image, icons))?.url ?? "";
+        }
+
+        return items;
     }
 }
