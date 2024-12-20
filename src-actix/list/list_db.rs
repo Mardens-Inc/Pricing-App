@@ -40,7 +40,7 @@ pub async fn get_all(
     let pool = create_pool(data).await?;
     let locations = sqlx::query_as::<_, LocationListItem>(
         r#"
-		select * from locations
+		select * from locations order by post_date desc
 		"#,
     )
     .fetch_all(&pool)
