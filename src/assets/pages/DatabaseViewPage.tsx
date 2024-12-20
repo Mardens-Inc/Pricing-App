@@ -8,11 +8,15 @@ import InventoryingForm from "../components/View/InventoryingForm.tsx";
 import InventoryTable from "../components/View/InventoryTable.tsx";
 import Logo from "../images/Logo.svg.tsx";
 import PrintLabelExtraOptions from "../components/View/PrintLabelExtraOptions.tsx";
+import {useAuth} from "../providers/AuthProvider.tsx";
 
 export default function DatabaseViewPage()
 {
     const id = useParams().id;
     const navigate = useNavigate();
+
+    const {isLoggedIn} = useAuth();
+
     if (!id)
     {
         console.error("No id provided for DatabaseViewPage");
@@ -65,7 +69,7 @@ export default function DatabaseViewPage()
 
                     <InventoryTable onItemSelected={console.log} options={data?.options ?? ({} as DatabaseOptions)}/>
 
-                    {data?.options["allow-inventorying"] && (
+                    {isLoggedIn && data?.options["allow-inventorying"] && (
                         <InventoryingForm columns={data?.options.columns} onSubmit={data =>
                         {
                             console.log(data);
