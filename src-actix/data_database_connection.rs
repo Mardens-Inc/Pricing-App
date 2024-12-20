@@ -8,7 +8,7 @@ pub struct DatabaseConnectionData {
 }
 
 impl DatabaseConnectionData {
-    pub(crate) async fn get() -> Result<Self, Box<dyn std::error::Error>> {
+    pub async fn get() -> Result<Self, Box<dyn std::error::Error>> {
         use reqwest::Client;
         let url = "https://lib.mardens.com/config.json";
         let client = Client::builder()
