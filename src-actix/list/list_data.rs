@@ -5,14 +5,14 @@ use serde::ser::SerializeMap;
 use serde::{Deserialize, Deserializer, Serialize};
 use sqlx::FromRow;
 
-#[derive(FromRow, Debug, Clone)]
+#[derive(FromRow)]
 pub struct LocationListItem {
     pub id: Option<u64>,
     pub name: String,
     pub location: String,
     pub po: String,
     pub image: String,
-    pub post_date: sqlx::types::chrono::DateTime<sqlx::types::chrono::Utc>,
+    pub post_date: chrono::DateTime<chrono::Utc>,
 }
 
 impl Serialize for LocationListItem {
@@ -24,13 +24,14 @@ impl Serialize for LocationListItem {
         if let Some(id) = self.id {
             let hashed_id = encode(&[id]);
             map.serialize_entry("id", &hashed_id)?;
-        }else{
+        } else {
             map.serialize_entry("id", "")?;
         }
         map.serialize_entry("name", &self.name)?;
         map.serialize_entry("location", &self.location)?;
         map.serialize_entry("po", &self.po)?;
         map.serialize_entry("image", &self.image)?;
+        map.serialize_entry("post_date", &self.post_date)?;
         map.end()
     }
 }
@@ -73,7 +74,7 @@ impl<'de> Deserialize<'de> for LocationListItem {
                 let mut location: Option<String> = None;
                 let mut po: Option<String> = None;
                 let mut image: Option<String> = None;
-                let mut post_date: Option<sqlx::types::chrono::DateTime<sqlx::types::chrono::Utc>> = None;
+                let mut post_date: Option<chrono::DateTime<chrono::Utc>> = None;
 
                 // Loop over the key-value pairs in the map
                 while let Some(key) = map.next_key()? {
