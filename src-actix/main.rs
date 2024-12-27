@@ -1,3 +1,8 @@
+// -------------
+// For debugging purposes only
+// TODO: Remove for production
+#![allow(clippy::all)]
+// -------------
 pub mod data_database_connection;
 mod icons_endpoint;
 mod server_information_endpoint;
@@ -31,7 +36,7 @@ use crate::server_information_endpoint::get_server_version;
 use actix_files::file_extension_to_mime;
 use actix_web::error::ErrorInternalServerError;
 use actix_web::{
-    get, middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder,
+	get, middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder,
 };
 use awc::Client;
 use futures_util::stream::StreamExt;
@@ -217,7 +222,7 @@ async fn proxy_to_vite(req: HttpRequest, mut payload: web::Payload) -> Result<Ht
         .send_body(body_bytes)
         .await
         .map_err(|err| {
-            actix_web::error::ErrorInternalServerError(format!(
+            ErrorInternalServerError(format!(
                 "Failed to forward request: {}",
                 err
             ))
@@ -246,7 +251,7 @@ async fn proxy_to_vite(req: HttpRequest, mut payload: web::Payload) -> Result<Ht
     Ok(res.body(resp_body_bytes))
 }
 
-fn start_vite_server() -> Result<Child, Box<dyn std::error::Error>> {
+fn start_vite_server() -> Result<Child, Box<dyn error::Error>> {
     #[cfg(target_os = "windows")]
     let find_cmd = "where";
     #[cfg(not(target_os = "windows"))]
