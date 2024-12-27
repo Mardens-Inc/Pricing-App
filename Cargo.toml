@@ -14,8 +14,12 @@ path = "src-actix/main.rs"
 crate-type = ["lib"]
 
 [[example]]
-name = "options_migration_tool"
-path = "tools/options_migration_tool.rs"
+name = "column_mapping_migration_tool"
+path = "tools/column_mapping_migration_tool.rs"
+
+[[example]]
+name = "table_name_migration_tool"
+path = "tools/table_name_migration_tool.rs"
 
 
 [dependencies]
