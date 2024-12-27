@@ -50,6 +50,35 @@ pub async fn get_columns(
     Ok(columns)
 }
 
+pub async fn insert_column(
+    name: impl AsRef<str>,
+    display_name: impl AsRef<str>,
+    visible: bool,
+    attributes: impl AsRef<str>,
+    database_id: u64,
+) -> Result<(), Box<dyn Error>> {
+    let name = name.as_ref();
+    let display_name = display_name.as_ref();
+    let attributes = attributes.as_ref();
+
+    let pool = create_pool(&DatabaseConnectionData::get().await?).await?;
+    let result = sqlx::query(
+        r#"
+        INSERT INTO inventory_columns (name, display_name, visible, attributes, database_id)
+        VALUES (?, ?, ?, ?, ?);
+    "#,
+    )
+    .bind(name)
+    .bind(display_name)
+    .bind(visible)
+    .bind(attributes)
+    .bind(database_id)
+    .execute(&pool)
+    .await?;
+
+    Ok(())
+}
+
 pub async fn set_display_name(
     location_id: u64,
     name: impl AsRef<str>,
@@ -74,7 +103,6 @@ pub async fn set_display_name(
     Ok(())
 }
 
-
 pub async fn set_visibility(
     location_id: u64,
     name: impl AsRef<str>,
@@ -83,25 +111,30 @@ pub async fn set_visibility(
 ) -> Result<(), Box<dyn Error>> {
     let name = name.as_ref();
     let pool = create_pool(data).await?;
-    
+
     sqlx::query(
         r#"
         UPDATE inventory_columns SET visible = ? WHERE name = ? AND database_id = ? LIMIT 1;
         "#,
     )
-        .bind(visible)
-        .bind(name)
-        .bind(location_id)
-        .execute(&pool)
-        .await?;
+    .bind(visible)
+    .bind(name)
+    .bind(location_id)
+    .execute(&pool)
+    .await?;
 
     Ok(())
 }
 
-pub async fn set_attributes(location_id: u64, name: impl AsRef<str>, attributes: impl AsRef<str>, data: &DatabaseConnectionData) -> Result<(), Box<dyn Error>> {
+pub async fn set_attributes(
+    location_id: u64,
+    name: impl AsRef<str>,
+    attributes: impl AsRef<str>,
+    data: &DatabaseConnectionData,
+) -> Result<(), Box<dyn Error>> {
     let name = name.as_ref();
     let pool = create_pool(data).await?;
-    
+
     let attributes = attributes.as_ref();
 
     sqlx::query(
@@ -111,11 +144,11 @@ pub async fn set_attributes(location_id: u64, name: impl AsRef<str>, attributes:
         WHERE name = ? AND database_id = ? LIMIT 1;
         "#,
     )
-        .bind(attributes)
-        .bind(name)
-        .bind(location_id)
-        .execute(&pool)
-        .await?;
+    .bind(attributes)
+    .bind(name)
+    .bind(location_id)
+    .execute(&pool)
+    .await?;
 
     Ok(())
 }
