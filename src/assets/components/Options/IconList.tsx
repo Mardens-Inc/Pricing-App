@@ -1,5 +1,4 @@
 import {useEffect, useState} from "react";
-import {baseUrl} from "../../../main.tsx";
 import $ from "jquery";
 import {cn, Image, Skeleton} from "@nextui-org/react";
 
@@ -25,7 +24,7 @@ export default function IconList(props: IconListProps)
     useEffect(() =>
     {
         setIsLoading(true);
-        const url = `${baseUrl}/api/locations/images`;
+        const url = `/api/icons`;
         $.get(url).then((data: Icon[]) =>
         {
             setIcons(data);
