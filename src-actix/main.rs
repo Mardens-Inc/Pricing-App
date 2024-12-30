@@ -32,6 +32,14 @@ pub mod list_db;
 mod list_endpoint;
 mod mysql_row_wrapper;
 
+// Inventory Options Modules
+#[path = "inventory/options/options_data.rs"]
+mod options_data;
+#[path = "inventory/options/options_db.rs"]
+mod options_db;
+#[path = "inventory/options/options_endpoint.rs"]
+mod options_endpoint;
+
 use crate::data_database_connection::DatabaseConnectionData;
 use crate::server_information_endpoint::get_server_version;
 use actix_files::file_extension_to_mime;
@@ -93,6 +101,7 @@ async fn main() -> std::io::Result<()> {
                     .service(
                         web::scope("list")
                             .service(list_endpoint::get_all_locations)
+                            .service(list_endpoint::get_location)
                             .service(list_endpoint::create_location)
                             .service(list_endpoint::delete_location)
                             .app_data(connection_data_mutex.clone()),
