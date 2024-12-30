@@ -1,6 +1,7 @@
 mod table_name_migration_tool;
 
 use log::{debug, info, warn};
+use pricing_app::columns_data::InventoryColumn;
 use pricing_app::columns_db::insert_column;
 use pricing_app::data_database_connection::DatabaseConnectionData;
 use serde::{Deserialize, Serialize};
@@ -72,12 +73,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
         for column in options.columns {
             debug!("Inserting column {}", column.name);
 
-            // Insert the column into the inventory_columns table.
-            insert_column(
+            InventoryColumn::insert(
+                &data,
                 column.real_name,
-                column.name,
+                Some(column.name),
                 column.visible,
-                column.attributes.join(","), // Serialize attributes as a comma-separated string.
+                Some(column.attributes.join(",")), // Serialize attributes as a comma-separated string.
                 id,
             )
             .await?;
