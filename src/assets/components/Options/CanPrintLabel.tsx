@@ -12,6 +12,9 @@ export default function CanPrintLabel()
     const [year, setYear] = useState<string>("");
     const [sticker, setSticker] = useState<PrintLabelSize | null>(null);
     const [showPriceLabel, setShowPriceLabel] = useState<boolean>(false);
+    const [showColorDropdown, setShowColorDropdown] = useState(false);
+    const [showYearInput, setShowYearInput] = useState(false);
+
     return (
         <>
             <ExtendedSwitch
@@ -60,6 +63,7 @@ export default function CanPrintLabel()
                             autoComplete={"off"}
                             value={color}
                             onSelectionChange={(e) => setColor([...e][0] as string)}
+                            isDisabled={showColorDropdown}
 
                         >
                             {PrintLabelColors.map((color) => (
@@ -75,6 +79,7 @@ export default function CanPrintLabel()
                             value={year}
                             onValueChange={(e) => setYear(e.replace(/\D/g, ""))}
                             maxLength={2}
+                            isDisabled={showYearInput}
                         />
                     </div>
                     <div className={"flex flex-row gap-2"}>
@@ -92,6 +97,10 @@ export default function CanPrintLabel()
                             ))}
                         </Select>
 
+
+                    </div>
+
+                    <div className={"flex flex-row gap-2"}>
                         <ExtendedSwitch
                             label={"Show Price Label"}
                             description={"Show the price label on the printed label."}
@@ -100,6 +109,20 @@ export default function CanPrintLabel()
                             className={"max-w-full"}
                         />
 
+                        <ExtendedSwitch
+                            label={"Show Year Input"}
+                            description={"Show the year input on the inventorying page."}
+                            toggle={showYearInput}
+                            onToggle={setShowYearInput}
+                            className={"max-w-full"}
+                        />
+                        <ExtendedSwitch
+                            label={"Show Color Input"}
+                            description={"Show the color dropdown on the inventorying page."}
+                            toggle={showColorDropdown}
+                            onToggle={setShowColorDropdown}
+                            className={"max-w-full"}
+                        />
                     </div>
                 </div>
             )}
