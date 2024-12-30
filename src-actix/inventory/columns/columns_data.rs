@@ -1,11 +1,10 @@
-use crypto::hashids::encode_single;
 use serde::ser::SerializeMap;
 use serde::{Serialize, Serializer};
 use sqlx::FromRow;
 
 #[derive(FromRow)]
 pub struct InventoryColumn {
-    pub id: i64,
+    pub id: u64,
     pub name: String,
     pub display_name: Option<String>,
     pub visible: bool,
@@ -22,7 +21,6 @@ impl Serialize for InventoryColumn {
         map.serialize_entry("name", &self.name)?;
         map.serialize_entry("display_name", &self.display_name)?;
         map.serialize_entry("visible", &self.visible)?;
-        map.serialize_entry("database_id", encode_single(self.database_id).as_str())?;
 
         if let Some(attributes) = &self.attributes {
             let attributes: Vec<String> = attributes.split(",").map(|s| s.to_string()).collect();
