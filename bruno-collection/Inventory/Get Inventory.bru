@@ -1,0 +1,33 @@
+meta {
+  name: Get Inventory
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/inventory/:id/?query_columns=Material,Description&limit=10&offset=0&sort_by=last_modified_date&sort_order=ASC
+  body: none
+  auth: none
+}
+
+params:query {
+  query_columns: Material,Description
+  limit: 10
+  offset: 0
+  sort_by: last_modified_date
+  sort_order: ASC
+  ~query: ASST
+}
+
+params:path {
+  id: dxaNQwP7XyvolB4m
+}
+
+body:xml {
+  query
+  query_columns
+  limit
+  offset
+  sort_by
+  sort_order
+}
