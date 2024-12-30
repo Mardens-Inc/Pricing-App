@@ -14,6 +14,19 @@ pub async fn get_all_locations(
     Ok(HttpResponse::Ok().json(locations))
 }
 
+#[get("{id}")]
+pub async fn get_location(
+    id: web::Path<String>,
+    data: web::Data<Arc<DatabaseConnectionData>>,
+) -> Result<impl Responder, Box<dyn Error>> {
+    let data = data.get_ref().as_ref();
+    let id = id.as_ref();
+    let id = decode_single(id)?;
+    let location = list_db::single(id, data).await?;
+
+    Ok(HttpResponse::Ok().json(location))
+}
+
 #[post("")]
 pub async fn create_location(
     data: web::Data<Arc<DatabaseConnectionData>>,
@@ -24,7 +37,7 @@ pub async fn create_location(
     Ok(HttpResponse::Ok().finish())
 }
 
-#[delete("/{id}")]
+#[delete("{id}")]
 pub async fn delete_location(
     data: web::Data<Arc<DatabaseConnectionData>>,
     id: web::Path<String>,
