@@ -49,6 +49,20 @@ pub async fn get_all(
     Ok(locations)
 }
 
+pub async fn single(
+    id: u64,
+    data: &DatabaseConnectionData,
+) -> Result<LocationListItem, Box<dyn Error>> {
+    let pool = create_pool(data).await?;
+    let location =
+        sqlx::query_as::<_, LocationListItem>(r#"select * from locations where id = ? limit 1"#)
+            .bind(id)
+            .fetch_one(&pool)
+            .await?;
+
+    Ok(location)
+}
+
 pub async fn insert(
     location: &LocationListItem,
     data: &DatabaseConnectionData,
