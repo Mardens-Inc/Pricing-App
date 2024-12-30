@@ -30,13 +30,14 @@ pub mod list_data;
 pub mod list_db;
 #[path = "list/list_endpoint.rs"]
 mod list_endpoint;
+mod mysql_row_wrapper;
 
 use crate::data_database_connection::DatabaseConnectionData;
 use crate::server_information_endpoint::get_server_version;
 use actix_files::file_extension_to_mime;
 use actix_web::error::ErrorInternalServerError;
 use actix_web::{
-	get, middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder,
+    get, middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder,
 };
 use awc::Client;
 use futures_util::stream::StreamExt;
@@ -97,13 +98,14 @@ async fn main() -> std::io::Result<()> {
                             .app_data(connection_data_mutex.clone()),
                     )
                     .service(
-                        web::scope("inventory")
+                        web::scope("inventory/{id}")
                             .service(inventory_endpoint::get_inventory)
                             .service(inventory_endpoint::get_inventory_headers)
                             .service(inventory_endpoint::get_inventory_options)
                             .service(inventory_endpoint::insert_record)
                             .service(inventory_endpoint::upload_inventory)
                             .service(inventory_endpoint::download_inventory)
+                            .service(web::scope("columns").service(columns_endpoint::get_columns))
                             .app_data(connection_data_mutex.clone()),
                     )
                     .service(
@@ -221,12 +223,7 @@ async fn proxy_to_vite(req: HttpRequest, mut payload: web::Payload) -> Result<Ht
         .no_decompress()
         .send_body(body_bytes)
         .await
-        .map_err(|err| {
-            ErrorInternalServerError(format!(
-                "Failed to forward request: {}",
-                err
-            ))
-        })?;
+        .map_err(|err| ErrorInternalServerError(format!("Failed to forward request: {}", err)))?;
 
     // Buffer the entire response body
     let mut resp_body_bytes = web::BytesMut::new();
@@ -251,7 +248,7 @@ async fn proxy_to_vite(req: HttpRequest, mut payload: web::Payload) -> Result<Ht
     Ok(res.body(resp_body_bytes))
 }
 
-fn start_vite_server() -> Result<Child, Box<dyn error::Error>> {
+fn start_vite_server() -> Result<Child, Box<dyn std::error::Error>> {
     #[cfg(target_os = "windows")]
     let find_cmd = "where";
     #[cfg(not(target_os = "windows"))]
