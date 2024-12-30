@@ -3,7 +3,6 @@ use crate::data_database_connection::DatabaseConnectionData;
 use log::debug;
 use sqlx::{Executor, MySqlPool};
 use std::error::Error;
-use std::path::Display;
 
 pub async fn initialize(data: &DatabaseConnectionData) -> Result<(), Box<dyn Error>> {
     let pool = create_pool(data).await?;
@@ -35,120 +34,96 @@ async fn create_pool(data: &DatabaseConnectionData) -> Result<MySqlPool, Box<dyn
     Ok(pool)
 }
 
-pub async fn get_columns(
-    location_id: u64,
-    data: &DatabaseConnectionData,
-) -> Result<Vec<InventoryColumn>, Box<dyn Error>> {
-    let pool = create_pool(data).await?;
-    let columns = sqlx::query_as::<_, InventoryColumn>(
-        "select * from inventory_columns where database_id = ?",
-    )
-    .bind(location_id)
-    .fetch_all(&pool)
-    .await?;
+impl InventoryColumn {
+    /// Inserts a new `InventoryColumn` record into the database.
+    pub async fn insert(
+        data: &DatabaseConnectionData,
+        name: impl AsRef<str>,
+        display_name: Option<impl AsRef<str>>,
+        visible: bool,
+        attributes: Option<impl AsRef<str>>,
+        database_id: u64,
+    ) -> Result<(), Box<dyn Error>> {
+        let pool = create_pool(data).await?;
 
-    Ok(columns)
-}
+        sqlx::query(
+            r#"
+            INSERT INTO inventory_columns (name, display_name, visible, attributes, database_id)
+            VALUES (?, ?, ?, ?, ?);
+            "#,
+        )
+            .bind(name.as_ref()) // Name
+            .bind(display_name.as_ref().map(|dn| dn.as_ref())) // Display Name
+            .bind(visible) // Visible
+            .bind(attributes.as_ref().map(|attr| attr.as_ref())) // Attributes
+            .bind(database_id) // Database ID
+            .execute(&pool)
+            .await?;
 
-pub async fn insert_column(
-    name: impl AsRef<str>,
-    display_name: impl AsRef<str>,
-    visible: bool,
-    attributes: impl AsRef<str>,
-    database_id: u64,
-) -> Result<(), Box<dyn Error>> {
-    let name = name.as_ref();
-    let display_name = display_name.as_ref();
-    let attributes = attributes.as_ref();
+        Ok(())
+    }
 
-    let pool = create_pool(&DatabaseConnectionData::get().await?).await?;
-    let result = sqlx::query(
-        r#"
-        INSERT INTO inventory_columns (name, display_name, visible, attributes, database_id)
-        VALUES (?, ?, ?, ?, ?);
-    "#,
-    )
-    .bind(name)
-    .bind(display_name)
-    .bind(visible)
-    .bind(attributes)
-    .bind(database_id)
-    .execute(&pool)
-    .await?;
+    /// Fetches all `InventoryColumn` records for a specific `database_id`.
+    pub async fn get_all(
+        data: &DatabaseConnectionData,
+        database_id: u64,
+    ) -> Result<Vec<Self>, Box<dyn Error>> {
+        let pool = create_pool(data).await?;
+        let columns = sqlx::query_as::<_, InventoryColumn>(
+            r#"
+            SELECT * FROM inventory_columns WHERE database_id = ?;
+            "#,
+        )
+            .bind(database_id)
+            .fetch_all(&pool)
+            .await?;
 
-    Ok(())
-}
+        Ok(columns)
+    }
 
-pub async fn set_display_name(
-    location_id: u64,
-    name: impl AsRef<str>,
-    display_name: impl AsRef<str>,
-    data: &DatabaseConnectionData,
-) -> Result<(), Box<dyn Error>> {
-    let name = name.as_ref();
-    let display_name = display_name.as_ref();
-    let pool = create_pool(data).await?;
+    /// Updates the `InventoryColumn` with new values for `display_name`, `visible`, and `attributes`.
+    pub async fn update(
+        &self,
+        data: &DatabaseConnectionData,
+    ) -> Result<(), Box<dyn Error>> {
+        let pool = create_pool(data).await?;
 
-    sqlx::query(
-        r#"
-        UPDATE inventory_columns SET display_name = ? WHERE name = ? AND database_id = ? LIMIT 1;
-    "#,
-    )
-    .bind(display_name)
-    .bind(name)
-    .bind(location_id)
-    .execute(&pool)
-    .await?;
+        sqlx::query(
+            r#"
+            UPDATE inventory_columns
+            SET display_name = ?, visible = ?, attributes = ?
+            WHERE name = ? AND database_id = ? LIMIT 1;
+            "#,
+        )
+            .bind(&self.display_name) // Updated display name
+            .bind(self.visible) // Updated visibility
+            .bind(&self.attributes) // Updated attributes
+            .bind(&self.name) // Column name
+            .bind(self.database_id) // Database ID
+            .execute(&pool)
+            .await?;
 
-    Ok(())
-}
+        Ok(())
+    }
 
-pub async fn set_visibility(
-    location_id: u64,
-    name: impl AsRef<str>,
-    visible: bool,
-    data: &DatabaseConnectionData,
-) -> Result<(), Box<dyn Error>> {
-    let name = name.as_ref();
-    let pool = create_pool(data).await?;
+    /// Deletes a column by name and database ID.
+    pub async fn delete(
+        data: &DatabaseConnectionData,
+        database_id: u64,
+        name: impl AsRef<str>,
+    ) -> Result<(), Box<dyn Error>> {
+        let pool = create_pool(data).await?;
+        sqlx::query(
+            r#"
+            DELETE FROM inventory_columns
+            WHERE name = ? AND database_id = ? LIMIT 1;
+            "#,
+        )
+            .bind(name.as_ref()) // Column name
+            .bind(database_id) // Database ID
+            .execute(&pool)
+            .await?;
 
-    sqlx::query(
-        r#"
-        UPDATE inventory_columns SET visible = ? WHERE name = ? AND database_id = ? LIMIT 1;
-        "#,
-    )
-    .bind(visible)
-    .bind(name)
-    .bind(location_id)
-    .execute(&pool)
-    .await?;
-
-    Ok(())
-}
-
-pub async fn set_attributes(
-    location_id: u64,
-    name: impl AsRef<str>,
-    attributes: impl AsRef<str>,
-    data: &DatabaseConnectionData,
-) -> Result<(), Box<dyn Error>> {
-    let name = name.as_ref();
-    let pool = create_pool(data).await?;
-
-    let attributes = attributes.as_ref();
-
-    sqlx::query(
-        r#"
-        UPDATE inventory_columns
-        SET attributes = ?
-        WHERE name = ? AND database_id = ? LIMIT 1;
-        "#,
-    )
-    .bind(attributes)
-    .bind(name)
-    .bind(location_id)
-    .execute(&pool)
-    .await?;
-
-    Ok(())
+        Ok(())
+    }
 }
