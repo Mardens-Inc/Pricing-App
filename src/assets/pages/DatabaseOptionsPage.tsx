@@ -6,7 +6,6 @@ import {isProduction, setTitle} from "../../main.tsx";
 import ColumnsList from "../components/Options/ColumnsList.tsx";
 import AllowInventorying from "../components/Options/AllowInventorying.tsx";
 import CanPrintLabel from "../components/Options/CanPrintLabel.tsx";
-import ExtendedSwitch from "../components/Extends/ExtendedSwitch.tsx";
 import {useEffect, useState} from "react";
 import DatabaseRecords, {Column, DatabaseData} from "../ts/DatabaseRecords.ts";
 import {Button, Input, Link} from "@nextui-org/react";
@@ -95,12 +94,6 @@ export default function DatabaseOptionsPage()
                 <h3 className={"text-2xl"}>Extra Options</h3>
                 <AllowInventorying/>
                 <CanPrintLabel/>
-                <ExtendedSwitch
-                    label={"Enable voice search?"}
-                    description={"Allow users to search using voice commands."}
-                    className={"max-w-full"}
-                />
-
             </div>
             <div className={"flex flex-row items-center justify-end gap-2 fixed bottom-0 h-20 w-full pr-4 z-10 backdrop-blur-lg backdrop-saturate-150 bg-background/70"}>
                 <Button radius={"full"} color={"primary"}>Save</Button>
