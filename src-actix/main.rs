@@ -61,7 +61,7 @@ async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
 
-    let port = 1860; // Port to listen on
+    let port = 1421; // Port to listen on
 
     let data = match DatabaseConnectionData::get().await {
         Ok(d) => d,
