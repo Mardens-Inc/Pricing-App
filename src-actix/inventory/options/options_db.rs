@@ -1,10 +1,10 @@
 use crate::data_database_connection::DatabaseConnectionData;
 use crate::options_data::{InventoryOptions, Inventorying, PrintForm};
+use anyhow::Result;
 use log::debug;
 use sqlx::{Executor, MySqlPool, Row};
-use std::error::Error;
 
-async fn create_pool(data: &DatabaseConnectionData) -> Result<MySqlPool, Box<dyn Error>> {
+async fn create_pool(data: &DatabaseConnectionData) -> Result<MySqlPool> {
     debug!("Creating MySQL production connection");
     let pool = MySqlPool::connect(&format!(
         "mysql://{}:{}@{}/pricing",
@@ -14,25 +14,23 @@ async fn create_pool(data: &DatabaseConnectionData) -> Result<MySqlPool, Box<dyn
     Ok(pool)
 }
 
-pub async fn initialize(data: &DatabaseConnectionData) -> Result<(), Box<dyn Error>> {
+pub async fn initialize(data: &DatabaseConnectionData) -> Result<()> {
     let pool = create_pool(data).await?;
     pool.execute(
         r#"
 CREATE TABLE IF NOT EXISTS `inventory_options`
 (
-    id           BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    inventorying_enabled BOOLEAN NOT NULL DEFAULT FALSE,
-    inventorying_add_if_missing BOOLEAN NOT NULL DEFAULT FALSE,
-    inventorying_remove_if_zero BOOLEAN NOT NULL DEFAULT FALSE,
+    id                           BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    inventorying_enabled         BOOLEAN NOT NULL DEFAULT FALSE,
+    inventorying_add_if_missing  BOOLEAN NOT NULL DEFAULT FALSE,
+    inventorying_remove_if_zero  BOOLEAN NOT NULL DEFAULT FALSE,
     inventorying_allow_additions BOOLEAN NOT NULL DEFAULT FALSE,
-    
-    print_enabled BOOLEAN NOT NULL DEFAULT FALSE,
-    print_year TINYINT UNSIGNED DEFAULT NULL,
-    print_label VARCHAR(120) DEFAULT NULL,
-    print_show_retail_value BOOLEAN NOT NULL DEFAULT FALSE,
-    print_show_retail_label BOOLEAN NOT NULL DEFAULT FALSE,
-    
-    database_id  BIGINT UNSIGNED
+    print_enabled                BOOLEAN NOT NULL DEFAULT FALSE,
+    print_year                   TINYINT UNSIGNED DEFAULT NULL,
+    print_label                  VARCHAR(120)     DEFAULT NULL,
+    print_show_retail_value      BOOLEAN NOT NULL DEFAULT FALSE,
+    print_show_retail_label      BOOLEAN NOT NULL DEFAULT FALSE,
+    database_id                  BIGINT UNSIGNED
 );
 	"#,
     )
@@ -43,11 +41,7 @@ CREATE TABLE IF NOT EXISTS `inventory_options`
 
 impl InventoryOptions {
     /// Inserts a new `InventoryOptions` record into the database.
-    pub async fn insert(
-        &self,
-        data: &DatabaseConnectionData,
-        database_id: u64,
-    ) -> Result<u64, Box<dyn Error>> {
+    pub async fn insert(&self, data: &DatabaseConnectionData, database_id: u64) -> Result<u64> {
         let pool = create_pool(data).await?;
         let result = sqlx::query(
             r#"
@@ -98,10 +92,7 @@ impl InventoryOptions {
     }
 
     /// Retrieves an `InventoryOptions` record by `database_id`.
-    pub async fn get(
-        data: &DatabaseConnectionData,
-        database_id: u64,
-    ) -> Result<Option<Self>, Box<dyn Error>> {
+    pub async fn get(data: &DatabaseConnectionData, database_id: u64) -> Result<Option<Self>> {
         let pool = create_pool(data).await?;
         if let Some(row) = sqlx::query(
             r#"
@@ -140,11 +131,7 @@ impl InventoryOptions {
     }
 
     /// Updates an existing `InventoryOptions` record identified by `database_id`.
-    pub async fn update(
-        &self,
-        data: &DatabaseConnectionData,
-        database_id: u64,
-    ) -> Result<(), Box<dyn Error>> {
+    pub async fn update(&self, data: &DatabaseConnectionData, database_id: u64) -> Result<()> {
         let pool = create_pool(data).await?;
         sqlx::query(
             r#"
@@ -195,10 +182,7 @@ impl InventoryOptions {
     }
 
     /// Deletes an `InventoryOptions` record identified by `database_id`.
-    pub async fn delete(
-        data: &DatabaseConnectionData,
-        database_id: u64,
-    ) -> Result<(), Box<dyn Error>> {
+    pub async fn delete(data: &DatabaseConnectionData, database_id: u64) -> Result<()> {
         let pool = create_pool(data).await?;
         sqlx::query(
             r#"
