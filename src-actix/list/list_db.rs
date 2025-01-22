@@ -1,17 +1,18 @@
 use crate::data_database_connection::DatabaseConnectionData;
 use crate::list_data::LocationListItem;
+use anyhow::Result;
 use log::debug;
 use sqlx::MySqlPool;
 use std::error::Error;
 
-pub async fn initialize(data: &DatabaseConnectionData) -> Result<(), Box<dyn Error>> {
+pub async fn initialize(data: &DatabaseConnectionData) -> Result<()> {
     let pool = create_pool(data).await?;
     sqlx::query(
         r#"
-CREATE TABLE IF NOT EXISTS locations
+CREATE TABLE if NOT EXISTS locations
 (
     id        BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name      VARCHAR(255)                        NOT NULL,
+    NAME      VARCHAR(255)                        NOT NULL,
     location  VARCHAR(255)                        NOT NULL,
     po        VARCHAR(255)                        NOT NULL,
     image     VARCHAR(255)                        NOT NULL,
@@ -24,7 +25,7 @@ CREATE TABLE IF NOT EXISTS locations
 
     Ok(())
 }
-async fn create_pool(data: &DatabaseConnectionData) -> Result<MySqlPool, Box<dyn Error>> {
+async fn create_pool(data: &DatabaseConnectionData) -> Result<MySqlPool> {
     debug!("Creating MySQL production connection");
     let pool = MySqlPool::connect(&format!(
         "mysql://{}:{}@{}/pricing",
@@ -40,7 +41,7 @@ pub async fn get_all(
     let pool = create_pool(data).await?;
     let locations = sqlx::query_as::<_, LocationListItem>(
         r#"
-		select * from locations order by post_date desc
+		SELECT * FROM locations ORDER BY post_date DESC
 		"#,
     )
     .fetch_all(&pool)
@@ -55,7 +56,7 @@ pub async fn single(
 ) -> Result<LocationListItem, Box<dyn Error>> {
     let pool = create_pool(data).await?;
     let location =
-        sqlx::query_as::<_, LocationListItem>(r#"select * from locations where id = ? limit 1"#)
+        sqlx::query_as::<_, LocationListItem>(r#"SELECT * FROM locations WHERE id = ? limit 1"#)
             .bind(id)
             .fetch_one(&pool)
             .await?;
@@ -70,8 +71,8 @@ pub async fn insert(
     let pool = create_pool(data).await?;
     sqlx::query(
         r#"
-		insert into locations (name, location, po, image)
-		values (?, ?, ?, ?)
+		INSERT INTO locations (name, location, po, image)
+		VALUES (?, ?, ?, ?)
 		"#,
     )
     .bind(&location.name)
@@ -83,16 +84,34 @@ pub async fn insert(
     Ok(())
 }
 
-pub async fn delete(id: u64, data: &DatabaseConnectionData) -> Result<(), Box<dyn Error>> {
+pub async fn delete(id: u64, data: &DatabaseConnectionData) -> Result<()> {
     let pool = create_pool(data).await?;
     sqlx::query(
         r#"
-		delete from locations
-		where id = ?
+		DELETE FROM locations
+		WHERE id = ?
 		"#,
     )
     .bind(id)
     .execute(&pool)
     .await?;
+    Ok(())
+}
+
+pub async fn update(
+    id: u64,
+    location: &LocationListItem,
+    data: &DatabaseConnectionData,
+) -> Result<()> {
+    let pool = create_pool(data).await?;
+    sqlx::query(r#"UPDATE locations SET name = ?, location = ?, po = ?, image = ? WHERE id = ?"#)
+        .bind(&location.name)
+        .bind(&location.location)
+        .bind(&location.po)
+        .bind(&location.image)
+        .bind(id)
+        .execute(&pool)
+        .await?;
+
     Ok(())
 }
