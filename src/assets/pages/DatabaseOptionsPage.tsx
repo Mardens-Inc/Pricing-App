@@ -8,7 +8,7 @@ import AllowInventorying from "../components/Options/AllowInventorying.tsx";
 import CanPrintLabel from "../components/Options/CanPrintLabel.tsx";
 import {useEffect, useState} from "react";
 import DatabaseRecords, {Column, DatabaseData} from "../ts/DatabaseRecords.ts";
-import {Button, Input, Link} from "@nextui-org/react";
+import {Button, Input, Link} from "@heroui/react";
 
 export default function DatabaseOptionsPage()
 {
