@@ -1,4 +1,5 @@
 use crate::data_database_connection::DatabaseConnectionData;
+use crate::http_error::Result;
 use crate::inventory_db;
 use crate::inventory_db::export_csv;
 use actix_web::{get, head, options, post, web, HttpResponse, Responder};
@@ -7,7 +8,6 @@ use serde_json::json;
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::sync::Arc;
-use crate::http_error::Result;
 
 #[get("")]
 pub async fn get_inventory(
@@ -83,4 +83,16 @@ pub async fn download_inventory(
             format!("attachment; filename={}.csv", id),
         ))
         .body(csv))
+}
+
+pub fn configure(cfg: &mut web::ServiceConfig) {
+    cfg.service(
+        web::scope("/inventory/{id}")
+            .service(get_inventory)
+            .service(get_inventory_headers)
+            .service(get_inventory_options)
+            .service(insert_record)
+            .service(upload_inventory)
+            .service(download_inventory),
+    );
 }

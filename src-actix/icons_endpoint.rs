@@ -1,4 +1,5 @@
 use crate::http_error::Result;
+use crate::icons_endpoint;
 use actix_files::file_extension_to_mime;
 use actix_web::{get, web, HttpRequest, HttpResponse, Responder};
 use log::error;
@@ -116,4 +117,8 @@ pub async fn get_icon(path: web::Path<String>) -> Result<impl Responder> {
             ),
         ))
         .body(bytes))
+}
+
+pub fn configure(cfg: &mut web::ServiceConfig) {
+    cfg.service(web::scope("/icons").service(get_icons).service(get_icon));
 }

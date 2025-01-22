@@ -32,7 +32,7 @@ pub async fn update_location(
     id: web::Path<String>,
     data: web::Data<Arc<DatabaseConnectionData>>,
     body: web::Json<list_data::LocationListItem>,
-)-> Result<impl Responder, Box<dyn Error>> {
+) -> Result<impl Responder, Box<dyn Error>> {
     let data = data.get_ref().as_ref();
     let id = id.as_ref();
     let id = decode_single(id)?;
@@ -66,4 +66,15 @@ pub async fn delete_location(
     // TODO: Implement this
 
     Ok(HttpResponse::Ok().finish())
+}
+
+pub fn configure(cfg: &mut web::ServiceConfig) {
+    cfg.service(
+        web::scope("/list")
+            .service(get_all_locations)
+            .service(get_location)
+            .service(update_location)
+            .service(create_location)
+            .service(delete_location),
+    );
 }
