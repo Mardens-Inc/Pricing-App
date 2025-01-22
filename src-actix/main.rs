@@ -15,7 +15,7 @@ pub mod inventory_db;
 #[path = "inventory/inventory_endpoint.rs"]
 mod inventory_endpoint;
 
-// Inventory Columns Modules
+// Inventory Column Modules
 #[path = "inventory/columns/columns_data.rs"]
 pub mod columns_data;
 #[path = "inventory/columns/columns_db.rs"]
@@ -39,6 +39,7 @@ mod options_data;
 mod options_db;
 #[path = "inventory/options/options_endpoint.rs"]
 mod options_endpoint;
+mod http_error;
 
 use crate::data_database_connection::DatabaseConnectionData;
 use crate::server_information_endpoint::get_server_version;
@@ -47,6 +48,7 @@ use actix_web::error::ErrorInternalServerError;
 use actix_web::{
     get, middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder,
 };
+use anyhow::Result;
 use awc::Client;
 use futures_util::stream::StreamExt;
 use include_dir::{include_dir, Dir};
@@ -57,7 +59,7 @@ use std::process::Child;
 pub static DEBUG: bool = cfg!(debug_assertions);
 
 #[actix_web::main]
-async fn main() -> std::io::Result<()> {
+async fn main() -> Result<()> {
     std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
 
@@ -71,10 +73,8 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
-    list_db::initialize(&data).await.map_err(|err| {
-        error!("Failed to initialize database: {}", err);
-        std::io::Error::new(std::io::ErrorKind::Other, "Failed to initialize database")
-    })?;
+    list_db::initialize(&data).await?;
+    options_db::initialize(&data).await?;
 
     let connection_data_mutex = web::Data::new(std::sync::Arc::new(data));
 
@@ -148,7 +148,7 @@ async fn main() -> std::io::Result<()> {
     if DEBUG {
         start_vite_server().expect("Failed to start vite server");
     }
-    server.await
+    Ok(server.await?)
 }
 
 // The maximum payload size allowed for forwarding requests and responses.
@@ -257,7 +257,7 @@ async fn proxy_to_vite(req: HttpRequest, mut payload: web::Payload) -> Result<Ht
     Ok(res.body(resp_body_bytes))
 }
 
-fn start_vite_server() -> Result<Child, Box<dyn std::error::Error>> {
+fn start_vite_server() -> Result<Child> {
     #[cfg(target_os = "windows")]
     let find_cmd = "where";
     #[cfg(not(target_os = "windows"))]
@@ -269,8 +269,7 @@ fn start_vite_server() -> Result<Child, Box<dyn std::error::Error>> {
         .output()?
         .stdout;
 
-    let vite = String::from_utf8(vite);
-    let vite = vite.unwrap();
+    let vite = String::from_utf8(vite)?;
     let vite = vite.as_str().trim();
 
     if vite.is_empty() {
