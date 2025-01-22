@@ -1,14 +1,14 @@
 import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
-import DatabaseRecords, {DatabaseData, DatabaseOptions} from "../ts/DatabaseRecords.ts";
 import {useDatabaseView} from "../providers/DatabaseViewProvider.tsx";
 import {setTitle} from "../../main.tsx";
-import {Image, Spinner} from "@nextui-org/react";
+import {Image, Spinner} from "@heroui/react";
 import InventoryingForm from "../components/View/InventoryingForm.tsx";
 import InventoryTable from "../components/View/InventoryTable.tsx";
 import Logo from "../images/Logo.svg.tsx";
 import PrintLabelExtraOptions from "../components/View/PrintLabelExtraOptions.tsx";
 import {useAuth} from "../providers/AuthProvider.tsx";
+import Location from "../ts/data/Location.ts";
 
 export default function DatabaseViewPage()
 {
@@ -24,7 +24,7 @@ export default function DatabaseViewPage()
         return <></>;
     }
 
-    const [data, setData] = useState<DatabaseData | null>(null);
+    const [data, setData] = useState<Location | null | undefined>(null);
     const [isLoading, setIsLoading] = useState(true);
 
 
@@ -37,11 +37,8 @@ export default function DatabaseViewPage()
         // Move the state update to useEffect to ensure it's not done during render
         databaseView.setDatabaseId(id);
 
-        DatabaseRecords.data(id, true)
-            .then(items =>
-            {
-                setData(items);
-            })
+        Location.get(id)
+            .then(setData)
             .finally(() => setIsLoading(false));
 
     }, [id, databaseView]);
