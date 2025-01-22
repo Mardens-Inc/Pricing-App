@@ -1,7 +1,7 @@
 import ExtendedSwitch from "../Extends/ExtendedSwitch.tsx";
 import {useState} from "react";
 import {Departments, PrintLabelColors, PrintLabels, PrintLabelSize} from "../../ts/printer.ts";
-import {Input, Select, SelectItem} from "@nextui-org/react";
+import {Input, Select, SelectItem} from "@heroui/react";
 
 export default function CanPrintLabel()
 {

@@ -3,7 +3,7 @@ import React from "react";
 import {fa1, faAlignJustify, faKey, faLayerGroup, faLock, faMagnifyingGlass, faPercent, faShop, faTag} from "@fortawesome/free-solid-svg-icons";
 import {IconProp} from "@fortawesome/fontawesome-svg-core";
 import {IndexedColumnItem} from "./ColumnsList.tsx";
-import {Button, Tooltip} from "@nextui-org/react";
+import {Button, Tooltip} from "@heroui/react";
 
 export interface ColumnAttribute
 {

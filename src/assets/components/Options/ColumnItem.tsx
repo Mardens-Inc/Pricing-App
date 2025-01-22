@@ -5,7 +5,7 @@ import {faEllipsisV} from "@fortawesome/free-solid-svg-icons";
 import ColumnAttributes from "./ColumnAttributes.tsx";
 import $ from "jquery";
 import {IndexedColumnItem} from "./ColumnsList.tsx";
-import {Button, cn, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Tooltip} from "@nextui-org/react";
+import {Button, cn, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Tooltip} from "@heroui/react";
 
 interface ColumnItemProps extends React.HTMLAttributes<HTMLDivElement>
 {

@@ -6,7 +6,7 @@ import {closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, use
 import {arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy} from "@dnd-kit/sortable";
 import {Column} from "../../ts/DatabaseRecords.ts";
 import {enforceAttributesSingleSelectionMode} from "./ColumnAttributes.tsx";
-import {Button, Tooltip} from "@nextui-org/react";
+import {Button, Tooltip} from "@heroui/react";
 
 export interface IndexedColumnItem extends Column
 {

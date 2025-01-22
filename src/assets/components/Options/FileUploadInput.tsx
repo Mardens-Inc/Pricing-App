@@ -2,7 +2,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faUpload} from "@fortawesome/free-solid-svg-icons";
 import $ from "jquery";
 import {useEffect} from "react";
-import {Button, cn, Divider} from "@nextui-org/react";
+import {Button, cn, Divider} from "@heroui/react";
 
 interface FileUploadInputProps
 {

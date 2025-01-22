@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import $ from "jquery";
-import {cn, Image, Skeleton} from "@nextui-org/react";
+import {cn, Image, Skeleton} from "@heroui/react";
 
 export interface Icon
 {
