@@ -1,4 +1,4 @@
-import {Button, cn, Tooltip} from "@nextui-org/react";
+import {Button, cn, Tooltip} from "@heroui/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faMicrophone} from "@fortawesome/free-solid-svg-icons";
 import {useEffect, useState} from "react";

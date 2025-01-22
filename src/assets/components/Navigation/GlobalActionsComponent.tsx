@@ -1,4 +1,4 @@
-import {Button, Link, NavbarContent, NavbarItem, Tooltip} from "@nextui-org/react";
+import {Button, Link, NavbarContent, NavbarItem, Tooltip} from "@heroui/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCloudDownload, faEdit, faLock, faMoon, faPlus, faSignOut, faSun} from "@fortawesome/free-solid-svg-icons";
 import DatabaseRecords from "../../ts/DatabaseRecords.ts";

@@ -1,4 +1,4 @@
-import {Link, NavbarBrand, NavbarContent, Tooltip} from "@nextui-org/react";
+import {Link, NavbarBrand, NavbarContent, Tooltip} from "@heroui/react";
 import Logo from "../../images/Logo.svg.tsx";
 import {useEffect, useState} from "react";
 import {getServerVersion} from "../../ts/server_information.ts";

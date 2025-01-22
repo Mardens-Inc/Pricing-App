@@ -1,4 +1,4 @@
-import {Input, NavbarContent} from "@nextui-org/react";
+import {Input, NavbarContent} from "@heroui/react";
 import {useSearch} from "../../providers/SearchProvider.tsx";
 import VoiceSearch from "./VoiceSearch.tsx";
 
