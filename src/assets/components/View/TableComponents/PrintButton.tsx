@@ -1,4 +1,4 @@
-import {Button, getKeyValue, Tooltip} from "@nextui-org/react";
+import {Button, getKeyValue, Tooltip} from "@heroui/react";
 import {OpenPrintWindow} from "../../../ts/printer.ts";
 import $ from "jquery";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";

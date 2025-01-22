@@ -1,4 +1,4 @@
-import {Button, cn, getKeyValue, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from "@nextui-org/react";
+import {Button, cn, getKeyValue, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from "@heroui/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEllipsisV} from "@fortawesome/free-solid-svg-icons";
 import {useSearch} from "../../providers/SearchProvider.tsx";

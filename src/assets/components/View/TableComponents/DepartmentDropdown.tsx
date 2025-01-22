@@ -1,6 +1,6 @@
 import {Departments} from "../../../ts/printer.ts";
 import $ from "jquery";
-import {Select, SelectItem} from "@nextui-org/react";
+import {Select, SelectItem} from "@heroui/react";
 
 export default function DepartmentDropdown({id}: { id: string })
 {

@@ -1,4 +1,4 @@
-import {Badge, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, getKeyValue, Tooltip} from "@nextui-org/react";
+import {Badge, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, getKeyValue, Tooltip} from "@heroui/react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faPrint} from "@fortawesome/free-solid-svg-icons";
 import PrintButton, {PrintButtonProps} from "./PrintButton.tsx";

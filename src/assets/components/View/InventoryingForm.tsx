@@ -1,4 +1,4 @@
-import {Button, Input, ScrollShadow} from "@nextui-org/react";
+import {Button, Input, ScrollShadow} from "@heroui/react";
 import {Column} from "../../ts/DatabaseRecords.ts";
 import {useState} from "react";
 
