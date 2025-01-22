@@ -12,7 +12,7 @@ import DatabaseOptionsPage from "./assets/pages/DatabaseOptionsPage.tsx";
 import DatabaseViewPage from "./assets/pages/DatabaseViewPage.tsx";
 import {SearchProvider} from "./assets/providers/SearchProvider.tsx";
 import {DatabaseViewProvider} from "./assets/providers/DatabaseViewProvider.tsx";
-import {NextUIProvider} from "@nextui-org/react";
+import {HeroUIProvider} from "@heroui/react";
 
 export const isProduction = window.location.hostname === "pricing-new.mardens.com";
 export const baseUrl =  "https://pricing-new.mardens.com";//isProduction ? "" : "http://pricing.local";
@@ -38,7 +38,7 @@ export function MainContentRenderer()
     applyTheme();
     const navigate = useNavigate();
     return (
-        <NextUIProvider navigate={navigate}>
+        <HeroUIProvider navigate={navigate}>
             <Navigation/>
             <Routes>
                 <Route path="/" element={<DatabaseListPage/>}/>
@@ -46,6 +46,6 @@ export function MainContentRenderer()
                 <Route path="/:id" element={<DatabaseViewPage/>}/>
                 <Route path="/:id/edit" element={<DatabaseOptionsPage/>}/>
             </Routes>
-        </NextUIProvider>
+        </HeroUIProvider>
     );
 }
