@@ -1,24 +1,24 @@
-import {default as dbList} from "../ts/DatabaseList.ts";
 import {useEffect, useState} from "react";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faEdit, faEllipsisH} from "@fortawesome/free-solid-svg-icons";
 import Logo from "../images/Logo.svg.tsx";
 import {useSearch} from "../providers/SearchProvider.tsx";
 import {useAuth} from "../providers/AuthProvider.tsx";
 import {useDatabaseView} from "../providers/DatabaseViewProvider.tsx";
-import {DatabaseItem} from "../ts/DatabaseManagement.ts";
-import {Avatar, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Link, Pagination, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip} from "@nextui-org/react";
+import {Avatar, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Link, Pagination, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip} from "@heroui/react";
 import $ from "jquery";
 import {setTitle} from "../../main.tsx";
+import Location from "../ts/data/Location.ts";
+import {Icon} from "@iconify/react";
+import IconData from "../ts/data/Icon.ts";
 
 
 export default function DatabaseListPage()
 {
     setTitle();
-    const [items, setItems] = useState<DatabaseItem[]>([]);
+    const [icons, setIcons] = useState<IconData[]>([]);
+    const [items, setItems] = useState<Location[]>([]);
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
-    const [currentItems, setCurrentItems] = useState<DatabaseItem[]>([]);
+    const [currentItems, setCurrentItems] = useState<Location[]>([]);
     const [itemsPerPage, setItemsPerPage] = useState<number>(10);
     const {search} = useSearch();
     const {auth, isLoggedIn} = useAuth();
@@ -35,21 +35,26 @@ export default function DatabaseListPage()
             });
 
         setLoading(true);
-        dbList.get().then((databases) =>
-        {
-            console.log("Loaded database list", databases);
-            setItems(databases);
-            setPage(1);
-            setLoading(false);
-        }).catch((error) =>
-        {
-            console.error(error);
-            setLoading(false);
-            alert("Failed to load database list.");
-        }).finally(() =>
-        {
-            setItemsPerPage(calculateItemsPerPage());
-        });
+        Location.all()
+            .then(location =>
+            {
+                console.log("Loaded database list", location);
+                setItems(location);
+                setPage(1);
+                setLoading(false);
+            })
+            .catch((error) =>
+            {
+                console.error(error);
+                setLoading(false);
+                alert("Failed to load database list.");
+            })
+            .finally(() =>
+            {
+                setItemsPerPage(calculateItemsPerPage());
+            });
+
+        IconData.all().then(setIcons);
 
     }, []);
 
@@ -134,7 +139,7 @@ export default function DatabaseListPage()
                     return (
                         <TableRow key={item.id + index.toString()} as={Link} href={`/${item.id}`} className={"dark:group-hover:bg-default-100/10"}>
                             <TableCell className={"w-12"}>
-                                {item.image ? <Avatar src={item.image} alt={item.name}/> : <Logo size={40}/>}
+                                <LocationIcon location={item} icons={icons}/>
                             </TableCell>
                             <TableCell>{item.name}</TableCell>
                             <TableCell>{item.location || "Unknown"}</TableCell>
@@ -157,22 +162,24 @@ export default function DatabaseListPage()
                                 <div className={"gap-2 flex flex-row"}>
                                     {isLoggedIn && auth.getUserProfile().admin ? (<>
                                         <Tooltip content={`Edit '${item.name}'`} closeDelay={0} classNames={{base: "pointer-events-none"}}>
-                                            <Button radius={"full"} className={"min-w-0 p-0 w-10 h-10"} as={Link} href={`/${item.id}/edit`}><FontAwesomeIcon icon={faEdit} width={10}/></Button>
+                                            <Button radius={"full"} className={"min-w-0 p-0 w-10 h-10"} as={Link} href={`/${item.id}/edit`}>
+                                                <Icon icon="mynaui:edit-solid" width="24" height="24"/>
+                                            </Button>
                                         </Tooltip>
                                         <Dropdown>
                                             <DropdownTrigger>
                                                 <div>
                                                     <Tooltip content={`More Options`} closeDelay={0} classNames={{base: "pointer-events-none"}}>
                                                         <Button radius={"full"} className={"min-w-0 p-0 w-10 h-10"} onPressStart={(e) => e.continuePropagation()}>
-                                                            <FontAwesomeIcon icon={faEllipsisH} width={10}/>
+                                                            <Icon icon="mynaui:dots" width="24" height="24"/>
                                                         </Button>
                                                     </Tooltip>
                                                 </div>
                                             </DropdownTrigger>
                                             <DropdownMenu>
-                                                <DropdownItem>View History</DropdownItem>
-                                                <DropdownItem as={Link} href={`/${item.id}/edit`} className={"text-inherit"}>Edit</DropdownItem>
-                                                <DropdownItem>Delete</DropdownItem>
+                                                <DropdownItem key={`${item.id}-history-dropdown-item`}>View History</DropdownItem>
+                                                <DropdownItem as={Link} href={`/${item.id}/edit`} className={"text-inherit"} key={`${item.id}-edit-dropdown-item`}>Edit</DropdownItem>
+                                                <DropdownItem key={`${item.id}-delete-dropdown-item`}>Delete</DropdownItem>
                                             </DropdownMenu>
                                         </Dropdown>
                                     </>) : (<></>)}
@@ -184,4 +191,19 @@ export default function DatabaseListPage()
             </TableBody>
         </Table>
     );
+}
+
+function LocationIcon(props: { location: Location, icons: IconData[] })
+{
+    const [icon, setIcon] = useState<IconData | undefined>(undefined);
+    useEffect(() =>
+    {
+        if (!props.location.image) return;
+        IconData.get(props.location.image, props.icons).then(setIcon);
+    }, []);
+
+    if (!props.location.image || !icon)
+        return <Logo size={40}/>;
+
+    return <Avatar src={icon.url} alt={props.location.name}/>;
 }
