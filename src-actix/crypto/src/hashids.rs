@@ -1,6 +1,7 @@
 use crate::salt::get_salt;
 use hash_ids::HashIds;
 use log::debug;
+use anyhow::Result;
 
 /// Decodes a given hash string into a vector of `u64` integers.
 ///
@@ -11,7 +12,7 @@ use log::debug;
 /// # Returns
 ///
 /// A vector of `u64` integers that were encoded in the given hash string.
-pub fn decode(hash: impl AsRef<str>) -> Result<Vec<u64>, Box<dyn std::error::Error>> {
+pub fn decode(hash: impl AsRef<str>) -> Result<Vec<u64>> {
     let hash = hash.as_ref();
     let hash_ids = hashids();
     let decode = hash_ids.decode(hash)?;
@@ -46,13 +47,13 @@ pub fn encode(data: &[u64]) -> String {
 /// * On success, returns a single `u64` value that was encoded in the hash.
 /// * On failure, returns an error if the hash does not decode to exactly one `u64` value,
 ///   or if an error occurs during decoding.
-pub fn decode_single(hash: impl AsRef<str>) -> Result<u64, Box<dyn std::error::Error>> {
+pub fn decode_single(hash: impl AsRef<str>) -> Result<u64> {
     let hash = hash.as_ref(); // Extracts the underlying string reference from the wrapper.
     let decode = decode(hash)?; // Attempts to decode the hash into a vector of `u64` integers.
 
     // Check if the decoded result contains exactly one value.
     if decode.len() != 1 {
-        return Err(format!("Invalid hash: {}", hash).into()); // Returns an error if not.
+        return Err(anyhow::Error::msg(format!("Invalid hash: {}", hash))); // Returns an error if not.
     }
 
     // Successfully return the single decoded value.
