@@ -6,12 +6,12 @@ use std::sync::Arc;
 use crate::options_data::InventoryOptions;
 
 /// Get options
-#[get("/{database_id}")]
+#[get("/")]
 pub async fn get_options(
-	database_id: web::Path<u64>,
+	id: web::Path<u64>,
 	data: web::Data<Arc<DatabaseConnectionData>>,
 ) -> Result<impl Responder> {
-	let database_id = database_id.into_inner();
+	let database_id = id.into_inner();
 	let connection_data = data.get_ref();
 
 	debug!("Fetching options for database_id: {}", database_id);
@@ -24,13 +24,13 @@ pub async fn get_options(
 }
 
 /// Create (insert) new options
-#[post("/{database_id}")]
+#[post("/")]
 pub async fn create_options(
-	database_id: web::Path<u64>,
+	id: web::Path<u64>,
 	options: web::Json<InventoryOptions>,
 	data: web::Data<Arc<DatabaseConnectionData>>,
 ) -> Result<impl Responder> {
-	let database_id = database_id.into_inner();
+	let database_id = id.into_inner();
 	let connection_data = data.get_ref();
 	let options = options.into_inner();
 
@@ -42,13 +42,13 @@ pub async fn create_options(
 }
 
 /// Update existing options
-#[patch("/{database_id}")]
+#[patch("/")]
 pub async fn update_options(
-	database_id: web::Path<u64>,
+	id: web::Path<u64>,
 	options_update: web::Json<InventoryOptions>,
 	data: web::Data<Arc<DatabaseConnectionData>>,
 ) -> Result<impl Responder> {
-	let database_id = database_id.into_inner();
+	let database_id = id.into_inner();
 	let connection_data = data.get_ref();
 	let options = options_update.into_inner();
 
@@ -60,12 +60,12 @@ pub async fn update_options(
 }
 
 /// Delete options
-#[actix_web::delete("/{database_id}")]
+#[actix_web::delete("/")]
 pub async fn delete_options(
-	database_id: web::Path<u64>,
+	id: web::Path<u64>,
 	data: web::Data<Arc<DatabaseConnectionData>>,
 ) -> Result<impl Responder> {
-	let database_id = database_id.into_inner();
+	let database_id = id.into_inner();
 	let connection_data = data.get_ref();
 
 	debug!("Deleting options for database_id: {}", database_id);
