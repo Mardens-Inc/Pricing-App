@@ -1,7 +1,7 @@
+use crate::http_error::Result;
 use actix_files::file_extension_to_mime;
 use actix_web::{get, web, HttpRequest, HttpResponse, Responder};
 use log::error;
-use std::error::Error;
 use std::ffi::OsStr;
 use std::fs::File;
 use std::io::Read;
@@ -16,7 +16,7 @@ struct Icon {
 }
 
 #[get("")]
-pub async fn get_icons(request: HttpRequest) -> Result<impl Responder, Box<dyn Error>> {
+pub async fn get_icons(request: HttpRequest) -> Result<impl Responder> {
     let mut icons = Vec::new();
     let connection_info = request.connection_info();
     let connection_info = connection_info.deref();
@@ -26,7 +26,7 @@ pub async fn get_icons(request: HttpRequest) -> Result<impl Responder, Box<dyn E
 
     for entry in std::fs::read_dir(ICONS_DIR).map_err(|err| {
         error!("Failed to read directory {}: {:?}", ICONS_DIR, err);
-        err
+        anyhow::Error::msg(format!("Failed to read directory: {:?}", err))
     })? {
         let entry = match entry {
             Ok(e) => e,
@@ -88,16 +88,22 @@ pub async fn get_icons(request: HttpRequest) -> Result<impl Responder, Box<dyn E
 }
 
 #[get("/{name}")]
-pub async fn get_icon(path: web::Path<String>) -> Result<impl Responder, Box<dyn Error>> {
+pub async fn get_icon(path: web::Path<String>) -> Result<impl Responder> {
     let name = path.into_inner();
     let path = format!("{}/{}", ICONS_DIR, name);
     let path = std::path::Path::new(&path);
     if !path.exists() {
         return Ok(HttpResponse::NotFound().finish());
     }
-    let mut file = File::open(path)?;
+    let mut file = File::open(path).map_err(|e| {
+        error!("Failed to open file: {:?}", e);
+        anyhow::Error::msg(format!("Failed to open file: {:?}", e))
+    })?;
     let mut bytes = Vec::new();
-    file.read_to_end(&mut bytes)?;
+    file.read_to_end(&mut bytes).map_err(|e| {
+        error!("Failed to read file: {:?}", e);
+        anyhow::Error::msg(format!("Failed to read file: {:?}", e))
+    })?;
     let content_type = file_extension_to_mime(path.extension().unwrap().to_str().unwrap());
 
     Ok(HttpResponse::Ok()
