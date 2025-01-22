@@ -1,10 +1,10 @@
 use crate::data_database_connection::DatabaseConnectionData;
 use crate::mysql_row_wrapper::MySqlRowWrapper;
+use anyhow::Result;
 use csv::WriterBuilder;
 use log::debug;
 use serde_derive::Deserialize;
 use sqlx::{Column, Executor, MySqlPool, Row};
-use std::error::Error;
 
 #[derive(Deserialize)]
 pub struct InventoryFilterOptions {
@@ -15,7 +15,7 @@ pub struct InventoryFilterOptions {
     sort_by: Option<String>,
     sort_order: Option<String>,
 }
-async fn create_pool(data: &DatabaseConnectionData) -> Result<MySqlPool, Box<dyn Error>> {
+async fn create_pool(data: &DatabaseConnectionData) -> Result<MySqlPool> {
     debug!("Creating MySQL production connection");
     let pool = MySqlPool::connect(&format!(
         "mysql://{}:{}@{}/pricing",
@@ -29,7 +29,7 @@ pub async fn get_inventory(
     id: u64,
     options: Option<InventoryFilterOptions>,
     data: &DatabaseConnectionData,
-) -> Result<Vec<serde_json::Value>, Box<dyn Error>> {
+) -> Result<Vec<serde_json::Value>> {
     // Create the database connection pool
     let pool = create_pool(data).await?;
 
@@ -93,7 +93,7 @@ pub async fn get_inventory(
     Ok(result)
 }
 
-pub async fn export_csv(id: u64, data: &DatabaseConnectionData) -> Result<String, Box<dyn Error>> {
+pub async fn export_csv(id: u64, data: &DatabaseConnectionData) -> Result<String> {
     let pool = create_pool(data).await?;
 
     // Use CSV Writer to write into the in-memory string
