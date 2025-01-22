@@ -2,7 +2,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEnvelope, faEye, faEyeSlash} from "@fortawesome/free-solid-svg-icons";
 import React, {useEffect, useState} from "react";
 import {useAuth} from "../../providers/AuthProvider.tsx";
-import {Button, Input, ModalBody, ModalFooter} from "@nextui-org/react";
+import {Button, Input, ModalBody, ModalFooter} from "@heroui/react";
 
 export default function RegisterForm({onClose}: { onClose: () => void })
 {
