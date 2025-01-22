@@ -1,0 +1,24 @@
+meta {
+  name: Update Location
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}/list/:id
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 
+}
+
+body:json {
+  {
+    "name": "Database Name",
+    "location": "City, USA",
+    "po": "MRD-123456",
+    "image": "amazon"
+  }
+}
