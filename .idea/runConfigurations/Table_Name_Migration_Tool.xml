@@ -1,7 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Build" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
-    <option name="buildProfileId" value="release" />
-    <option name="command" value="build" />
+  <configuration default="false" name="Table Name Migration Tool" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="Tools">
+    <option name="command" value="run --example table_name_migration_tool" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <envs />
     <option name="emulateTerminal" value="true" />
@@ -14,15 +13,6 @@
     <option name="isRedirectInput" value="false" />
     <option name="redirectInputPath" value="" />
     <method v="2">
-      <option name="NpmBeforeRunTask" enabled="true">
-        <package-json value="$PROJECT_DIR$/package.json" />
-        <command value="run" />
-        <scripts>
-          <script value="build-frontend" />
-        </scripts>
-        <node-interpreter value="project" />
-        <envs />
-      </option>
       <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
     </method>
   </configuration>
