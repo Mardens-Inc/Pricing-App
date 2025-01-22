@@ -3,8 +3,9 @@ use crate::data_database_connection::DatabaseConnectionData;
 use log::debug;
 use sqlx::{Executor, MySqlPool};
 use std::error::Error;
+use anyhow::Result;
 
-pub async fn initialize(data: &DatabaseConnectionData) -> Result<(), Box<dyn Error>> {
+pub async fn initialize(data: &DatabaseConnectionData) -> Result<()> {
     let pool = create_pool(data).await?;
     pool.execute(
         r#"
@@ -24,7 +25,7 @@ CREATE TABLE IF NOT EXISTS `inventory_columns`
     Ok(())
 }
 
-async fn create_pool(data: &DatabaseConnectionData) -> Result<MySqlPool, Box<dyn Error>> {
+async fn create_pool(data: &DatabaseConnectionData) -> Result<MySqlPool> {
     debug!("Creating MySQL production connection");
     let pool = MySqlPool::connect(&format!(
         "mysql://{}:{}@{}/pricing",
@@ -43,7 +44,7 @@ impl InventoryColumn {
         visible: bool,
         attributes: Option<impl AsRef<str>>,
         database_id: u64,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<()> {
         let pool = create_pool(data).await?;
 
         sqlx::query(
@@ -67,7 +68,7 @@ impl InventoryColumn {
     pub async fn get_all(
         data: &DatabaseConnectionData,
         database_id: u64,
-    ) -> Result<Vec<Self>, Box<dyn Error>> {
+    ) -> Result<Vec<Self>> {
         let pool = create_pool(data).await?;
         let columns = sqlx::query_as::<_, InventoryColumn>(
             r#"
@@ -85,7 +86,7 @@ impl InventoryColumn {
     pub async fn update(
         &self,
         data: &DatabaseConnectionData,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<()> {
         let pool = create_pool(data).await?;
 
         sqlx::query(
@@ -111,7 +112,7 @@ impl InventoryColumn {
         data: &DatabaseConnectionData,
         database_id: u64,
         name: impl AsRef<str>,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<()> {
         let pool = create_pool(data).await?;
         sqlx::query(
             r#"
