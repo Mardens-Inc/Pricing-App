@@ -1,6 +1,6 @@
 use crate::data_database_connection::DatabaseConnectionData;
 use crate::{list_data, list_db};
-use actix_web::{delete, get, post, web, HttpResponse, Responder};
+use actix_web::{delete, get, patch, post, web, HttpResponse, Responder};
 use crypto::hashids::decode_single;
 use std::error::Error;
 use std::sync::Arc;
@@ -24,6 +24,19 @@ pub async fn get_location(
     let id = decode_single(id)?;
     let location = list_db::single(id, data).await?;
 
+    Ok(HttpResponse::Ok().json(location))
+}
+
+#[patch("{id}")]
+pub async fn update_location(
+    id: web::Path<String>,
+    data: web::Data<Arc<DatabaseConnectionData>>,
+    body: web::Json<list_data::LocationListItem>,
+)-> Result<impl Responder, Box<dyn Error>> {
+    let data = data.get_ref().as_ref();
+    let id = id.as_ref();
+    let id = decode_single(id)?;
+    let location = list_db::update(id, &body, data).await?;
     Ok(HttpResponse::Ok().json(location))
 }
 
