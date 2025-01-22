@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use anyhow::Result;
 
 #[derive(Deserialize, Clone)]
 pub struct DatabaseConnectionData {
@@ -8,7 +9,7 @@ pub struct DatabaseConnectionData {
 }
 
 impl DatabaseConnectionData {
-    pub async fn get() -> Result<Self, Box<dyn std::error::Error>> {
+    pub async fn get() -> Result<Self> {
         use reqwest::Client;
         let url = "https://lib.mardens.com/config.json";
         let client = Client::builder()
