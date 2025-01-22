@@ -1,6 +1,6 @@
 import LoginForm from "./LoginForm.tsx";
 import RegisterForm from "./RegisterForm.tsx";
-import {Modal, ModalContent, Tab, Tabs} from "@nextui-org/react";
+import {Modal, ModalContent, Tab, Tabs} from "@heroui/react";
 
 export default function LoginModal({isOpen, onClose}: { isOpen: boolean, onClose: () => void })
 {
