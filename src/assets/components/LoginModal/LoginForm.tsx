@@ -2,7 +2,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEnvelope, faEye, faEyeSlash} from "@fortawesome/free-solid-svg-icons";
 import React, {useState} from "react";
 import {useAuth} from "../../providers/AuthProvider.tsx";
-import {Button, Checkbox, Input, Link, ModalBody, ModalFooter, Tooltip} from "@nextui-org/react";
+import {Button, Checkbox, Input, Link, ModalBody, ModalFooter, Tooltip} from "@heroui/react";
 
 
 export default function LoginForm({onClose}: { onClose: () => void })
