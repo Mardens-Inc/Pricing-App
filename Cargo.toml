@@ -21,6 +21,10 @@ path = "tools/column_mapping_migration_tool.rs"
 name = "table_name_migration_tool"
 path = "tools/table_name_migration_tool.rs"
 
+[[example]]
+name ="options_migration_tool"
+path="tools/options_migration_tool.rs"
+
 
 [dependencies]
 actix-web = { version = "4.9.0" }
