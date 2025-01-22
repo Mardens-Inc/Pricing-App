@@ -1,4 +1,4 @@
-import {Navbar} from "@nextui-org/react";
+import {Navbar} from "@heroui/react";
 import BrandComponent from "./Navigation/BrandComponent.tsx";
 import GlobalSearchComponent from "./Navigation/GlobalSearchComponent.tsx";
 import GlobalActionsComponent from "./Navigation/GlobalActionsComponent.tsx";
