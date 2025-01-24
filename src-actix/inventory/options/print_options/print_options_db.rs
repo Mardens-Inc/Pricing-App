@@ -2,7 +2,7 @@ use crate::data_database_connection::{create_pool, DatabaseConnectionData};
 use crate::print_options_data::PrintForm;
 use anyhow::{anyhow, Context, Result};
 use log::{debug, error};
-use sqlx::{Executor, MySql, MySqlPool, Row};
+use sqlx::{Executor, MySqlPool, Row};
 
 pub async fn initialize(data: &DatabaseConnectionData) -> Result<()> {
     debug!("Initializing print options database table");
