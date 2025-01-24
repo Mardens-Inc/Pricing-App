@@ -1,5 +1,5 @@
 use crate::columns_data::InventoryColumn;
-use crate::data_database_connection::DatabaseConnectionData;
+use crate::data_database_connection::{create_pool, DatabaseConnectionData};
 use log::debug;
 use sqlx::{Executor, MySqlPool};
 use std::error::Error;
@@ -25,15 +25,6 @@ CREATE TABLE IF NOT EXISTS `inventory_columns`
     Ok(())
 }
 
-async fn create_pool(data: &DatabaseConnectionData) -> Result<MySqlPool> {
-    debug!("Creating MySQL production connection");
-    let pool = MySqlPool::connect(&format!(
-        "mysql://{}:{}@{}/pricing",
-        data.user, data.password, data.host
-    ))
-    .await?;
-    Ok(pool)
-}
 
 impl InventoryColumn {
     /// Inserts a new `InventoryColumn` record into the database.
