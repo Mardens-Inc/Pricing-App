@@ -1,18 +1,8 @@
-use crate::data_database_connection::DatabaseConnectionData;
-use crate::options_data::{InventoryOptions, Inventorying, PrintForm};
+use crate::data_database_connection::{create_pool, DatabaseConnectionData};
+use crate::options_data::{InventoryOptions, Inventorying};
+use crate::print_options_db;
 use anyhow::Result;
-use log::debug;
-use sqlx::{Executor, MySqlPool, Row};
-
-async fn create_pool(data: &DatabaseConnectionData) -> Result<MySqlPool> {
-    debug!("Creating MySQL production connection");
-    let pool = MySqlPool::connect(&format!(
-        "mysql://{}:{}@{}/pricing",
-        data.user, data.password, data.host
-    ))
-    .await?;
-    Ok(pool)
-}
+use sqlx::{Executor, Row};
 
 pub async fn initialize(data: &DatabaseConnectionData) -> Result<()> {
     let pool = create_pool(data).await?;
@@ -25,11 +15,8 @@ CREATE TABLE IF NOT EXISTS `inventory_options`
     inventorying_add_if_missing  BOOLEAN NOT NULL DEFAULT FALSE,
     inventorying_remove_if_zero  BOOLEAN NOT NULL DEFAULT FALSE,
     inventorying_allow_additions BOOLEAN NOT NULL DEFAULT FALSE,
-    print_enabled                BOOLEAN NOT NULL DEFAULT FALSE,
-    print_year                   TINYINT UNSIGNED DEFAULT NULL,
-    print_label                  VARCHAR(120)     DEFAULT NULL,
-    print_show_retail_value      BOOLEAN NOT NULL DEFAULT FALSE,
-    print_show_retail_label      BOOLEAN NOT NULL DEFAULT FALSE,
+    show_color_dropdown          BOOLEAN NOT NULL DEFAULT FALSE,
+    show_year_input              BOOLEAN NOT NULL DEFAULT FALSE,
     database_id                  BIGINT UNSIGNED
 );
 	"#,
@@ -50,15 +37,13 @@ impl InventoryOptions {
                 inventorying_add_if_missing,
                 inventorying_remove_if_zero,
                 inventorying_allow_additions,
-                print_enabled,
-                print_year,
-                print_label,
-                print_show_retail_value,
-                print_show_retail_label,
+                show_color_dropdown,
+                show_year_input,
                 database_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
             "#,
         )
+        .bind(self.inventorying.is_some()) // inventorying_enabled
         .bind(
             self.inventorying
                 .as_ref()
@@ -74,19 +59,13 @@ impl InventoryOptions {
                 .as_ref()
                 .map_or(false, |i| i.allow_additions),
         ) // inventorying_allow_additions
-        .bind(self.inventorying.is_some()) // inventorying_enabled
-        .bind(self.print_form.is_some()) // print_enabled
-        .bind(self.print_form.as_ref().and_then(|p| p.year)) // print_year
-        .bind(self.print_form.as_ref().and_then(|p| p.label.clone())) // print_label
-        .bind(self.print_form.as_ref().map_or(false, |p| p.show_retail)) // print_show_retail_value
-        .bind(
-            self.print_form
-                .as_ref()
-                .map_or(false, |p| p.show_price_label),
-        ) // print_show_retail_label
+        .bind(self.show_color_dropdown) // show_color_dropdown
+        .bind(self.show_year_input) // show_year_input
         .bind(database_id) // database_id
         .execute(&pool)
         .await?;
+
+        print_options_db::set(&pool, database_id, &self.print_form).await?;
 
         Ok(result.last_insert_id())
     }
@@ -96,15 +75,7 @@ impl InventoryOptions {
         let pool = create_pool(data).await?;
         if let Some(row) = sqlx::query(
             r#"
-            SELECT
-                inventorying_add_if_missing,
-                inventorying_remove_if_zero,
-                inventorying_allow_additions,
-                print_year,
-                print_label,
-                print_show_retail_value,
-                print_show_retail_label
-            FROM inventory_options
+            SELECT * FROM inventory_options
             WHERE database_id = ?
             "#,
         )
@@ -118,12 +89,9 @@ impl InventoryOptions {
                     remove_if_zero: row.try_get::<bool, _>("inventorying_remove_if_zero")?,
                     allow_additions: row.try_get::<bool, _>("inventorying_allow_additions")?,
                 }),
-                print_form: Some(PrintForm {
-                    year: row.try_get::<Option<u8>, _>("print_year")?,
-                    label: row.try_get::<Option<String>, _>("print_label")?,
-                    show_retail: row.try_get::<bool, _>("print_show_retail_value")?,
-                    show_price_label: row.try_get::<bool, _>("print_show_retail_label")?,
-                }),
+                print_form: print_options_db::get(&data, database_id).await?,
+                show_color_dropdown: row.try_get("show_color_dropdown")?,
+                show_year_input: row.try_get("show_year_input")?,
             }))
         } else {
             Ok(None)
@@ -141,14 +109,12 @@ impl InventoryOptions {
                 inventorying_add_if_missing = ?,
                 inventorying_remove_if_zero = ?,
                 inventorying_allow_additions = ?,
-                print_enabled = ?,
-                print_year = ?,
-                print_label = ?,
-                print_show_retail_value = ?,
-                print_show_retail_label = ?
+                show_color_dropdown = ?,
+                show_year_input = ?
             WHERE database_id = ?
             "#,
         )
+        .bind(self.inventorying.is_some()) // inventorying_enabled
         .bind(
             self.inventorying
                 .as_ref()
@@ -164,19 +130,13 @@ impl InventoryOptions {
                 .as_ref()
                 .map_or(false, |i| i.allow_additions),
         ) // inventorying_allow_additions
-        .bind(self.inventorying.is_some()) // inventorying_enabled
-        .bind(self.print_form.is_some()) // print_enabled
-        .bind(self.print_form.as_ref().and_then(|p| p.year)) // print_year
-        .bind(self.print_form.as_ref().and_then(|p| p.label.clone())) // print_label
-        .bind(self.print_form.as_ref().map_or(false, |p| p.show_retail)) // print_show_retail_value
-        .bind(
-            self.print_form
-                .as_ref()
-                .map_or(false, |p| p.show_price_label),
-        ) // print_show_retail_label
+        .bind(self.show_color_dropdown) // show_color_dropdown
+        .bind(self.show_year_input) // show_year_input
         .bind(database_id) // database_id
         .execute(&pool)
         .await?;
+
+        print_options_db::set(&pool, database_id, &self.print_form).await?;
 
         Ok(())
     }
@@ -193,6 +153,8 @@ impl InventoryOptions {
         .bind(database_id)
         .execute(&pool)
         .await?;
+
+        print_options_db::delete_all(&pool, database_id).await?;
 
         Ok(())
     }
