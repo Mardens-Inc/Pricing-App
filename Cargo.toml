@@ -5,12 +5,12 @@ edition = "2021"
 build = "src-actix/build.rs"
 
 [[bin]]
-name = "pricing-app"
+name = "pricing_app"
 path = "src-actix/main.rs"
 
 [lib]
-name = "pricing_app"
-path = "src-actix/main.rs"
+name = "pricing_app_lib"
+path = "src-actix/lib.rs"
 crate-type = ["lib"]
 
 [[example]]
