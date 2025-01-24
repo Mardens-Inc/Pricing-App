@@ -1,5 +1,7 @@
-use serde::Deserialize;
 use anyhow::Result;
+use log::debug;
+use serde::Deserialize;
+use sqlx::MySqlPool;
 
 #[derive(Deserialize, Clone)]
 pub struct DatabaseConnectionData {
@@ -19,4 +21,13 @@ impl DatabaseConnectionData {
         let credentials = response.json::<DatabaseConnectionData>().await?;
         Ok(credentials)
     }
+}
+pub async fn create_pool(data: &DatabaseConnectionData) -> Result<MySqlPool> {
+    debug!("Creating MySQL production connection");
+    let pool = MySqlPool::connect(&format!(
+        "mysql://{}:{}@{}/pricing",
+        data.user, data.password, data.host
+    ))
+    .await?;
+    Ok(pool)
 }
