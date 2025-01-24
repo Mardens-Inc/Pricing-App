@@ -122,9 +122,7 @@ INSERT INTO inventory_print_options (
 }
 
 async fn update_item(pool: &MySqlPool, database_id: u64, item: &PrintForm) -> Result<()> {
-    let id = item
-        .id
-        .context("No id provided for update item")?;
+    let id = item.id.context("No id provided for update item")?;
     sqlx::query(
         r#"
     UPDATE inventory_print_options SET 
@@ -167,9 +165,7 @@ async fn exists(pool: &MySqlPool, database_id: u64, item: &PrintForm) -> Result<
     Ok(!rows.is_empty())
 }
 
-async fn delete_item(pool: &MySqlPool, database_id: u64, item: &PrintForm) -> Result<()> {
-    let id = item.id.context("No id provided for deletion")?;
-
+async fn delete_item(pool: &MySqlPool, database_id: u64, id: u64) -> Result<()> {
     sqlx::query(
         r#"
             delete from inventory_print_options where id = ? and database_id = ?;
@@ -194,15 +190,23 @@ async fn clean_unused_items(
         .map(|i| i.to_string())
         .collect::<Vec<_>>()
         .join(",");
-    sqlx::query(
+    let unused_rows = sqlx::query(
         r#"
             select id from inventory_print_options where database_id = ? and id not in (?)
         "#,
     )
     .bind(database_id)
     .bind(used_ids)
-    .execute(pool)
+    .fetch_all(pool)
     .await?;
+
+    let unused_ids = unused_rows
+        .iter()
+        .map(|row| row.get::<u64, _>("id"))
+        .collect::<Vec<_>>();
+    for id in unused_ids {
+        delete_item(&pool, database_id, id).await?;
+    }
 
     Ok(())
 }
