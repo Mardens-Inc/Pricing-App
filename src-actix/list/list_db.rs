@@ -1,4 +1,4 @@
-use crate::data_database_connection::DatabaseConnectionData;
+use crate::data_database_connection::{create_pool, DatabaseConnectionData};
 use crate::list_data::LocationListItem;
 use anyhow::Result;
 use log::debug;
@@ -24,15 +24,6 @@ CREATE TABLE if NOT EXISTS locations
     .await?;
 
     Ok(())
-}
-async fn create_pool(data: &DatabaseConnectionData) -> Result<MySqlPool> {
-    debug!("Creating MySQL production connection");
-    let pool = MySqlPool::connect(&format!(
-        "mysql://{}:{}@{}/pricing",
-        data.user, data.password, data.host
-    ))
-    .await?;
-    Ok(pool)
 }
 
 pub async fn get_all(
