@@ -1,13 +1,13 @@
 mod table_name_migration_tool;
 
 use log::{debug, info, warn};
-use pricing_app::columns_data::InventoryColumn;
-use pricing_app::columns_db::insert_column;
-use pricing_app::data_database_connection::DatabaseConnectionData;
 use serde::{Deserialize, Serialize};
 use sqlx::{MySqlPool, Row};
 use std::collections::HashMap;
 use std::error::Error;
+use pricing_app_lib::columns_data::InventoryColumn;
+use pricing_app_lib::columns_db;
+use pricing_app_lib::data_database_connection::DatabaseConnectionData;
 
 /// Struct representing the old options format for migration.
 #[derive(Debug, Serialize, Deserialize)]
@@ -50,7 +50,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let data = DatabaseConnectionData::get().await?;
 
     // Initialize the 'columns_db' schema if it doesn't already exist.
-    pricing_app::columns_db::initialize(&data).await?;
+    columns_db::initialize(&data).await?;
 
     // Create a pool for connecting to the database.
     let pool = create_pool(&data).await?;

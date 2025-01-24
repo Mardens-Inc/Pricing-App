@@ -1,5 +1,5 @@
 use log::{debug, info};
-use pricing_app::data_database_connection::DatabaseConnectionData;
+use pricing_app_lib::data_database_connection::DatabaseConnectionData;
 use serde_json::Value;
 use sqlx::MySqlPool;
 use std::error::Error;
