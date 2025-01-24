@@ -1,11 +1,14 @@
 use serde::Serialize;
 use serde_derive::Deserialize;
+use crate::print_options_data::PrintForm;
 
 #[derive(Serialize, Deserialize)]
 pub struct InventoryOptions {
     #[serde(rename = "print-form")]
-    pub print_form: Option<PrintForm>,
+    pub print_form: Option<Vec<PrintForm>>,
     pub inventorying: Option<Inventorying>,
+    pub show_year_input: bool,
+    pub show_color_dropdown: bool,
 }
 #[derive(Serialize, Deserialize)]
 pub struct Inventorying {
@@ -17,12 +20,3 @@ pub struct Inventorying {
     pub allow_additions: bool,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct PrintForm {
-    pub year: Option<u8>,
-    pub label: Option<String>,
-    #[serde(rename = "show-retail")]
-    pub show_retail: bool,
-    #[serde(rename = "show-price-label")]
-    pub show_price_label: bool,
-}
