@@ -1,0 +1,31 @@
+meta {
+  name: Create Option
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/inventory/:id/options/
+  body: json
+  auth: none
+}
+
+params:path {
+  id: test
+}
+
+body:json {
+  {
+    "print-form": {
+      "year": 23,
+      "label": "Internet Store",
+      "show-retail": true,
+      "show-price-label": false
+    },
+    "inventorying": {
+      "add-if-missing": true,
+      "remove-if-zero": false,
+      "allow-additions": true
+    }
+  }
+}
