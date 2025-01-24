@@ -174,7 +174,7 @@ where
 			    .service(web::resource("/node_modules/{file:.*}").route(web::get().to(proxy_to_vite)))
 		} else {
 			self.default_service(web::route().to(index))
-			    .service(web::scope("/assets").service(assets))
+			    .service(web::scope("/assets/{file:.*}").service(assets))
 		}
 	}
 }
