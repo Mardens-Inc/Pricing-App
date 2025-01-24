@@ -15,7 +15,7 @@ import {DatabaseViewProvider} from "./assets/providers/DatabaseViewProvider.tsx"
 import {HeroUIProvider} from "@heroui/react";
 
 export const isProduction = window.location.hostname === "pricing-new.mardens.com";
-export const baseUrl =  "https://pricing-new.mardens.com";//isProduction ? "" : "http://pricing.local";
+export const baseUrl = "https://pricing-new.mardens.com";//isProduction ? "" : "http://pricing.local";
 
 export const setTitle = (title?: string) => document.title = `${title ? `${title} - ` : ""}New Pricing Database`;
 
@@ -45,6 +45,7 @@ export function MainContentRenderer()
                 <Route path="/new" element={<DatabaseOptionsPage/>}/>
                 <Route path="/:id" element={<DatabaseViewPage/>}/>
                 <Route path="/:id/edit" element={<DatabaseOptionsPage/>}/>
+                <Route path="*" element={<>Error 404: Page not found.</>}/>
             </Routes>
         </HeroUIProvider>
     );
