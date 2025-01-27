@@ -22,8 +22,8 @@ name = "table_name_migration_tool"
 path = "tools/table_name_migration_tool.rs"
 
 [[example]]
-name ="options_migration_tool"
-path="tools/options_migration_tool.rs"
+name = "options_migration_tool"
+path = "tools/options_migration_tool.rs"
 
 
 [dependencies]
@@ -47,3 +47,4 @@ serde_derive = "1.0.210"
 tokio = { version = "1.40.0", features = ["rt", "rt-multi-thread", "macros"] }
 anyhow = "1.0.95"
 thiserror = "2.0.11"
+vite-actix = { git = "https://github.com/Drew-Chase/vite-actix.git" }
