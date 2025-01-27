@@ -58,7 +58,6 @@ use serde_json::json;
 pub static DEBUG: bool = cfg!(debug_assertions);
 const PORT: u16 = 1421;
 
-#[actix_web::main]
 pub async fn run() -> Result<()> {
     // Set the logging level and initialize the logger
     std::env::set_var("RUST_LOG", "debug");
