@@ -9,6 +9,8 @@ use include_dir::{include_dir, Dir};
 // This static directory is used to embed files into the binary at compile time.
 // The `WWWROOT` directory will be used to serve static files such as `index.html`.
 static WWWROOT: Dir = include_dir!("target/wwwroot");
+
+
 // Handles the request for the index.html file.
 //
 // This function serves the `index.html` file from the embedded directory
