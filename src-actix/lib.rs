@@ -3,7 +3,7 @@
 // TODO: Remove for production
 #![allow(clippy::all)]
 // -------------
-use vite_actix::{start_vite_server, AppConfig};
+use vite_actix::{start_vite_server, ViteAppFactory};
 pub mod data_database_connection;
 mod icons_endpoint;
 mod server_information_endpoint;
