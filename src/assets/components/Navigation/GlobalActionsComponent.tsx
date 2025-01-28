@@ -96,7 +96,7 @@ export default function GlobalActionsComponent()
                     <NavbarItem>
                         <Tooltip content={"Login"}>
                             <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} onPress={() => setIsLoginModalOpen(true)}>
-                                <Icon icon="mage:lock"/>
+                                <Icon icon="mage:lock-fill"/>
                             </Button>
                         </Tooltip>
                     </NavbarItem>
