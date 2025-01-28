@@ -1,7 +1,5 @@
 import {useSortable} from "@dnd-kit/sortable";
 import React, {useEffect, useRef, useState} from "react";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faEllipsisV} from "@fortawesome/free-solid-svg-icons";
 import ColumnAttributes from "./ColumnAttributes.tsx";
 import $ from "jquery";
 import {IndexedColumnItem} from "./ColumnsList.tsx";
@@ -72,13 +70,13 @@ export default function ColumnItem(props: ColumnItemProps)
                     <DropdownTrigger>
                         <div>
                             <Tooltip content={"More options"} closeDelay={0} classNames={{base: "pointer-events-none"}}>
-                                <Button radius={"full"} className={"min-w-0 w-12 h-12"} onPressStart={e => e.continuePropagation()}><FontAwesomeIcon icon={faEllipsisV}/></Button>
+                                <Button radius={"full"} className={"min-w-0 w-12 h-12"} onPressStart={e => e.continuePropagation()}><Icon icon="mage:dots"/></Button>
                             </Tooltip>
                         </div>
                     </DropdownTrigger>
                     <DropdownMenu>
-                        <DropdownItem onClick={() => setIsEditingDisplayName(true)}>Change Display Name</DropdownItem>
-                        <DropdownItem>Toggle Visibility</DropdownItem>
+                        <DropdownItem key={"change-display-name-dropdown-item"} onPress={() => setIsEditingDisplayName(true)}>Change Display Name</DropdownItem>
+                        <DropdownItem key={"toggle-visibility-dropdown-item"}>Toggle Visibility</DropdownItem>
                     </DropdownMenu>
                 </Dropdown>
             </div>

@@ -20,8 +20,8 @@ export default function CanPrintLabel()
             <ExtendedSwitch
                 label={"Can Print Label?"}
                 description={"Allow users to print labels for this database."}
-                toggle={canPrintLabel}
-                onToggle={setCanPrintLabel}
+                isSelected={canPrintLabel}
+                onValueChange={setCanPrintLabel}
                 className={"max-w-full"}
             />
 
@@ -104,23 +104,23 @@ export default function CanPrintLabel()
                         <ExtendedSwitch
                             label={"Show Price Label"}
                             description={"Show the price label on the printed label."}
-                            toggle={showPriceLabel}
-                            onToggle={setShowPriceLabel}
+                            isSelected={showPriceLabel}
+                            onValueChange={setShowPriceLabel}
                             className={"max-w-full"}
                         />
 
                         <ExtendedSwitch
                             label={"Show Year Input"}
                             description={"Show the year input on the inventorying page."}
-                            toggle={showYearInput}
-                            onToggle={setShowYearInput}
+                            isSelected={showYearInput}
+                            onValueChange={setShowYearInput}
                             className={"max-w-full"}
                         />
                         <ExtendedSwitch
                             label={"Show Color Input"}
                             description={"Show the color dropdown on the inventorying page."}
-                            toggle={showColorDropdown}
-                            onToggle={setShowColorDropdown}
+                            isSelected={showColorDropdown}
+                            onValueChange={setShowColorDropdown}
                             className={"max-w-full"}
                         />
                     </div>

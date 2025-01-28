@@ -1,10 +1,9 @@
 import {Badge, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, getKeyValue, Tooltip} from "@heroui/react";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faPrint} from "@fortawesome/free-solid-svg-icons";
 import PrintButton, {PrintButtonProps} from "./PrintButton.tsx";
 import {RowValue} from "../InventoryTable.tsx";
 import {OpenPrintWindow} from "../../../ts/printer.ts";
 import $ from "jquery";
+import {Icon} from "@iconify/react";
 
 export default function PrintPercentagesButton(props: PrintButtonProps)
 {
@@ -27,7 +26,7 @@ export default function PrintPercentagesButton(props: PrintButtonProps)
                                 className={"min-w-0 w-12 h-12"}
                                 onPressStart={e => e.continuePropagation()}
                             >
-                                <FontAwesomeIcon icon={faPrint}/>
+                                <Icon icon={"mage:printer-fill"}/>
                             </Button>
                         </Tooltip>
                     </Badge>
@@ -38,7 +37,7 @@ export default function PrintPercentagesButton(props: PrintButtonProps)
                     <DropdownItem
                         key={index}
                         onPressStart={e => e.continuePropagation()}
-                        onClick={
+                        onPress={
                             () =>
                             {
                                 OpenPrintWindow(props.databaseId, rowData, props.printOptions, +($(`tr#${props.row.id}`).attr("data-department") ?? -1), item.price);

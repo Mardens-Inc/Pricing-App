@@ -1,8 +1,7 @@
 import {Button, cn, Tooltip} from "@heroui/react";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faMicrophone} from "@fortawesome/free-solid-svg-icons";
 import {useEffect, useState} from "react";
 import {useSearch} from "../../providers/SearchProvider.tsx";
+import {Icon} from "@iconify/react";
 
 export default function VoiceSearch()
 {
@@ -102,9 +101,9 @@ export default function VoiceSearch()
                         )
                     }
                     data-listening={isListening}
-                    onClick={() => setIsListening(prev => !prev)}
+                    onPress={() => setIsListening(prev => !prev)}
                 >
-                    <FontAwesomeIcon icon={faMicrophone}/>
+                    <Icon icon="mage:microphone-fill"/>
                     {isListening && <p>LISTENING</p>}
                 </Button>
             </Tooltip>

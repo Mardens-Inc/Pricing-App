@@ -1,8 +1,7 @@
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faEnvelope, faEye, faEyeSlash} from "@fortawesome/free-solid-svg-icons";
 import React, {useState} from "react";
 import {useAuth} from "../../providers/AuthProvider.tsx";
 import {Button, Checkbox, Input, Link, ModalBody, ModalFooter, Tooltip} from "@heroui/react";
+import {Icon} from "@iconify/react";
 
 
 export default function LoginForm({onClose}: { onClose: () => void })
@@ -83,7 +82,7 @@ export default function LoginForm({onClose}: { onClose: () => void })
                     isRequired
                     autoFocus
                     endContent={
-                        <FontAwesomeIcon icon={faEnvelope} height={14} className="text-default-400 pointer-events-none flex-shrink-0"/>
+                        <Icon icon="mage:email-fill" height={14} className="text-default-400 pointer-events-none flex-shrink-0"/>
                     }
                     label="Username"
                     placeholder="Enter your username or email"
@@ -98,7 +97,7 @@ export default function LoginForm({onClose}: { onClose: () => void })
                     id={"password-input-field"}
                     isRequired
                     endContent={
-                        <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} height={14} className="text-default-400 cursor-pointer flex-shrink-0" onClick={() => setShowPassword(prev => !prev)}/>
+                        <Icon icon={showPassword ? "mage:eye-off" : "mage:eye-fill"} height={14} className="text-default-400 cursor-pointer flex-shrink-0" onClick={() => setShowPassword(prev => !prev)}/>
                     }
                     label="Password"
                     placeholder="Enter your password"
@@ -129,10 +128,10 @@ export default function LoginForm({onClose}: { onClose: () => void })
                 <p className={"text-danger"}>{error}</p>
             </ModalBody>
             <ModalFooter>
-                <Button color="danger" variant="flat" onClick={onClose} radius={"full"}>
+                <Button color="danger" variant="flat" onPress={onClose} radius={"full"}>
                     Close
                 </Button>
-                <Button color="primary" isLoading={loading} isDisabled={!username || !password} onClick={login} radius={"full"}>
+                <Button color="primary" isLoading={loading} isDisabled={!username || !password} onPress={login} radius={"full"}>
                     Log in
                 </Button>
             </ModalFooter>

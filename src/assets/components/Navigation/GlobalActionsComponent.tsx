@@ -1,13 +1,11 @@
 import {Button, Link, NavbarContent, NavbarItem, Tooltip} from "@heroui/react";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faCloudDownload, faEdit, faLock, faMoon, faPlus, faSignOut, faSun} from "@fortawesome/free-solid-svg-icons";
-import DatabaseRecords from "../../ts/DatabaseRecords.ts";
 import LoginModal from "../LoginModal/LoginModal.tsx";
 import AlertModal from "../AlertModal.tsx";
 import {useAuth} from "../../providers/AuthProvider.tsx";
 import {useEffect, useState} from "react";
 import {applyTheme, getCurrentTheme, Theme} from "../../ts/Theme.ts";
 import {useDatabaseView} from "../../providers/DatabaseViewProvider.tsx";
+import {Icon} from "@iconify/react";
 
 export default function GlobalActionsComponent()
 {
@@ -36,13 +34,13 @@ export default function GlobalActionsComponent()
                 message={"Are you sure you want to logout"}
                 buttons={
                     <>
-                        <Button radius={"full"} color={"danger"} onClick={() =>
+                        <Button radius={"full"} color={"danger"} onPress={() =>
                         {
                             auth.logout();
                             setIsLoggedIn(false);
                             setIsLogoutAlertOpen(false);
                         }}>Logout</Button>
-                        <Button radius={"full"} onClick={() => setIsLogoutAlertOpen(false)}>Cancel</Button>
+                        <Button radius={"full"} onPress={() => setIsLogoutAlertOpen(false)}>Cancel</Button>
                     </>
                 }
             />
@@ -56,20 +54,20 @@ export default function GlobalActionsComponent()
                                         <NavbarItem>
                                             <Tooltip content={"Edit database"}>
                                                 <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} as={Link} href={`/${id}/edit`}>
-                                                    <FontAwesomeIcon icon={faEdit}/>
+                                                    <Icon icon="mage:edit-pen-fill"/>
                                                 </Button>
                                             </Tooltip>
                                         </NavbarItem>
                                         <NavbarItem>
                                             <Tooltip content={"Export database"}>
-                                                <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} isLoading={isLoadingExport} onClick={async () =>
+                                                <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} isLoading={isLoadingExport} onPress={async () =>
                                                 {
                                                     setIsLoadingExport(true);
-                                                    await DatabaseRecords.export(id);
+                                                    // await DatabaseRecords.export(id);
                                                     setIsLoadingExport(false);
                                                 }}>
                                                     {!isLoadingExport && (
-                                                        <FontAwesomeIcon icon={faCloudDownload}/>
+                                                        <Icon icon="humbleicons:download"/>
                                                     )}
                                                 </Button>
                                             </Tooltip>
@@ -79,7 +77,7 @@ export default function GlobalActionsComponent()
                                     <NavbarItem>
                                         <Tooltip content={"Add new database"}>
                                             <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} as={Link} href={"/new"}>
-                                                <FontAwesomeIcon icon={faPlus}/>
+                                                <Icon icon="ic:round-plus"/>
                                             </Button>
                                         </Tooltip>
                                     </NavbarItem>
@@ -88,8 +86,8 @@ export default function GlobalActionsComponent()
                         )}
                         <NavbarItem>
                             <Tooltip content={"Logout"}>
-                                <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} onClick={() => setIsLogoutAlertOpen(true)}>
-                                    <FontAwesomeIcon icon={faSignOut}/>
+                                <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} onPress={() => setIsLogoutAlertOpen(true)}>
+                                    <Icon icon="mage:logout"/>
                                 </Button>
                             </Tooltip>
                         </NavbarItem>
@@ -97,16 +95,16 @@ export default function GlobalActionsComponent()
                 ) : (
                     <NavbarItem>
                         <Tooltip content={"Login"}>
-                            <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} onClick={() => setIsLoginModalOpen(true)}>
-                                <FontAwesomeIcon icon={faLock}/>
+                            <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} onPress={() => setIsLoginModalOpen(true)}>
+                                <Icon icon="mage:lock"/>
                             </Button>
                         </Tooltip>
                     </NavbarItem>
                 )}
                 <NavbarItem>
                     <Tooltip content={`Toggle ${darkMode ? "Light" : "Dark"} Mode`}>
-                        <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} onClick={() => setDarkMode(prev => !prev)} color={"primary"}>
-                            <FontAwesomeIcon icon={darkMode ? faMoon : faSun}/>
+                        <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} onPress={() => setDarkMode(prev => !prev)} color={"primary"}>
+                            <Icon icon={darkMode ? "mage:moon-fill" : "mage:sun-fill"}/>
                         </Button>
                     </Tooltip>
                 </NavbarItem>

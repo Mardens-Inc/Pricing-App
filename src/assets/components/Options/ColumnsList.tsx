@@ -1,12 +1,10 @@
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faEllipsisV, faPlus} from "@fortawesome/free-solid-svg-icons";
 import ColumnItem from "./ColumnItem.tsx";
 import {useEffect, useState} from "react";
 import {closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors} from "@dnd-kit/core";
 import {arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy} from "@dnd-kit/sortable";
-import {Column} from "../../ts/DatabaseRecords.ts";
 import {enforceAttributesSingleSelectionMode} from "./ColumnAttributes.tsx";
 import {Button, Tooltip} from "@heroui/react";
+import {Icon} from "@iconify/react";
 
 export interface IndexedColumnItem extends Column
 {
@@ -57,11 +55,11 @@ export default function ColumnsList(props: ColumnListProps)
             <div className={"flex flex-row items-center"}>
                 <p className={"text-2xl mr-auto"}>Columns</p>
                 <Tooltip content={"Add column"}>
-                    <Button radius={"full"} className={"min-w-0 w-12 h-12"}><FontAwesomeIcon icon={faPlus}/></Button>
+                    <Button radius={"full"} className={"min-w-0 w-12 h-12"}><Icon icon="mage:plus"/></Button>
                 </Tooltip>
             </div>
             <div className={"flex flex-col gap-2"}>
-                <p>Drag columns around to order them or click the <FontAwesomeIcon icon={faEllipsisV}/> for more information.</p>
+                <p>Drag columns around to order them or click the <Icon icon="mage:dots"/> for more information.</p>
 
                 <DndContext
                     sensors={sensors}

@@ -1,8 +1,7 @@
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faEnvelope, faEye, faEyeSlash} from "@fortawesome/free-solid-svg-icons";
 import React, {useEffect, useState} from "react";
 import {useAuth} from "../../providers/AuthProvider.tsx";
 import {Button, Input, ModalBody, ModalFooter} from "@heroui/react";
+import {Icon} from "@iconify/react";
 
 export default function RegisterForm({onClose}: { onClose: () => void })
 {
@@ -95,7 +94,7 @@ export default function RegisterForm({onClose}: { onClose: () => void })
                 <Input
                     autoFocus
                     endContent={
-                        <FontAwesomeIcon icon={faEnvelope} height={14} className="text-default-400 pointer-events-none flex-shrink-0"/>
+                        <Icon icon="mage:email-fill" height={14} className="text-default-400 pointer-events-none flex-shrink-0"/>
                     }
                     label="First and Last Name"
                     placeholder="Enter your firstname.lastname"
@@ -107,7 +106,7 @@ export default function RegisterForm({onClose}: { onClose: () => void })
                 />
                 <Input
                     endContent={
-                        <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} height={14} className="text-default-400 cursor-pointer flex-shrink-0" onClick={() => setShowPassword(prev => !prev)}/>
+                        <Icon icon={showPassword ? "mage:eye-off" : "mage:eye-fill"} height={14} className="text-default-400 cursor-pointer flex-shrink-0" onClick={() => setShowPassword(prev => !prev)}/>
                     }
                     label="Password"
                     placeholder="Enter your password"
@@ -120,7 +119,7 @@ export default function RegisterForm({onClose}: { onClose: () => void })
                 />
                 <Input
                     endContent={
-                        <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} height={14} className="text-default-400 cursor-pointer flex-shrink-0" onClick={() => setShowConfirmPassword(prev => !prev)}/>
+                        <Icon icon={showPassword ? "mage:eye-off" : "mage:eye-fill"} height={14} className="text-default-400 cursor-pointer flex-shrink-0" onClick={() => setShowConfirmPassword(prev => !prev)}/>
                     }
                     label="Confirm Password"
                     placeholder="Confirm your password"

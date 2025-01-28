@@ -1,8 +1,7 @@
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faUpload} from "@fortawesome/free-solid-svg-icons";
 import $ from "jquery";
 import {useEffect} from "react";
 import {Button, cn, Divider} from "@heroui/react";
+import {Icon} from "@iconify/react";
 
 interface FileUploadInputProps
 {
@@ -78,8 +77,8 @@ export default function FileUploadInput(props: FileUploadInputProps)
                     radius={"full"}
                     color={"primary"}
                     className={"p-8"}
-                    onClick={openSelector}
-                    startContent={<FontAwesomeIcon icon={faUpload}/>}
+                    onPress={openSelector}
+                    startContent={<Icon icon="mage:file-upload"/>}
                 >
                     Select CSV
                 </Button>

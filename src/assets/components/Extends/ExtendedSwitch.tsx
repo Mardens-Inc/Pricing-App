@@ -4,8 +4,6 @@ interface IExpandedSwitchProps extends SwitchProps
 {
     label?: string;
     description?: string;
-    toggle?: boolean;
-    onToggle?: (selected: boolean) => void;
 }
 
 export default function ExtendedSwitch(props: IExpandedSwitchProps)
@@ -13,13 +11,9 @@ export default function ExtendedSwitch(props: IExpandedSwitchProps)
     const updatedProps = {...props};
     delete updatedProps.label;
     delete updatedProps.description;
-    delete updatedProps.toggle;
-    delete updatedProps.onToggle;
     return (
         <Switch
             {...updatedProps}
-            defaultSelected={props.toggle ?? false}
-            onValueChange={props.onValueChange ?? props.onToggle}
             classNames={{
                 ...props.classNames,
                 base: cn(

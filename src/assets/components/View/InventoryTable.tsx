@@ -1,13 +1,11 @@
 import {Button, cn, getKeyValue, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from "@heroui/react";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faEllipsisV} from "@fortawesome/free-solid-svg-icons";
 import {useSearch} from "../../providers/SearchProvider.tsx";
 import {useEffect, useState} from "react";
-import DatabaseRecords, {Column, DatabaseOptions} from "../../ts/DatabaseRecords.ts";
 import {useNavigate, useParams} from "react-router-dom";
 import DepartmentDropdown from "./TableComponents/DepartmentDropdown.tsx";
 import PrintButton from "./TableComponents/PrintButton.tsx";
 import $ from "jquery";
+import {Icon} from "@iconify/react";
 
 interface InventoryTableProps
 {
@@ -182,7 +180,7 @@ export default function InventoryTable(props: InventoryTableProps)
                                                     <PrintButton databaseId={id} row={row} columns={columns} printOptions={props.options["print-form"]}/>
                                                 </>
                                             }
-                                            <Button radius={"full"} className={"min-w-0 w-12 h-12"}><FontAwesomeIcon icon={faEllipsisV}/></Button>
+                                            <Button radius={"full"} className={"min-w-0 w-12 h-12"}><Icon icon="mage:dots" /></Button>
                                         </div>
                                     </TableCell>
                                 )

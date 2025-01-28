@@ -1,15 +1,13 @@
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import React from "react";
-import {fa1, faAlignJustify, faKey, faLayerGroup, faLock, faMagnifyingGlass, faPercent, faShop, faTag} from "@fortawesome/free-solid-svg-icons";
-import {IconProp} from "@fortawesome/fontawesome-svg-core";
 import {IndexedColumnItem} from "./ColumnsList.tsx";
 import {Button, Tooltip} from "@heroui/react";
+import {Icon} from "@iconify/react";
 
 export interface ColumnAttribute
 {
     key: string;
     description: string | React.ReactNode;
-    icon: IconProp;
+    icon: string;
     selected: boolean;
     selectionMode: "single" | "multiple";
 }
@@ -26,21 +24,21 @@ export const DefaultAttributes: ColumnAttribute[] = [
         description: (
             <p>Mark this item as the primary key, which will be used to uniquely identify each item.<br/><b>There can only be one primary key.</b></p>
         ),
-        icon: faKey,
+        icon: "mage:key-fill",
         selected: false,
         selectionMode: "single"
     },
     {
         key: "price",
         description: "Mark this item as a price column, which will be used to format it as currency.",
-        icon: faTag,
+        icon: "mage:tag-2-fill",
         selected: false,
         selectionMode: "multiple"
     },
     {
         key: "search",
         description: "Mark this item as a search column, which will be used to search for items.",
-        icon: faMagnifyingGlass,
+        icon: "mage:search",
         selected: false,
         selectionMode: "multiple"
     },
@@ -49,7 +47,7 @@ export const DefaultAttributes: ColumnAttribute[] = [
         description: (
             <p>Mark this item as a quantity column, which will be used to calculate the total price of an item and incrementing and decrementing inventory.<br/><b>There can only be one quantity column.</b></p>
         ),
-        icon: fa1,
+        icon: "iconamoon:number-1",
         selected: false,
         selectionMode: "single"
     },
@@ -58,7 +56,7 @@ export const DefaultAttributes: ColumnAttribute[] = [
         description: (
             <p>Mark this as the description column, this will be used for voice search.<br/><b>There can only be one description column.</b></p>
         ),
-        icon: faAlignJustify,
+        icon: "mage:align-left",
         selected: false,
         selectionMode: "single"
     },
@@ -67,7 +65,7 @@ export const DefaultAttributes: ColumnAttribute[] = [
         description: (
             <p>Mark this as the department column, which will be used in printing.<br/><b>There can only be one department column.</b></p>
         ),
-        icon: faShop,
+        icon: "mage:shop-fill",
         selected: false,
         selectionMode: "single"
     },
@@ -76,7 +74,7 @@ export const DefaultAttributes: ColumnAttribute[] = [
         description: (
             <p>Mark this as the Marden's Price column.<br/><b>There can only be one Marden's Price column.</b></p>
         ),
-        icon: faPercent,
+        icon: "lsicon:percent-filled",
         selected: false,
         selectionMode: "single"
     },
@@ -85,14 +83,14 @@ export const DefaultAttributes: ColumnAttribute[] = [
         description: (
             <p>Mark this column for use in the <b>Dynamically Generate Mardens Price</b> section.<br/><b>There can only be one category column.</b></p>
         ),
-        icon: faLayerGroup,
+        icon: "famicons:layers",
         selected: false,
         selectionMode: "single"
     },
     {
         key: "readonly",
         description: "Mark this item as readonly, which will prevent it from being edited and remove it from the addition form.",
-        icon: faLock,
+        icon: "mage:lock-fill",
         selected: false,
         selectionMode: "multiple"
     }
@@ -116,7 +114,7 @@ export default function ColumnAttributes(props: ColumnAttributesProps)
                         radius={"full"}
                         variant={"light"}
                         data-selected={attribute.selected}
-                        onClick={() =>
+                        onPress={() =>
                         {
                             if (props.onSelectionChange)
                             {
@@ -127,7 +125,7 @@ export default function ColumnAttributes(props: ColumnAttributesProps)
                             }
                         }}
                     >
-                        <FontAwesomeIcon icon={attribute.icon} width={16} height={16}/>
+                        <Icon icon={attribute.icon} width={16} height={16}/>
                     </Button>
                 </Tooltip>
             ))}
