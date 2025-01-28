@@ -14,7 +14,9 @@ export default function LoginModal({isOpen, onClose}: { isOpen: boolean, onClose
                         variant={"underlined"}
                         classNames={{
                             tab: "flex py-4 px-6 flex-initial text-large font-semibold"
-                        }}>
+                        }}
+                        disableAnimation
+                    >
                         <Tab title="Login"><LoginForm onClose={onClose}/></Tab>
                         <Tab title="Register"><RegisterForm onClose={onClose}/></Tab>
                     </Tabs>
