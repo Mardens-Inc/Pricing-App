@@ -2,13 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-
-
-
 :root {
   --scrollbar-background-color: transparent;
-  --scrollbar-thumb-color: hsl(var(--nextui-primary));
-  --scrollbar-thumb-hover-color: hsl(var(--nextui-primary));
+  --scrollbar-thumb-color: hsl(var(--heroui-primary));
+  --scrollbar-thumb-hover-color: hsl(var(--heroui-primary));
   overflow: auto;
   scrollbar-color: var(--scrollbar-thumb-color) var(--scrollbar-background-color);
   scrollbar-width: thin;
@@ -32,6 +29,6 @@
 }
 
 ::selection {
-  background-color: hsl(var(--nextui-primary));
-  color: hsl(var(--nextui-neutral-800));
+  background-color: hsl(var(--heroui-primary)) !important;
+  color: hsl(var(--heroui-foreground)) !important;
 }
