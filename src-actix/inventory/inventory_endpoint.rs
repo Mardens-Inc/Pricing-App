@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use std::ops::Deref;
 use std::sync::Arc;
 
-#[get("")]
+#[get("/")]
 pub async fn get_inventory(
     id: web::Path<String>,
     query: web::Query<inventory_db::InventoryFilterOptions>,
@@ -24,7 +24,7 @@ pub async fn get_inventory(
     Ok(HttpResponse::Ok().json(results))
 }
 
-#[head("")]
+#[head("/")]
 pub async fn get_inventory_headers(
     id: web::Path<String>,
     data: web::Data<Arc<DatabaseConnectionData>>,
@@ -34,7 +34,7 @@ pub async fn get_inventory_headers(
     })))
 }
 
-#[options("")]
+#[options("/")]
 pub async fn get_inventory_options(
     id: web::Path<String>,
     data: web::Data<Arc<DatabaseConnectionData>>,
@@ -44,7 +44,7 @@ pub async fn get_inventory_options(
     })))
 }
 
-#[post("")]
+#[post("/")]
 pub async fn insert_record(
     id: web::Path<String>,
     body: web::Json<Vec<serde_json::Value>>,

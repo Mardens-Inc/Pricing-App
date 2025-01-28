@@ -5,7 +5,7 @@ use crypto::hashids::decode_single;
 use std::error::Error;
 use std::sync::Arc;
 
-#[get("")]
+#[get("/")]
 pub async fn get_all_locations(
     data: web::Data<Arc<DatabaseConnectionData>>,
 ) -> Result<impl Responder, Box<dyn Error>> {
@@ -14,7 +14,7 @@ pub async fn get_all_locations(
     Ok(HttpResponse::Ok().json(locations))
 }
 
-#[get("{id}")]
+#[get("/{id}")]
 pub async fn get_location(
     id: web::Path<String>,
     data: web::Data<Arc<DatabaseConnectionData>>,
@@ -27,7 +27,7 @@ pub async fn get_location(
     Ok(HttpResponse::Ok().json(location))
 }
 
-#[patch("{id}")]
+#[patch("/{id}")]
 pub async fn update_location(
     id: web::Path<String>,
     data: web::Data<Arc<DatabaseConnectionData>>,
@@ -40,7 +40,7 @@ pub async fn update_location(
     Ok(HttpResponse::Ok().json(location))
 }
 
-#[post("")]
+#[post("/")]
 pub async fn create_location(
     data: web::Data<Arc<DatabaseConnectionData>>,
     body: web::Json<list_data::LocationListItem>,
@@ -50,7 +50,7 @@ pub async fn create_location(
     Ok(HttpResponse::Ok().finish())
 }
 
-#[delete("{id}")]
+#[delete("/{id}")]
 pub async fn delete_location(
     data: web::Data<Arc<DatabaseConnectionData>>,
     id: web::Path<String>,
