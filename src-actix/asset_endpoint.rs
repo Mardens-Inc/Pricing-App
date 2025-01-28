@@ -3,6 +3,7 @@ use actix_files::file_extension_to_mime;
 use actix_web::error::ErrorInternalServerError;
 use actix_web::{get, web, App, Error, HttpRequest, HttpResponse, Responder};
 use include_dir::{include_dir, Dir};
+use vite_actix::ViteAppFactory;
 
 // Static directory including all files under `target/wwwroot`.
 //
@@ -63,7 +64,7 @@ where
             self.default_service(web::route().to(index))
                 .service(web::scope("/assets/{file:.*}").service(assets))
         } else {
-            self
+            self.configure_vite()
         }
     }
 }

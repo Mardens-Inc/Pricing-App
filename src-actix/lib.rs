@@ -3,7 +3,7 @@
 // TODO: Remove for production
 #![allow(clippy::all)]
 // -------------
-use vite_actix::{start_vite_server, ViteAppFactory};
+use vite_actix::start_vite_server;
 pub mod data_database_connection;
 mod icons_endpoint;
 mod server_information_endpoint;
@@ -98,7 +98,6 @@ pub async fn run() -> Result<()> {
                     .app_data(connection_data_mutex.clone()),
             )
             .configure_routes()
-            .configure_vite()
     })
     .workers(4) // Set number of workers
     .bind(format!("0.0.0.0:{port}", port = PORT))? // Bind to specified port
