@@ -4,23 +4,22 @@ use anyhow::{anyhow, Context, Result};
 use log::{debug, error};
 use sqlx::{Executor, MySqlPool, Row};
 
-pub async fn initialize(data: &DatabaseConnectionData) -> Result<()> {
+pub async fn initialize(pool: &MySqlPool) -> Result<()> {
     debug!("Initializing print options database table");
-    let pool = create_pool(data).await?;
     pool.execute(
         r#"
-CREATE TABLE inventory_print_options
+CREATE TABLE IF NOT EXISTS inventory_print_options
 (
     id               BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    hint             TEXT,
-    label            TEXT,
-    year             SMALLINT,
-    department       TEXT,
-    color            TEXT,
-    size             SMALLINT,
-    show_retail      BOOLEAN NOT NULL,
-    show_price_label BOOLEAN NOT NULL,
-    database_id      BIGINT UNSIGNED
+    hint             VARCHAR(255) DEFAULT NULL,
+    label            VARCHAR(128) DEFAULT NULL,
+    year             SMALLINT DEFAULT NULL,
+    department       SMALLINT DEFAULT NULL,
+    color            VARCHAR(128) DEFAULT NULL,
+    size             VARCHAR(20) NULL DEFAULT '1x0.75',
+    show_retail      BOOLEAN NOT NULL DEFAULT FALSE,
+    show_price_label BOOLEAN NOT NULL DEFAULT FALSE,
+    database_id      BIGINT UNSIGNED NOT NULL
 );
     "#,
     )
