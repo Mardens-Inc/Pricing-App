@@ -76,7 +76,7 @@ export default function GlobalActionsComponent()
                                 ) : (
                                     <NavbarItem>
                                         <Tooltip content={"Add new database"}>
-                                            <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} as={Link} href={"/new"}>
+                                            <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem]"} as={Link} href={"/new"}>
                                                 <Icon icon="ic:round-plus"/>
                                             </Button>
                                         </Tooltip>
@@ -86,7 +86,7 @@ export default function GlobalActionsComponent()
                         )}
                         <NavbarItem>
                             <Tooltip content={"Logout"}>
-                                <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} onPress={() => setIsLogoutAlertOpen(true)}>
+                                <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem]"} onPress={() => setIsLogoutAlertOpen(true)}>
                                     <Icon icon="mage:logout"/>
                                 </Button>
                             </Tooltip>
@@ -95,7 +95,7 @@ export default function GlobalActionsComponent()
                 ) : (
                     <NavbarItem>
                         <Tooltip content={"Login"}>
-                            <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} onPress={() => setIsLoginModalOpen(true)}>
+                            <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem]"} onPress={() => setIsLoginModalOpen(true)}>
                                 <Icon icon="mage:lock-fill"/>
                             </Button>
                         </Tooltip>
@@ -103,7 +103,7 @@ export default function GlobalActionsComponent()
                 )}
                 <NavbarItem>
                     <Tooltip content={`Toggle ${darkMode ? "Light" : "Dark"} Mode`}>
-                        <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} onPress={() => setDarkMode(prev => !prev)} color={"primary"}>
+                        <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem]"} onPress={() => setDarkMode(prev => !prev)} color={"primary"}>
                             <Icon icon={darkMode ? "mage:moon-fill" : "mage:sun-fill"}/>
                         </Button>
                     </Tooltip>
