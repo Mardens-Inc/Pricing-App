@@ -26,8 +26,8 @@ pub async fn get_inventory(
 
 #[head("/")]
 pub async fn get_inventory_headers(
-    id: web::Path<String>,
-    data: web::Data<Arc<DatabaseConnectionData>>,
+    _id: web::Path<String>,
+    _data: web::Data<Arc<DatabaseConnectionData>>,
 ) -> Result<impl Responder> {
     Ok(HttpResponse::InternalServerError().json(json!({
         "error": "Not implemented"
@@ -36,8 +36,8 @@ pub async fn get_inventory_headers(
 
 #[options("/")]
 pub async fn get_inventory_options(
-    id: web::Path<String>,
-    data: web::Data<Arc<DatabaseConnectionData>>,
+    _id: web::Path<String>,
+    _data: web::Data<Arc<DatabaseConnectionData>>,
 ) -> Result<impl Responder> {
     Ok(HttpResponse::InternalServerError().json(json!({
         "error": "Not implemented"
@@ -46,9 +46,9 @@ pub async fn get_inventory_options(
 
 #[post("/")]
 pub async fn insert_record(
-    id: web::Path<String>,
-    body: web::Json<Vec<serde_json::Value>>,
-    data: web::Data<Arc<DatabaseConnectionData>>,
+    _id: web::Path<String>,
+    _body: web::Json<Vec<serde_json::Value>>,
+    _data: web::Data<Arc<DatabaseConnectionData>>,
 ) -> Result<impl Responder> {
     Ok(HttpResponse::InternalServerError().json(json!({
         "error": "Not implemented"
@@ -57,8 +57,8 @@ pub async fn insert_record(
 
 #[post("/upload")]
 pub async fn upload_inventory(
-    body: web::Bytes,
-    data: web::Data<Arc<DatabaseConnectionData>>,
+    _body: web::Bytes,
+    _data: web::Data<Arc<DatabaseConnectionData>>,
 ) -> Result<impl Responder> {
     Ok(HttpResponse::InternalServerError().json(json!({
         "error": "Not implemented"
@@ -93,6 +93,10 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
             .service(get_inventory_options)
             .service(insert_record)
             .service(upload_inventory)
-            .service(download_inventory),
+            .service(download_inventory)
+            .default_service(web::to(|| async {
+                // Handle unmatched API endpoints
+                HttpResponse::NotFound().json(json!({"error": "API endpoint not found"}))
+            })),
     );
 }
