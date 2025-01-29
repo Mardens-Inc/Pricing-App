@@ -3,8 +3,8 @@ use crate::mysql_row_wrapper::MySqlRowWrapper;
 use anyhow::Result;
 use csv::WriterBuilder;
 use log::debug;
-use serde_derive::Deserialize;
-use sqlx::{Column, Executor, MySqlPool, Row};
+use serde_derive::{Deserialize, Serialize};
+use sqlx::{Column, Executor, Row};
 
 #[derive(Deserialize)]
 pub struct InventoryFilterOptions {
@@ -16,16 +16,22 @@ pub struct InventoryFilterOptions {
     sort_order: Option<String>,
 }
 
+#[derive(Serialize)]
+pub struct InventoryResult {
+    data: Vec<serde_json::Value>,
+    total: Option<u64>,
+}
+
 pub async fn get_inventory(
     id: u64,
     options: Option<InventoryFilterOptions>,
     data: &DatabaseConnectionData,
-) -> Result<Vec<serde_json::Value>> {
+) -> Result<InventoryResult> {
     // Create the database connection pool
     let pool = create_pool(data).await?;
 
     let mut result = Vec::new();
-    let mut query = format!("SELECT * FROM `{}`", id);
+    let mut query = format!("SELECT *, COUNT(*) OVER () AS total_records FROM `{}`", id);
     let mut conditions = Vec::new();
     let mut params = Vec::new(); // Collect parameters for binding
 
@@ -77,11 +83,24 @@ pub async fn get_inventory(
     let rows = sql_query.fetch_all(&pool).await?;
 
     // Process rows into JSON results
+    let mut total: Option<u64> = None;
     for row in rows {
-        result.push(serde_json::json!(MySqlRowWrapper(row)));
+        debug!("Row Data: {:?}", row);
+        if total.is_none() {
+            total = row.try_get("total_records").ok();
+        }
+        // Remove the `total_records` column from the row
+        let mut row_json = serde_json::json!(MySqlRowWrapper(row));
+        if let Some(obj) = row_json.as_object_mut() {
+            obj.remove("total_records");
+        }
+        result.push(row_json);
     }
 
-    Ok(result)
+    Ok(InventoryResult {
+        data: result,
+        total,
+    })
 }
 
 pub async fn export_csv(id: u64, data: &DatabaseConnectionData) -> Result<String> {
@@ -119,4 +138,13 @@ pub async fn export_csv(id: u64, data: &DatabaseConnectionData) -> Result<String
     let csv_str = String::from_utf8(writer.into_inner()?)?;
 
     Ok(csv_str)
+}
+
+pub async fn count(id: u64, data: &DatabaseConnectionData) -> Result<u64> {
+    let pool = create_pool(data).await?;
+    let result = sqlx::query(r#"select count(*) from ?"#)
+        .bind(id)
+        .fetch_one(&pool)
+        .await?;
+    Ok(result.try_get("count")?)
 }
