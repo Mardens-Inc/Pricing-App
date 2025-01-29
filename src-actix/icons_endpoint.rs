@@ -1,8 +1,8 @@
 use crate::http_error::Result;
-use crate::icons_endpoint;
 use actix_files::file_extension_to_mime;
 use actix_web::{get, web, HttpRequest, HttpResponse, Responder};
 use log::error;
+use serde_json::json;
 use std::ffi::OsStr;
 use std::fs::File;
 use std::io::Read;
@@ -120,5 +120,9 @@ pub async fn get_icon(path: web::Path<String>) -> Result<impl Responder> {
 }
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
-    cfg.service(web::scope("/icons").service(get_icons).service(get_icon));
+    cfg.service(web::scope("/icons").service(get_icons).service(get_icon))
+        .default_service(web::to(|| async {
+            // Handle unmatched API endpoints
+            HttpResponse::NotFound().json(json!({"error": "API endpoint not found"}))
+        }));
 }
