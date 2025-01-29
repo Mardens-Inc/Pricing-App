@@ -1,13 +1,11 @@
 use crate::data_database_connection::{create_pool, DatabaseConnectionData};
 use crate::list_data::LocationListItem;
 use anyhow::Result;
-use log::debug;
-use sqlx::MySqlPool;
+use sqlx::{Executor, MySqlPool};
 use std::error::Error;
 
-pub async fn initialize(data: &DatabaseConnectionData) -> Result<()> {
-    let pool = create_pool(data).await?;
-    sqlx::query(
+pub async fn initialize(pool: &MySqlPool) -> Result<()> {
+    pool.execute(
         r#"
 CREATE TABLE if NOT EXISTS locations
 (
@@ -20,7 +18,6 @@ CREATE TABLE if NOT EXISTS locations
 );
 		"#,
     )
-    .execute(&pool)
     .await?;
 
     Ok(())
