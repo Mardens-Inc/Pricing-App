@@ -2,10 +2,9 @@ use crate::data_database_connection::{create_pool, DatabaseConnectionData};
 use crate::options_data::{InventoryOptions, Inventorying};
 use crate::print_options_db;
 use anyhow::Result;
-use sqlx::{Executor, Row};
+use sqlx::{Executor, MySqlPool, Row};
 
-pub async fn initialize(data: &DatabaseConnectionData) -> Result<()> {
-    let pool = create_pool(data).await?;
+pub async fn initialize(pool: &MySqlPool) -> Result<()> {
     pool.execute(
         r#"
 CREATE TABLE IF NOT EXISTS `inventory_options`
@@ -22,6 +21,8 @@ CREATE TABLE IF NOT EXISTS `inventory_options`
 	"#,
     )
     .await?;
+    
+    print_options_db::initialize(&pool).await?;
 
     Ok(())
 }
