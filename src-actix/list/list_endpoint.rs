@@ -2,6 +2,7 @@ use crate::data_database_connection::DatabaseConnectionData;
 use crate::{list_data, list_db};
 use actix_web::{delete, get, patch, post, web, HttpResponse, Responder};
 use crypto::hashids::decode_single;
+use serde_json::json;
 use std::error::Error;
 use std::sync::Arc;
 
@@ -75,6 +76,10 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
             .service(get_location)
             .service(update_location)
             .service(create_location)
-            .service(delete_location),
+            .service(delete_location)
+            .default_service(web::to(|| async {
+                // Handle unmatched API endpoints
+                HttpResponse::NotFound().json(json!({"error": "API endpoint not found"}))
+            })),
     );
 }
