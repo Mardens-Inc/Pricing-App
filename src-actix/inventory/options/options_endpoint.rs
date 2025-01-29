@@ -99,6 +99,10 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
             .service(get_options)
             .service(create_options)
             .service(update_options)
-            .service(delete_options),
+            .service(delete_options)
+            .default_service(web::to(|| async {
+                // Handle unmatched API endpoints
+                HttpResponse::NotFound().json(json!({"error": "API endpoint not found"}))
+            })),
     );
 }
