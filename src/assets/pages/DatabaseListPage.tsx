@@ -97,7 +97,7 @@ export default function DatabaseListPage()
             className={"w-auto mx-8 mt-4"}
             classNames={{
                 tr: "hover:bg-foreground/5 cursor-pointer transition-colors",
-                td: "dark:group-data-[odd=true]:before:bg-default-100/10",
+                td: "before:!bg-default-100/10",
                 th: "dark:bg-background/50 backdrop-blur-md saturation-150 dark:brightness-150 mx-2"
             }}
             onSortChange={(descriptor) =>
@@ -137,7 +137,7 @@ export default function DatabaseListPage()
                 {currentItems.map((item, index) =>
                 {
                     return (
-                        <TableRow key={item.id + index.toString()} as={Link} href={`/${item.id}`} className={"dark:group-hover:bg-default-100/10"}>
+                        <TableRow key={item.id + index.toString()} as={Link} href={`/inv/${item.id}`} className={"dark:group-hover:bg-default-100/10"}>
                             <TableCell className={"w-12"}>
                                 <LocationIcon location={item} icons={icons}/>
                             </TableCell>
@@ -162,16 +162,16 @@ export default function DatabaseListPage()
                                 <div className={"gap-2 flex flex-row"}>
                                     {isLoggedIn && auth.getUserProfile().admin ? (<>
                                         <Tooltip content={`Edit '${item.name}'`} closeDelay={0} classNames={{base: "pointer-events-none"}}>
-                                            <Button radius={"full"} className={"min-w-0 p-0 w-10 h-10"} as={Link} href={`/${item.id}/edit`}>
-                                                <Icon icon="mynaui:edit-solid" width="24" height="24"/>
+                                            <Button radius={"full"} className={"min-w-0 p-0 w-10 h-10 text-[1rem]"} as={Link} href={`/inv/${item.id}/edit`}>
+                                                <Icon icon="mage:edit-fill"/>
                                             </Button>
                                         </Tooltip>
                                         <Dropdown>
                                             <DropdownTrigger>
                                                 <div>
                                                     <Tooltip content={`More Options`} closeDelay={0} classNames={{base: "pointer-events-none"}}>
-                                                        <Button radius={"full"} className={"min-w-0 p-0 w-10 h-10"} onPressStart={(e) => e.continuePropagation()}>
-                                                            <Icon icon="mynaui:dots" width="24" height="24"/>
+                                                        <Button radius={"full"} className={"min-w-0 p-0 w-10 h-10 text-[2rem]"} onPressStart={(e) => e.continuePropagation()}>
+                                                            <Icon icon="mynaui:dots"/>
                                                         </Button>
                                                     </Tooltip>
                                                 </div>
