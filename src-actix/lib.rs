@@ -48,7 +48,7 @@ pub mod print_options_data;
 pub mod print_options_db;
 
 use crate::asset_endpoint::AssetsAppConfig;
-use crate::data_database_connection::DatabaseConnectionData;
+use crate::data_database_connection::{create_pool, DatabaseConnectionData};
 use crate::server_information_endpoint::get_server_version;
 use actix_web::{middleware, web, App, HttpResponse, HttpServer};
 use anyhow::Result;
@@ -67,8 +67,10 @@ pub async fn run() -> Result<()> {
     let data = DatabaseConnectionData::get().await?;
 
     // Initialize necessary databases
-    list_db::initialize(&data).await?;
-    options_db::initialize(&data).await?;
+    let pool = create_pool(&data).await?;
+    list_db::initialize(&pool).await?;
+    options_db::initialize(&pool).await?;
+    pool.close().await;
 
     let connection_data_mutex = web::Data::new(std::sync::Arc::new(data));
 
@@ -93,8 +95,12 @@ pub async fn run() -> Result<()> {
                     .service(get_server_version)
                     .configure(icons_endpoint::configure)
                     .configure(list_endpoint::configure)
-                    .configure(inventory_endpoint::configure)
                     .configure(options_endpoint::configure)
+                    .configure(inventory_endpoint::configure)
+                    .default_service(web::to(|| async {
+                        // Handle unmatched API endpoints
+                        HttpResponse::NotFound().json(json!({"error": "API endpoint not found"}))
+                    }))
                     .app_data(connection_data_mutex.clone()),
             )
             .configure_routes()
