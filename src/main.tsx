@@ -43,8 +43,8 @@ export function MainContentRenderer()
             <Routes>
                 <Route path="/" element={<DatabaseListPage/>}/>
                 <Route path="/new" element={<DatabaseOptionsPage/>}/>
-                <Route path="/:id" element={<DatabaseViewPage/>}/>
-                <Route path="/:id/edit" element={<DatabaseOptionsPage/>}/>
+                <Route path="/inv/:id" element={<DatabaseViewPage/>}/>
+                <Route path="/inv/:id/edit" element={<DatabaseOptionsPage/>}/>
                 <Route path="*" element={<>Error 404: Page not found.</>}/>
             </Routes>
         </HeroUIProvider>
