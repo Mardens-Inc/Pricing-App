@@ -10,16 +10,17 @@ pub async fn initialize(pool: &MySqlPool) -> Result<()> {
         r#"
 CREATE TABLE IF NOT EXISTS inventory_print_options
 (
-    id               BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    hint             VARCHAR(255) DEFAULT NULL,
-    label            VARCHAR(128) DEFAULT NULL,
-    year             SMALLINT DEFAULT NULL,
-    department       SMALLINT DEFAULT NULL,
-    color            VARCHAR(128) DEFAULT NULL,
-    size             VARCHAR(20) NULL DEFAULT '1x0.75',
-    show_retail      BOOLEAN NOT NULL DEFAULT FALSE,
-    show_price_label BOOLEAN NOT NULL DEFAULT FALSE,
-    database_id      BIGINT UNSIGNED NOT NULL
+    id                  BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    hint                VARCHAR(255) DEFAULT NULL,
+    label               VARCHAR(128) DEFAULT NULL,
+    year                SMALLINT DEFAULT NULL,
+    department          SMALLINT DEFAULT NULL,
+    color               VARCHAR(128) DEFAULT NULL,
+    size                VARCHAR(20) NULL DEFAULT '1x0.75',
+    show_retail         BOOLEAN NOT NULL DEFAULT FALSE,
+    show_price_label    BOOLEAN NOT NULL DEFAULT FALSE,
+    percent_off_retail  SMALLINT DEFAULT NULL,
+    database_id         BIGINT UNSIGNED NOT NULL
 );
     "#,
     )
@@ -59,6 +60,7 @@ pub async fn get(
             size: row.try_get("size").unwrap_or(None),
             show_retail: row.try_get("show_retail").unwrap_or(false),
             show_price_label: row.try_get("show_price_label").unwrap_or(false),
+            percent_off_retail: row.try_get("percent_off_retail").unwrap_or(None),
         })
     }
 
@@ -102,8 +104,9 @@ INSERT INTO inventory_print_options (
     size,
     show_retail,
     show_price_label,
+    percent_off_retail,                     
     database_id
-) VALUES (?,?,?,?,?,?,?,?,?)
+) VALUES (?,?,?,?,?,?,?,?,?,?)
 "#,
     )
     .bind(&item.hint)
@@ -114,6 +117,7 @@ INSERT INTO inventory_print_options (
     .bind(&item.size)
     .bind(item.show_retail)
     .bind(item.show_price_label)
+    .bind(item.percent_off_retail)
     .bind(database_id)
     .execute(pool)
     .await?;
@@ -132,7 +136,8 @@ async fn update_item(pool: &MySqlPool, database_id: u64, item: &PrintForm) -> Re
         color = ?,
         size = ?,
         show_retail = ?,
-        show_price_label = ?
+        show_price_label = ?,
+        percent_off_retail = ?
     WHERE id = ? AND database_id = ?;
 "#,
     )
@@ -144,6 +149,7 @@ async fn update_item(pool: &MySqlPool, database_id: u64, item: &PrintForm) -> Re
     .bind(&item.size)
     .bind(item.show_retail)
     .bind(item.show_price_label)
+    .bind(item.percent_off_retail)
     .bind(id)
     .bind(database_id)
     .execute(pool)
