@@ -115,6 +115,7 @@ export default function InventoryTable(props: InventoryTableProps)
     }
 
 
+    // console.log(props.options);
     return (
         <Table
             removeWrapper
@@ -182,7 +183,7 @@ export default function InventoryTable(props: InventoryTableProps)
                                             }
                                         }
 
-                                        if (props.options.printForm?.[0].id === 0 && column.attributes.includes("department"))
+                                        if (column.attributes.includes("department"))
                                         {
                                             value = <DepartmentDropdown id={row.id}/>;
                                         }
