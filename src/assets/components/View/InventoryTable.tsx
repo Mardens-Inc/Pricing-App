@@ -1,4 +1,4 @@
-import {Button, cn, getKeyValue, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from "@heroui/react";
+import {Button, cn, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, getKeyValue, SortDescriptor, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip} from "@heroui/react";
 import {useSearch} from "../../providers/SearchProvider.tsx";
 import {useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
@@ -6,11 +6,14 @@ import DepartmentDropdown from "./TableComponents/DepartmentDropdown.tsx";
 import PrintButton from "./TableComponents/PrintButton.tsx";
 import $ from "jquery";
 import {Icon} from "@iconify/react";
+import Column from "../../ts/data/Column.ts";
+import Options from "../../ts/data/Options.ts";
+import Location, {InventoryRecord} from "../../ts/data/Location.ts";
 
 interface InventoryTableProps
 {
     onItemSelected: (id: string | null) => void;
-    options: DatabaseOptions;
+    options: Options;
 }
 
 export type RowValue = {
@@ -23,19 +26,21 @@ export default function InventoryTable(props: InventoryTableProps)
     const id = useParams().id ?? "";
     const navigate = useNavigate();
     const {search} = useSearch();
-    const [items, setItems] = useState<any[]>([]);
+    const [items, setItems] = useState<InventoryRecord[]>([]);
+    const [location, setLocation] = useState<Location | undefined>(undefined);
     const [columns, setColumns] = useState<Column[]>([]);
 
     const [searchColumns, setSearchColumns] = useState<string[]>([]);
-    const [primaryKey, setPrimaryKey] = useState<string>("");
+    const [_primaryKey, setPrimaryKey] = useState<string>("");
     const [isLoading, setIsLoading] = useState(true);
+    const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({column: "last_modified_date", direction: "ascending"});
 
     let abortController = new AbortController();
-    let signal = abortController.signal;
 
 
     useEffect(() =>
     {
+        Location.get(id).then(setLocation);
         return () =>
         {
             // Clean up on component unmount
@@ -45,32 +50,35 @@ export default function InventoryTable(props: InventoryTableProps)
 
     useEffect(() =>
     {
-        if (!search)
+        setIsLoading(true);
+        if (location)
         {
-            // Perform the main data fetch without search
-            DatabaseRecords.data(id, false)
-                .then(items =>
+            if (!search)
+            {
+                Column.all(id).then(columns =>
                 {
-                    setSearchColumns(items.options.columns.filter(i => i.attributes.includes("search")).flatMap(i => i.real_name));
-                    setPrimaryKey(items.options.columns.find(i => i.attributes.includes("primary"))?.real_name ?? "id");
+                    setColumns(columns.filter(i => i.visible));
+                    setSearchColumns(columns.filter(i => i.attributes.includes("search")).flatMap(i => i.name));
+                    setPrimaryKey(columns.find(i => i.attributes.includes("primary"))?.name ?? "id");
+                });
 
-                    if (items.columns) setColumns(items.options.columns);
-                    if (items.results?.items) setItems(items.results?.items);
-                })
-                .finally(() => setIsLoading(false));
-        } else
-        {
-            setIsLoading(true);
-            DatabaseRecords.search(id, search, searchColumns, 100, 0, true, primaryKey, signal)
-                .then((results) =>
-                {
-                    if (results?.items)
-                    {
-                        setItems(results.items);
-                    } else
-                        setItems([]);
-                })
-                .finally(() => setIsLoading(false));
+                abortController.abort();
+                abortController = new AbortController();
+                location
+                    .records({limit: 100, sort: sortDescriptor.column.toString(), ascending: sortDescriptor.direction === "ascending", offset: 0}, abortController.signal)
+                    .then(i => i.data)
+                    .then(setItems)
+                    .finally(() => setIsLoading(false));
+            } else
+            {
+                abortController.abort();
+                abortController = new AbortController();
+                location
+                    .search({limit: 100, sort: sortDescriptor.column.toString(), ascending: sortDescriptor.direction === "ascending", offset: 0, search: search, columns: searchColumns}, abortController.signal)
+                    .then(i => i.data)
+                    .then(setItems)
+                    .finally(() => setIsLoading(false));
+            }
         }
 
         return () =>
@@ -78,7 +86,7 @@ export default function InventoryTable(props: InventoryTableProps)
             // Abort the fetch on component unmount or dependency change
             abortController.abort();
         };
-    }, [search]);
+    }, [search, location, sortDescriptor]);
 
     useEffect(() =>
     {
@@ -101,6 +109,12 @@ export default function InventoryTable(props: InventoryTableProps)
         return <></>;
     }
 
+    if (!location)
+    {
+        return <></>;
+    }
+
+
     return (
         <Table
             removeWrapper
@@ -120,9 +134,11 @@ export default function InventoryTable(props: InventoryTableProps)
                 th: "dark:bg-background/50 backdrop-blur-md saturation-150 dark:brightness-150 mx-2",
                 base: "max-h-[calc(100dvh_-_250px)] overflow-y-auto min-h-[250px]"
             }}
+            sortDescriptor={sortDescriptor}
             onSortChange={(descriptor) =>
             {
-                console.log(descriptor);
+                console.log("Sort changed", descriptor);
+                setSortDescriptor(descriptor);
             }}
             selectionMode={"single"}
             onSelectionChange={(selected) =>
@@ -140,54 +156,79 @@ export default function InventoryTable(props: InventoryTableProps)
 
             <TableHeader>
                 {[...columns.filter(c => c.visible).map((column) =>
-                    <TableColumn key={column.name}>{column.name}</TableColumn>
+                    <TableColumn key={column.name} allowsSorting>{column.displayName}</TableColumn>
                 ), (<TableColumn key="actions" className={"min-w-0 w-0"}>Actions</TableColumn>)]}
 
             </TableHeader>
 
-            <TableBody emptyContent={<p>No Results Found!</p>} isLoading={isLoading} loadingContent={<Spinner size={"lg"}/>}>
-                {items.map((row) =>
-                    <TableRow key={row.id} id={row.id}>
-                        {
-                            [...columns
-                                .filter(c => c.visible)
-                                .map((column) =>
-                                {
-                                    let value = getKeyValue(row, column.real_name);
-                                    if (!value)
+            <TableBody emptyContent={<p>No Results Found!</p>} isLoading={isLoading} loadingContent={<Spinner size={"lg"}/>} items={items}>
+                {isLoading ? <></> :
+                    (items ?? []).map((row) =>
+                        <TableRow key={row.id} id={row.id}>
+                            {
+                                [...columns
+                                    .filter(c => c.visible)
+                                    .map((column) =>
                                     {
-                                        value = "-";
-                                    } else
-                                    {
-                                        if (column.attributes.includes("price") || column.attributes.includes("mp"))
+                                        let value = getKeyValue(row, column.name);
+                                        if (!value)
                                         {
-                                            value = `$${(+value.replace(/[^0-9.]/g, "")).toFixed(2)}`;
-                                        }
-                                    }
-
-                                    if (props.options["print-form"].department?.id === -1 && column.attributes.includes("department"))
-                                    {
-                                        value = <DepartmentDropdown id={row.id}/>;
-                                    }
-
-                                    return (<TableCell key={column.name} {...column.attributes.reduce((acc, attr) => ({...acc, [`data-${attr}`]: true}), {})}>{value}</TableCell>);
-                                }),
-                                (
-                                    <TableCell key={`${row.id}-actions`}>
-                                        <div className={"flex flex-row gap-2"}>
-                                            {props.options["print-form"].enabled &&
-                                                <>
-                                                    <PrintButton databaseId={id} row={row} columns={columns} printOptions={props.options["print-form"]}/>
-                                                </>
+                                            value = "-";
+                                        } else
+                                        {
+                                            if (column.attributes.includes("price") || column.attributes.includes("mp"))
+                                            {
+                                                value = `$${(+value.replace(/[^0-9.]/g, "")).toFixed(2)}`;
                                             }
-                                            <Button radius={"full"} className={"min-w-0 w-12 h-12"}><Icon icon="mage:dots" /></Button>
-                                        </div>
-                                    </TableCell>
-                                )
-                            ]
-                        }
-                    </TableRow>
-                )}
+                                        }
+
+                                        if (props.options.printForm?.[0].id === 0 && column.attributes.includes("department"))
+                                        {
+                                            value = <DepartmentDropdown id={row.id}/>;
+                                        }
+
+                                        return (<TableCell key={column.name} {...column.attributes.reduce((acc, attr) => ({...acc, [`data-${attr}`]: true}), {})}>{value}</TableCell>);
+                                    }),
+                                    (
+                                        <TableCell key={`${row.id}-actions`}>
+                                            <div className={"flex flex-row gap-2"}>
+                                                {(() =>
+                                                {
+                                                    if (props.options.printForm && props.options.isPrintingEnabled())
+                                                    {
+                                                        if (props.options.printForm?.length === 1)
+                                                        {
+                                                            return <PrintButton databaseId={id} row={row} columns={columns} printOptions={props.options.printForm[0]}/>;
+                                                        } else
+                                                        {
+                                                            return (
+                                                                <Dropdown>
+                                                                    <DropdownTrigger>
+                                                                        <Tooltip content={"Print"} classNames={{base: "pointer-events-none"}} closeDelay={0}>
+                                                                            <Button radius={"full"} className={"min-w-0 w-12 h-12"} onPressStart={e => e.continuePropagation()}>
+                                                                                <Icon icon={"mage:printer-fill"}/>
+                                                                            </Button>
+                                                                        </Tooltip>
+                                                                    </DropdownTrigger>
+                                                                    <DropdownMenu>
+                                                                        {props.options.printForm.map(i => (
+                                                                            <DropdownItem key={`print-item-${i.id}-${i.hint}`} id={`print-item-${i.id}-${i.hint}`}>{i.hint}</DropdownItem>
+                                                                        ))}
+                                                                    </DropdownMenu>
+                                                                </Dropdown>
+                                                            );
+                                                        }
+                                                    }
+                                                    return <></>;
+                                                })()}
+                                                <Button radius={"full"} className={"min-w-0 w-12 h-12"}><Icon icon="mage:dots"/></Button>
+                                            </div>
+                                        </TableCell>
+                                    )
+                                ]
+                            }
+                        </TableRow>
+                    )}
             </TableBody>
 
         </Table>
