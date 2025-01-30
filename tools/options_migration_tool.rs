@@ -25,7 +25,7 @@ struct OldOptions {
     allow_inventorying: bool,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, Copy)]
 struct Sticker {
     // Sticker properties
     width: f64,
@@ -62,9 +62,10 @@ struct PrintForm {
         deserialize_with = "deserialize_bool"
     )]
     show_color_dropdown: Option<bool>,
+    percentages: Option<Vec<String>>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Copy, Clone)]
 struct Department {
     id: i8,
 }
@@ -85,41 +86,74 @@ async fn main() -> Result<()> {
     sqlx::query("TRUNCATE TABLE inventory_print_options")
         .execute(&pool)
         .await?;
-    let options = get_location_options(&pool).await?;
-    for (id, options) in options {
+    let option_map = get_location_options(&pool).await?;
+    for (id, option) in option_map {
         let mut print_form: Option<Vec<print_options_data::PrintForm>> = None;
 
-        if let Some(enabled) = options.print_form.enabled {
+        if let Some(enabled) = option.print_form.enabled {
             if enabled {
-                print_form = Some(vec![print_options_data::PrintForm {
-                    id: None,
-                    hint: None,
-                    label: Some(options.print_form.label.unwrap_or("".to_string())),
-                    year: options.print_form.year,
-                    department: options
-                        .print_form
-                        .department
-                        .map(|d| u8::try_from(d.id).unwrap_or(0)),
-                    color: options.print_form.color,
-                    size: options
-                        .print_form
-                        .sticker
-                        .map(|s| format!("{}x{}", s.width, s.height)),
-                    show_retail: options.print_form.show_retail.unwrap_or(false),
-                    show_price_label: options.print_form.show_price_label.unwrap_or(false),
-                }]);
+                let mut p_form = vec![];
+                if let Some(percentages) = option.print_form.percentages {
+                    for percentage in percentages {
+                        if let Ok(percentage) = percentage.parse::<f64>() {
+                            p_form.push(print_options_data::PrintForm {
+                                id: None,
+                                hint: Some(format!("{}% Off", percentage)),
+                                label: Some(
+                                    option.print_form.label.clone().unwrap_or("".to_string()),
+                                ),
+                                year: option.print_form.year,
+                                department: option
+                                    .print_form
+                                    .department
+                                    .map(|d| u8::try_from(d.id).unwrap_or(0)),
+                                color: option.print_form.color.clone(),
+                                size: option
+                                    .print_form
+                                    .sticker
+                                    .map(|s| format!("{}x{}", s.width, s.height)),
+                                show_retail: option.print_form.show_retail.unwrap_or(false),
+                                show_price_label: option
+                                    .print_form
+                                    .show_price_label
+                                    .unwrap_or(false),
+                                percent_off_retail: Some(percentage as u8),
+                            })
+                        }
+                    }
+                    print_form = Some(p_form);
+                } else {
+                    print_form = Some(vec![print_options_data::PrintForm {
+                        id: None,
+                        hint: None,
+                        label: Some(option.print_form.label.unwrap_or("".to_string())),
+                        year: option.print_form.year,
+                        department: option
+                            .print_form
+                            .department
+                            .map(|d| u8::try_from(d.id).unwrap_or(0)),
+                        color: option.print_form.color,
+                        size: option
+                            .print_form
+                            .sticker
+                            .map(|s| format!("{}x{}", s.width, s.height)),
+                        show_retail: option.print_form.show_retail.unwrap_or(false),
+                        show_price_label: option.print_form.show_price_label.unwrap_or(false),
+                        percent_off_retail: None,
+                    }]);
+                }
             }
         }
 
         let new_option = InventoryOptions {
             print_form,
             inventorying: Some(Inventorying {
-                allow_additions: options.allow_additions,
-                remove_if_zero: options.remove_if_zero,
-                add_if_missing: options.add_if_missing,
+                allow_additions: option.allow_additions,
+                remove_if_zero: option.remove_if_zero,
+                add_if_missing: option.add_if_missing,
             }),
-            show_year_input: options.print_form.show_year_input.unwrap_or(false),
-            show_color_dropdown: options.print_form.show_color_dropdown.unwrap_or(false),
+            show_year_input: option.print_form.show_year_input.unwrap_or(false),
+            show_color_dropdown: option.print_form.show_color_dropdown.unwrap_or(false),
         };
         new_option.insert(&data, id).await?;
     }
