@@ -19,7 +19,7 @@ export default function FileUploadInput(props: FileUploadInputProps)
             if (e.target instanceof HTMLInputElement && e.target.files)
             {
                 const file = e.target.files[0];
-                console.log(file);
+                console.log("Uploading file",file);
             }
         });
         input.trigger("click");
@@ -46,7 +46,7 @@ export default function FileUploadInput(props: FileUploadInputProps)
             if (e.originalEvent instanceof DragEvent && e.originalEvent.dataTransfer)
             {
                 const file = e.originalEvent.dataTransfer.files[0];
-                console.log(file);
+                console.log("Dragged file",file);
                 if (props.onFileUpload) props.onFileUpload(file);
             }
         });
