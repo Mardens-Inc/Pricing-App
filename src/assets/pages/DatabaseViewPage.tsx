@@ -71,7 +71,7 @@ export default function DatabaseViewPage()
                         <InventoryTable onItemSelected={console.log} options={options}/>
                     }
 
-                    {isLoggedIn && options?.inventorying?.["allow-additions"] && (
+                    {isLoggedIn && options?.inventorying?.allowAdditions && (
                         <InventoryingForm columns={[]} onSubmit={data =>
                         {
                             console.log("Submitted data: ", data);
@@ -95,5 +95,5 @@ function LocationIcon(props: { location: Location })
     if (!props.location.image || !icon)
         return <></>;
 
-    return <Image src={icon.url} alt={props.location.name} width={80} className={"bg-foreground/10"}/>;
+    return <Image src={icon.url} alt={props.location.name} width={96} className={"bg-foreground/10"}/>;
 }
