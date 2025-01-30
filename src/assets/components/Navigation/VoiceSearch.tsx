@@ -54,7 +54,7 @@ export default function VoiceSearch()
                     {
                         console.log("Results: ", results);
                         setSearch(transcript);
-                        console.log(transcript);
+                        console.log("Voice search transcript", transcript);
                     }
                 };
 
