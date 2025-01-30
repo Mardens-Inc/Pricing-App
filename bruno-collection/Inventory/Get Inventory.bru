@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/inventory/:id/?query_columns=Material,Description&limit=10&offset=0&sort_by=last_modified_date&sort_order=ASC
+  url: {{baseUrl}}/inventory/:id/?query_columns=Material,Description&limit=10&offset=0&sort_by=last_modified_date&sort_order=DESC&query=38000199
   body: none
   auth: none
 }
@@ -15,8 +15,8 @@ params:query {
   limit: 10
   offset: 0
   sort_by: last_modified_date
-  sort_order: ASC
-  ~query: ASST
+  sort_order: DESC
+  query: 38000199
 }
 
 params:path {
