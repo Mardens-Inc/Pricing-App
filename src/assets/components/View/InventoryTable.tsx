@@ -1,4 +1,4 @@
-import {Button, cn, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, getKeyValue, SortDescriptor, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip} from "@heroui/react";
+import {Button, cn, getKeyValue, SortDescriptor, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from "@heroui/react";
 import {useSearch} from "../../providers/SearchProvider.tsx";
 import {useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
@@ -9,6 +9,7 @@ import {Icon} from "@iconify/react";
 import Column from "../../ts/data/Column.ts";
 import Options from "../../ts/data/Options.ts";
 import Location, {InventoryRecord} from "../../ts/data/Location.ts";
+import PrintDropdown from "./TableComponents/PrintDropdown.tsx";
 
 interface InventoryTableProps
 {
@@ -202,22 +203,7 @@ export default function InventoryTable(props: InventoryTableProps)
                                                             return <PrintButton databaseId={id} row={row} columns={columns} printOptions={props.options.printForm[0]}/>;
                                                         } else
                                                         {
-                                                            return (
-                                                                <Dropdown>
-                                                                    <DropdownTrigger>
-                                                                        <Tooltip content={"Print"} classNames={{base: "pointer-events-none"}} closeDelay={0}>
-                                                                            <Button radius={"full"} className={"min-w-0 w-12 h-12"} onPressStart={e => e.continuePropagation()}>
-                                                                                <Icon icon={"mage:printer-fill"}/>
-                                                                            </Button>
-                                                                        </Tooltip>
-                                                                    </DropdownTrigger>
-                                                                    <DropdownMenu>
-                                                                        {props.options.printForm.map(i => (
-                                                                            <DropdownItem key={`print-item-${i.id}-${i.hint}`} id={`print-item-${i.id}-${i.hint}`}>{i.hint}</DropdownItem>
-                                                                        ))}
-                                                                    </DropdownMenu>
-                                                                </Dropdown>
-                                                            );
+                                                            return <PrintDropdown databaseId={id} row={row} columns={columns} printOptions={props.options.printForm}/>;
                                                         }
                                                     }
                                                     return <></>;
