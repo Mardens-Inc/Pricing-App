@@ -1,4 +1,5 @@
 import $ from "jquery";
+import {snakeToCamel} from "../object-utilities.ts";
 
 export default class Column
 {
@@ -18,7 +19,9 @@ export default class Column
 
     public static async all(databaseId: string): Promise<Column[]>
     {
-        return $.get(`/api/inventory/${databaseId}/columns`);
+        const col = JSON.parse(snakeToCamel(JSON.stringify(await $.get(`/api/inventory/${databaseId}/columns/`))));
+        console.log("Fetched columns", col);
+        return col;
     }
 
 }
