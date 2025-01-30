@@ -1,4 +1,5 @@
 import $ from "jquery";
+import {convertKeysToCamelCase} from "../object-utilities.ts";
 
 export interface PrintForm
 {
@@ -9,16 +10,16 @@ export interface PrintForm
     department?: number;
     color?: string;
     size?: string;
-    "show-retail": boolean;
-    "show-price-label": boolean;
+    showRetail: boolean;
+    showPriceLabel: boolean;
 }
 
 
 export interface Inventorying
 {
-    "add-if-missing": boolean;
-    "remove-if-zero": boolean;
-    "allow-additions": boolean;
+    addIfMissing: boolean;
+    removeIfZero: boolean;
+    allowAdditions: boolean;
 }
 
 
@@ -43,7 +44,7 @@ export default class Options
     {
         try
         {
-            return Options.fromObj(databaseId, await $.get(`/api/inventory/${databaseId}/options/`));
+            return Options.fromObj(databaseId, convertKeysToCamelCase(await $.get(`/api/inventory/${databaseId}/options/`)) as Options);
         } catch (e)
         {
             console.error("Failed to fetch options for database", databaseId, e);
@@ -63,7 +64,7 @@ export default class Options
 
     static fromObj(id: string, obj: Options): Options
     {
-       let response = new Options(
+        let response = new Options(
             obj.printForm,
             obj.inventorying,
             obj.showYearInput,
