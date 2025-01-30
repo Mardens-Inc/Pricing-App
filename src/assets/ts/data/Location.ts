@@ -18,6 +18,11 @@ export type InventoryRecord = {
     [key: string]: string;
 }
 
+export type FetchRecordResponse = {
+    data: InventoryRecord[];
+    total: number | null;
+}
+
 
 export default class Location
 {
@@ -39,14 +44,35 @@ export default class Location
         this.post_date = post_date;
     }
 
+    static fromObj(obj: Location): Location
+    {
+        return new Location(obj.id, obj.name, obj.location, obj.po, obj.image, obj.post_date);
+    }
+
     static async all(): Promise<Location[]>
     {
-        return $.get("/api/list/");
+        try
+        {
+            const response: Location[] = await $.get("/api/list/");
+            return response.map(Location.fromObj);
+        } catch (e)
+        {
+            console.error("Failed to fetch locations", e);
+        }
+        return [];
     }
 
     static async get(id: string): Promise<Location | undefined>
     {
-        return $.get(`/api/list/${id}`);
+        try
+        {
+            const response = await $.get(`/api/list/${id}`);
+            return Location.fromObj(response);
+        } catch (e)
+        {
+            console.error("Failed to fetch location", e);
+        }
+        return undefined;
     }
 
     async delete(): Promise<boolean>
@@ -78,35 +104,77 @@ export default class Location
         }
     }
 
-    async records(options: RecordOptions = {}): Promise<InventoryRecord[]>
+    async records(options: RecordOptions = {}, abortSignal?: AbortSignal): Promise<FetchRecordResponse>
     {
-        return $.get(optionsToUrl(this.id, options).toString());
+        const url = optionsToUrl(this.id, options).toString();
+
+        try
+        {
+            const response = await fetch(url, {
+                method: "GET",
+                signal: abortSignal // Pass the AbortSignal here
+            });
+
+            if (!response.ok) throw new Error(`Failed to fetch records: ${response.status} - ${response.statusText}`);
+
+            return await response.json();
+        } catch (error: any)
+        {
+            if (error.name === "AbortError")
+            {
+                console.warn("Fetch request was aborted");
+                return {} as FetchRecordResponse;
+            }
+            console.error("Failed to fetch records", error);
+            throw error;
+        }
     }
 
-    async search(options: RecordSearchOptions = {}): Promise<InventoryRecord[]>
+    async search(options: RecordSearchOptions = {}, abortSignal?: AbortSignal): Promise<FetchRecordResponse>
     {
-        return $.get(optionsToUrl(this.id, options).toString());
+        const url = optionsToUrl(this.id, options).toString();
+
+        try
+        {
+            const response = await fetch(url, {
+                method: "GET",
+                signal: abortSignal // Pass the AbortSignal here
+            });
+
+            if (!response.ok) throw new Error(`Failed to fetch records: ${response.status} - ${response.statusText}`);
+
+            return await response.json();
+        } catch (error: any)
+        {
+            if (error.name === "AbortError")
+            {
+                console.warn("Fetch request was aborted");
+                return {} as FetchRecordResponse;
+            }
+            console.error("Failed to fetch records", error);
+            throw error;
+        }
     }
 }
 
 function optionsToUrl(id: string, options: RecordOptions | RecordSearchOptions): URL
 {
-    let url: URL = new URL(`/api/list/${id}`);
+    let url: URL = new URL(`/api/inventory/${id}/`, window.location.origin);
 
     if ("search" in options || "columns" in options)
     {
-        if (options.search)
-            url.searchParams.append("search", options.search);
-        if (options.columns)
+        if (options.search != undefined)
+            url.searchParams.append("query", options.search);
+        if (options.columns != undefined)
             url.searchParams.append("query_columns", options.columns.join(","));
     }
-    if (options.limit)
+    if (options.limit != undefined)
         url.searchParams.append("limit", options.limit.toString());
-    if (options.offset)
+    if (options.offset != undefined)
         url.searchParams.append("offset", options.offset.toString());
-    if (options.sort)
+    if (options.sort != undefined)
         url.searchParams.append("sort_by", options.sort);
-    if (options.ascending)
+    if (options.ascending != undefined)
         url.searchParams.append("sort_order", options.ascending ? "ASC" : "DESC");
 
     return url;
