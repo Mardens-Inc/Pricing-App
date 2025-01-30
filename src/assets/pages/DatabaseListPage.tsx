@@ -9,11 +9,13 @@ import {setTitle} from "../../main.tsx";
 import Location from "../ts/data/Location.ts";
 import {Icon} from "@iconify/react";
 import IconData from "../ts/data/Icon.ts";
+import {useNavigate} from "react-router-dom";
 
 
 export default function DatabaseListPage()
 {
     setTitle();
+    const navigate = useNavigate();
     const [icons, setIcons] = useState<IconData[]>([]);
     const [items, setItems] = useState<Location[]>([]);
     const [page, setPage] = useState(1);
@@ -23,6 +25,7 @@ export default function DatabaseListPage()
     const {search} = useSearch();
     const {auth, isLoggedIn} = useAuth();
     useDatabaseView().setDatabaseId(undefined);
+
     useEffect(() =>
     {
         setItemsPerPage(calculateItemsPerPage());
@@ -137,7 +140,7 @@ export default function DatabaseListPage()
                 {currentItems.map((item, index) =>
                 {
                     return (
-                        <TableRow key={item.id + index.toString()} as={Link} href={`/inv/${item.id}`} className={"dark:group-hover:bg-default-100/10"}>
+                        <TableRow key={item.id + index.toString()} className={"dark:group-hover:bg-default-100/10"} onClick={() => navigate(`/inv/${item.id}`)}>
                             <TableCell className={"w-12"}>
                                 <LocationIcon location={item} icons={icons}/>
                             </TableCell>
