@@ -24,7 +24,7 @@ export default function PrintLabelExtraOptions({showColor = true, showYear = tru
 
     useEffect(() =>
     {
-        console.log(color);
+        console.log("setting print color: ", color);
         if (!color || color === "No Color") localStorage.removeItem(`print-color-${id}`);
         else localStorage.setItem(`print-color-${id}`, color);
     }, [color]);
