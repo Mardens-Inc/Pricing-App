@@ -68,8 +68,8 @@ export default function PrintLabelExtraOptions({showColor = true, showYear = tru
                 <ExtendedSwitch
                     label={"Auto Print"}
                     description={"Automatically print labels when scanning a barcode."}
-                    toggle={autoPrintLabel}
-                    onToggle={setAutoPrintLabel}
+                    isSelected={autoPrintLabel}
+                    onValueChange={setAutoPrintLabel}
                 />
             }
         </div>
