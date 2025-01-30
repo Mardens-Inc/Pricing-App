@@ -10,12 +10,13 @@ import PrintLabelExtraOptions from "../components/View/PrintLabelExtraOptions.ts
 import {useAuth} from "../providers/AuthProvider.tsx";
 import Location from "../ts/data/Location.ts";
 import Options from "../ts/data/Options.ts";
+import IconData from "../ts/data/Icon.ts";
 
 export default function DatabaseViewPage()
 {
     const id = useParams().id;
     const navigate = useNavigate();
-    const [data, setData] = useState<Location | null | undefined>(null);
+    const [location, setLocation] = useState<Location | null | undefined>(null);
     const [options, setOptions] = useState<Options | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const databaseView = useDatabaseView();
@@ -29,7 +30,7 @@ export default function DatabaseViewPage()
     }
 
 
-    setTitle(data?.name || "Database");
+    setTitle(location?.name || "Database");
 
     useEffect(() =>
     {
@@ -38,7 +39,7 @@ export default function DatabaseViewPage()
         databaseView.setDatabaseId(id);
 
         Location.get(id)
-            .then(setData)
+            .then(setLocation)
             .finally(() => setIsLoading(false));
 
         Options.get(id)
@@ -51,12 +52,12 @@ export default function DatabaseViewPage()
         : (
             <div className={"flex flex-col gap-3"}>
                 <div className={"flex flex-row mt-5 ml-8"}>
-                    {data?.image === "" ? <Logo size={96}/> : <Image src={data?.image} width={96}/>}
+                    <LocationIcon location={location!}/>
                     <div className={"flex flex-col gap-2 m-4"}>
-                        <h1 className={"text-4xl"}>{data?.name}</h1>
+                        <h1 className={"text-4xl"}>{location?.name}</h1>
                         <div className={"flex flex-row gap-3 italic opacity-50"}>
-                            <p>Location: <span className={"font-bold"}>{data?.location || "Unknown"}</span></p>
-                            <p>PO#: <span className={"font-bold"}>{data?.po || "Unknown"}</span></p>
+                            <p>Location: <span className={"font-bold"}>{location?.location || "Unknown"}</span></p>
+                            <p>PO#: <span className={"font-bold"}>{location?.po || "Unknown"}</span></p>
                         </div>
                     </div>
                     <PrintLabelExtraOptions
@@ -67,16 +68,33 @@ export default function DatabaseViewPage()
                 </div>
                 <div className={"flex flex-row"}>
 
-                    <InventoryTable onItemSelected={console.log} options={options ?? ({} as Options)}/>
+                    {options &&
+                        <InventoryTable onItemSelected={console.log} options={options}/>
+                    }
 
                     {isLoggedIn && options?.inventorying?.["allow-additions"] && (
                         <InventoryingForm columns={[]} onSubmit={data =>
                         {
-                            console.log(data);
+                            console.log("Submitted data: ", data);
                         }}/>
                     )}
 
                 </div>
             </div>
         );
+}
+
+function LocationIcon(props: { location: Location })
+{
+    const [icon, setIcon] = useState<IconData | undefined>(undefined);
+    useEffect(() =>
+    {
+        if (!props.location.image) return;
+        IconData.get(props.location.image).then(setIcon);
+    }, []);
+
+    if (!props.location.image || !icon)
+        return <Logo size={40}/>;
+
+    return <Image src={icon.url} alt={props.location.name} width={80} className={"bg-foreground/10"}/>;
 }
