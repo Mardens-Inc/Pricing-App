@@ -68,7 +68,7 @@ impl InventoryColumn {
     }
 
     /// Updates the `InventoryColumn` with new values for `display_name`, `visible`, and `attributes`.
-    pub async fn update(&self, data: &DatabaseConnectionData) -> Result<()> {
+    pub async fn update(&self, database_id: u64, data: &DatabaseConnectionData) -> Result<()> {
         let pool = create_pool(data).await?;
 
         sqlx::query(
@@ -82,7 +82,7 @@ impl InventoryColumn {
         .bind(self.visible) // Updated visibility
         .bind(&self.attributes) // Updated attributes
         .bind(&self.name) // Column name
-        .bind(self.database_id) // Database ID
+        .bind(database_id) // Database ID
         .execute(&pool)
         .await?;
 
