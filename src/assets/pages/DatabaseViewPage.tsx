@@ -5,7 +5,6 @@ import {setTitle} from "../../main.tsx";
 import {Image, Spinner} from "@heroui/react";
 import InventoryingForm from "../components/View/InventoryingForm.tsx";
 import InventoryTable from "../components/View/InventoryTable.tsx";
-import Logo from "../images/Logo.svg.tsx";
 import PrintLabelExtraOptions from "../components/View/PrintLabelExtraOptions.tsx";
 import {useAuth} from "../providers/AuthProvider.tsx";
 import Location from "../ts/data/Location.ts";
@@ -94,7 +93,7 @@ function LocationIcon(props: { location: Location })
     }, []);
 
     if (!props.location.image || !icon)
-        return <Logo size={40}/>;
+        return <></>;
 
     return <Image src={icon.url} alt={props.location.name} width={80} className={"bg-foreground/10"}/>;
 }
