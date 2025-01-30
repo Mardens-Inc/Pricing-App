@@ -12,6 +12,7 @@ export interface PrintForm
     size?: string;
     showRetail: boolean;
     showPriceLabel: boolean;
+    percentOffRetail?: number;
 }
 
 
