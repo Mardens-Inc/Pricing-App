@@ -1,5 +1,5 @@
-import {PrintForm} from "./DatabaseRecords.ts";
 import {RowValue} from "../components/View/InventoryTable.tsx";
+import {PrintForm} from "./data/Options.ts";
 
 export interface PrintLabelSize
 {
@@ -85,14 +85,15 @@ export function OpenPrintWindow(databaseId: string, values: RowValue[], printOpt
     else
     {
         let mp = values.find(v => v.attributes.includes("mp"));
-        if (mp) uri.searchParams.append("mp", mp.value.replace(/[^0-9.]/g, ""));
+        if (mp && mp.value) uri.searchParams.append("mp", mp.value.replace(/[^0-9.]/g, ""));
     }
 
-    if (printOptions.department && printOptions.department.id > 0) uri.searchParams.append("department", printOptions.department.id.toString());
+    if (printOptions.department !== undefined && printOptions.department > 0) uri.searchParams.append("department", printOptions.department.toString());
     if (department && department > 0) uri.searchParams.append("department", department.toString());
     if (printOptions.label) uri.searchParams.append("label", printOptions.label);
-    if (printOptions.year) uri.searchParams.append("year", printOptions.year);
-    if (printOptions["show-price-label"]) uri.searchParams.append("showPriceLabel", "");
+    if (printOptions.year) uri.searchParams.append("year", printOptions.year.toString());
+    if (printOptions.showPriceLabel) uri.searchParams.append("showPriceLabel", "");
+
 
     const databasePrintYear = localStorage.getItem(`print-year-${databaseId}`);
     const databasePrintColor = localStorage.getItem(`print-color-${databaseId}`);
