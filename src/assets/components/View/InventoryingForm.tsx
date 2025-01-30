@@ -1,5 +1,4 @@
 import {Button, Input, ScrollShadow} from "@heroui/react";
-import {Column} from "../../ts/DatabaseRecords.ts";
 import {useState} from "react";
 
 
@@ -32,7 +31,7 @@ export default function InventoryingForm(props: InventoryingFormProps)
                     />
                 </>
             ))}
-            <Button radius={"full"} color={"primary"} className={"w-1/2 mx-auto h-10 min-h-10"} onClick={() =>
+            <Button radius={"full"} color={"primary"} className={"w-1/2 mx-auto h-10 min-h-10"} onPress={() =>
             {
                 props.onSubmit(columnValue);
                 setColumnValue({});
