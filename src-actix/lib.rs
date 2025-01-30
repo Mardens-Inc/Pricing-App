@@ -95,6 +95,7 @@ pub async fn run() -> Result<()> {
                     .service(get_server_version)
                     .configure(icons_endpoint::configure)
                     .configure(list_endpoint::configure)
+                    .configure(columns_endpoint::configure)
                     .configure(options_endpoint::configure)
                     .configure(inventory_endpoint::configure)
                     .default_service(web::to(|| async {
