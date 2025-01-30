@@ -3,7 +3,15 @@ import react from "@vitejs/plugin-react";
 import wasm from "vite-plugin-wasm";
 
 export default defineConfig({
-    plugins: [react(), wasm()],
+    plugins: [react({
+        babel: {
+            plugins: [
+                ["babel-plugin-react-compiler", {
+                    "target": "19"
+                }]
+            ]
+        }
+    }), wasm()],
     esbuild: {
         legalComments: "none",
         supported: {
