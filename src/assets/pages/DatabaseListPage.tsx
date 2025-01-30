@@ -102,7 +102,7 @@ export default function DatabaseListPage()
             }}
             onSortChange={(descriptor) =>
             {
-                console.log(descriptor);
+                console.log("Sort changed", descriptor);
             }}
             bottomContent={
                 items.length > itemsPerPage ?
@@ -193,7 +193,7 @@ export default function DatabaseListPage()
     );
 }
 
-function LocationIcon(props: { location: Location, icons: IconData[] })
+function LocationIcon(props: { location: Location, icons: IconData[], size?: number })
 {
     const [icon, setIcon] = useState<IconData | undefined>(undefined);
     useEffect(() =>
@@ -203,7 +203,7 @@ function LocationIcon(props: { location: Location, icons: IconData[] })
     }, []);
 
     if (!props.location.image || !icon)
-        return <Logo size={40}/>;
+        return <Logo size={props.size ?? 40}/>;
 
     return <Avatar src={icon.url} alt={props.location.name}/>;
 }
