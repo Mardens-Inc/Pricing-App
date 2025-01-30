@@ -2,7 +2,6 @@ use crate::data_database_connection::{create_pool, DatabaseConnectionData};
 use crate::mysql_row_wrapper::MySqlRowWrapper;
 use anyhow::Result;
 use csv::WriterBuilder;
-use log::debug;
 use serde_derive::{Deserialize, Serialize};
 use sqlx::{Column, Executor, Row};
 
@@ -41,7 +40,7 @@ pub async fn get_inventory(
             if let Some(query_columns) = options.query_columns {
                 for column in query_columns.split(',') {
                     conditions.push(format!("`{}` like ?", column.trim()));
-                    params.push(query_value.to_string());
+                    params.push(format!("%{}%", query_value));
                 }
             }
         }
@@ -85,7 +84,6 @@ pub async fn get_inventory(
     // Process rows into JSON results
     let mut total: Option<u64> = None;
     for row in rows {
-        debug!("Row Data: {:?}", row);
         if total.is_none() {
             total = row.try_get("total_records").ok();
         }
