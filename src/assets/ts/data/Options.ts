@@ -43,10 +43,7 @@ export default class Options
     {
         try
         {
-
-            const response: Options = await $.get(`/api/inventory/${databaseId}/options/`);
-            response.databaseId = databaseId;
-            return response;
+            return Options.fromObj(databaseId, await $.get(`/api/inventory/${databaseId}/options/`));
         } catch (e)
         {
             console.error("Failed to fetch options for database", databaseId, e);
@@ -62,6 +59,18 @@ export default class Options
     isPrintingEnabled(): boolean
     {
         return (this.printForm?.length ?? 0) > 0;
+    }
+
+    static fromObj(id: string, obj: Options): Options
+    {
+       let response = new Options(
+            obj.printForm,
+            obj.inventorying,
+            obj.showYearInput,
+            obj.showColorDropdown
+        );
+        response.databaseId = id;
+        return response;
     }
 
 
