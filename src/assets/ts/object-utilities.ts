@@ -19,7 +19,7 @@ export function convertKeysToCamelCase(obj: any): any {
 
 /**
  * Converts a snake_case string to camelCase.
- * @param str - The snake_case string to convert.
+ * @param str - The snake_case string to convert. 
  * @returns The camelCase version of the input string.
  */
 export function snakeToCamel(str: string): string {
