@@ -9,8 +9,7 @@ pub struct PrintForm {
     pub department: Option<u8>,
     pub color: Option<String>,
     pub size: Option<String>,
-    #[serde(rename = "show-retail")]
     pub show_retail: bool,
-    #[serde(rename = "show-price-label")]
     pub show_price_label: bool,
+    pub percent_off_retail: Option<u8>,
 }
