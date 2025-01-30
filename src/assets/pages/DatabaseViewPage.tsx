@@ -9,12 +9,16 @@ import Logo from "../images/Logo.svg.tsx";
 import PrintLabelExtraOptions from "../components/View/PrintLabelExtraOptions.tsx";
 import {useAuth} from "../providers/AuthProvider.tsx";
 import Location from "../ts/data/Location.ts";
+import Options from "../ts/data/Options.ts";
 
 export default function DatabaseViewPage()
 {
     const id = useParams().id;
     const navigate = useNavigate();
-
+    const [data, setData] = useState<Location | null | undefined>(null);
+    const [options, setOptions] = useState<Options | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const databaseView = useDatabaseView();
     const {isLoggedIn} = useAuth();
 
     if (!id)
@@ -24,11 +28,7 @@ export default function DatabaseViewPage()
         return <></>;
     }
 
-    const [data, setData] = useState<Location | null | undefined>(null);
-    const [isLoading, setIsLoading] = useState(true);
 
-
-    const databaseView = useDatabaseView();
     setTitle(data?.name || "Database");
 
     useEffect(() =>
@@ -40,6 +40,9 @@ export default function DatabaseViewPage()
         Location.get(id)
             .then(setData)
             .finally(() => setIsLoading(false));
+
+        Options.get(id)
+            .then(setOptions);
 
     }, [id, databaseView]);
 
@@ -57,17 +60,17 @@ export default function DatabaseViewPage()
                         </div>
                     </div>
                     <PrintLabelExtraOptions
-                        showYear={data?.options["print-form"]["show-year-dropdown"] ?? false}
-                        showColor={data?.options["print-form"]["show-color-dropdown"] ?? false}
-                        isPrintingEnabled={data?.options["print-form"]["enabled"] ?? false}
+                        showYear={options?.showYearInput ?? false}
+                        showColor={options?.showColorDropdown ?? false}
+                        isPrintingEnabled={options?.isPrintingEnabled() ?? false}
                     />
                 </div>
                 <div className={"flex flex-row"}>
 
-                    <InventoryTable onItemSelected={console.log} options={data?.options ?? ({} as DatabaseOptions)}/>
+                    <InventoryTable onItemSelected={console.log} options={options ?? ({} as Options)}/>
 
-                    {isLoggedIn && data?.options["allow-inventorying"] && (
-                        <InventoryingForm columns={data?.options.columns} onSubmit={data =>
+                    {isLoggedIn && options?.inventorying?.["allow-additions"] && (
+                        <InventoryingForm columns={[]} onSubmit={data =>
                         {
                             console.log(data);
                         }}/>
