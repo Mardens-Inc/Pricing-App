@@ -12,7 +12,8 @@ export interface LoginResponse
     token: string | null;
 }
 
-export interface RegistrationResponse{
+export interface RegistrationResponse
+{
     success: boolean;
     message: string;
     user: string;
@@ -46,7 +47,7 @@ export default class Authentication
 
             this.loginWithTokenFromCookie().then((response) =>
             {
-                console.log(response);
+                console.log("Login with cookies responded with: ", response);
             });
 
         } catch (e)
