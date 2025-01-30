@@ -13,13 +13,13 @@ CREATE TABLE IF NOT EXISTS inventory_print_options
     id                  BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     hint                VARCHAR(255) DEFAULT NULL,
     label               VARCHAR(128) DEFAULT NULL,
-    year                SMALLINT DEFAULT NULL,
-    department          SMALLINT DEFAULT NULL,
+    year                SMALLINT UNSIGNED DEFAULT NULL,
+    department          SMALLINT UNSIGNED DEFAULT NULL,
     color               VARCHAR(128) DEFAULT NULL,
     size                VARCHAR(20) NULL DEFAULT '1x0.75',
     show_retail         BOOLEAN NOT NULL DEFAULT FALSE,
     show_price_label    BOOLEAN NOT NULL DEFAULT FALSE,
-    percent_off_retail  SMALLINT DEFAULT NULL,
+    percent_off_retail  SMALLINT UNSIGNED DEFAULT NULL,
     database_id         BIGINT UNSIGNED NOT NULL
 );
     "#,
@@ -60,7 +60,9 @@ pub async fn get(
             size: row.try_get("size").unwrap_or(None),
             show_retail: row.try_get("show_retail").unwrap_or(false),
             show_price_label: row.try_get("show_price_label").unwrap_or(false),
-            percent_off_retail: row.try_get("percent_off_retail").unwrap_or(None),
+            percent_off_retail: row
+                .try_get::<Option<u8>, _>("percent_off_retail")
+                .unwrap_or(None),
         })
     }
 
