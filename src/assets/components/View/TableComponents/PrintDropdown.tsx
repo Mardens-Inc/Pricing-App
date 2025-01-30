@@ -4,6 +4,7 @@ import {Icon} from "@iconify/react";
 import Column from "../../../ts/data/Column.ts";
 import {PrintForm} from "../../../ts/data/Options.ts";
 import {OpenPrintWindow} from "../../../ts/printer.ts";
+import $ from "jquery";
 
 export interface PrintDropdownProps
 {
