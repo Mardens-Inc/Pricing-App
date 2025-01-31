@@ -2,7 +2,7 @@ import {Button, cn, getKeyValue, SortDescriptor, Spinner, Table, TableBody, Tabl
 import {useSearch} from "../../providers/SearchProvider.tsx";
 import {useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
-import DepartmentDropdown from "./TableComponents/DepartmentDropdown.tsx";
+import {DepartmentDropdown} from "./TableComponents/DepartmentDropdown.tsx";
 import PrintButton from "./TableComponents/PrintButton.tsx";
 import $ from "jquery";
 import {Icon} from "@iconify/react";
@@ -66,7 +66,7 @@ export default function InventoryTable(props: InventoryTableProps)
                 abortController.abort();
                 abortController = new AbortController();
                 location
-                    .records({limit: 100, sort: sortDescriptor.column.toString(), ascending: sortDescriptor.direction === "ascending", offset: 0}, abortController.signal)
+                    .records({limit: 10, sort: sortDescriptor.column.toString(), ascending: sortDescriptor.direction === "ascending", offset: 0}, abortController.signal)
                     .then(i => i.data)
                     .then(setItems)
                     .finally(() => setIsLoading(false));
@@ -75,7 +75,7 @@ export default function InventoryTable(props: InventoryTableProps)
                 abortController.abort();
                 abortController = new AbortController();
                 location
-                    .search({limit: 100, sort: sortDescriptor.column.toString(), ascending: sortDescriptor.direction === "ascending", offset: 0, search: search, columns: searchColumns}, abortController.signal)
+                    .search({limit: 10, sort: sortDescriptor.column.toString(), ascending: sortDescriptor.direction === "ascending", offset: 0, search: search, columns: searchColumns}, abortController.signal)
                     .then(i => i.data)
                     .then(setItems)
                     .finally(() => setIsLoading(false));
@@ -92,7 +92,7 @@ export default function InventoryTable(props: InventoryTableProps)
     useEffect(() =>
     {
 
-        if (localStorage.getItem(`print-auto-print-${id}`) === "true" && items.length === 1)
+        if (localStorage.getItem(`print-auto-print-${id}`) === "true" && items?.length === 1)
         {
             const firstPrintButton = $(`button[data-print-form]`)[0] as HTMLButtonElement;
             console.log("Auto Printing", firstPrintButton);
@@ -165,7 +165,7 @@ export default function InventoryTable(props: InventoryTableProps)
 
             <TableBody emptyContent={<p>No Results Found!</p>} isLoading={isLoading} loadingContent={<Spinner size={"lg"}/>} items={items}>
                 {isLoading ? <></> :
-                    (items ?? []).map((row) =>
+                    (items ?? []).map((row: InventoryRecord) =>
                         <TableRow key={row.id} id={row.id}>
                             {
                                 [...columns
@@ -189,7 +189,7 @@ export default function InventoryTable(props: InventoryTableProps)
                                             value = <DepartmentDropdown id={row.id}/>;
                                         }
 
-                                        return (<TableCell key={column.name} {...column.attributes.reduce((acc, attr) => ({...acc, [`data-${attr}`]: true}), {})}>{value}</TableCell>);
+                                        return <TableCell key={column.name} {...column.attributes.reduce((acc, attr) => ({...acc, [`data-${attr}`]: true}), {})}>{value}</TableCell>;
                                     }),
                                     (
                                         <TableCell key={`${row.id}-actions`}>
@@ -221,4 +221,3 @@ export default function InventoryTable(props: InventoryTableProps)
         </Table>
     );
 }
-
