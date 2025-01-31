@@ -13,7 +13,6 @@ import DatabaseViewPage from "./assets/pages/DatabaseViewPage.tsx";
 import {SearchProvider} from "./assets/providers/SearchProvider.tsx";
 import {DatabaseViewProvider} from "./assets/providers/DatabaseViewProvider.tsx";
 import {HeroUIProvider} from "@heroui/react";
-import TestTablePage from "./assets/pages/TestTablePage.tsx";
 
 export const isProduction = window.location.hostname === "pricing-new.mardens.com";
 export const baseUrl = "https://pricing-new.mardens.com";//isProduction ? "" : "http://pricing.local";
@@ -46,7 +45,6 @@ export function MainContentRenderer()
                 <Route path="/new" element={<DatabaseOptionsPage/>}/>
                 <Route path="/inv/:id" element={<DatabaseViewPage/>}/>
                 <Route path="/inv/:id/edit" element={<DatabaseOptionsPage/>}/>
-                <Route path="/test" element={<TestTablePage/>}/>
                 <Route path="*" element={<>Error 404: Page not found.</>}/>
             </Routes>
         </HeroUIProvider>
