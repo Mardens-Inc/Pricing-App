@@ -2,14 +2,14 @@ import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {useDatabaseView} from "../providers/DatabaseViewProvider.tsx";
 import {setTitle} from "../../main.tsx";
-import {Image, Spinner} from "@heroui/react";
-import InventoryingForm from "../components/View/InventoryingForm.tsx";
+import {Button, Image, Spinner, Tooltip} from "@heroui/react";
 import InventoryTable from "../components/View/InventoryTable.tsx";
 import PrintLabelExtraOptions from "../components/View/PrintLabelExtraOptions.tsx";
 import {useAuth} from "../providers/AuthProvider.tsx";
 import Location from "../ts/data/Location.ts";
 import Options from "../ts/data/Options.ts";
 import IconData from "../ts/data/Icon.ts";
+import {Icon} from "@iconify/react";
 
 export default function DatabaseViewPage()
 {
@@ -59,25 +59,26 @@ export default function DatabaseViewPage()
                             <p>PO#: <span className={"font-bold"}>{location?.po || "Unknown"}</span></p>
                         </div>
                     </div>
-                    <PrintLabelExtraOptions
-                        showYear={options?.showYearInput ?? false}
-                        showColor={options?.showColorDropdown ?? false}
-                        isPrintingEnabled={options?.isPrintingEnabled() ?? false}
-                    />
+                    <div className={"flex flex-row gap-3 ml-auto mr-4"}>
+                        <PrintLabelExtraOptions
+                            showYear={options?.showYearInput ?? false}
+                            showColor={options?.showColorDropdown ?? false}
+                            isPrintingEnabled={options?.isPrintingEnabled() ?? false}
+                        />
+                        {isLoggedIn && options?.inventorying?.allowAdditions && (
+                            <Tooltip content={"Add record"}>
+                                <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem] my-auto"}>
+                                    <Icon icon="mage:plus"/>
+                                </Button>
+                            </Tooltip>
+                        )}
+                    </div>
                 </div>
                 <div className={"flex flex-row"}>
 
                     {options &&
                         <InventoryTable onItemSelected={console.log} options={options}/>
                     }
-
-                    {isLoggedIn && options?.inventorying?.allowAdditions && (
-                        <InventoryingForm columns={[]} onSubmit={data =>
-                        {
-                            console.log("Submitted data: ", data);
-                        }}/>
-                    )}
-
                 </div>
             </div>
         );
