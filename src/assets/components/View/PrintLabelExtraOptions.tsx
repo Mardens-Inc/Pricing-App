@@ -1,8 +1,8 @@
-import {Input, Select, SelectItem} from "@heroui/react";
+import {Button, Input, Select, SelectItem, Tooltip} from "@heroui/react";
 import {useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
 import {PrintLabelColors} from "../../ts/printer.ts";
-import ExtendedSwitch from "../Extends/ExtendedSwitch.tsx";
+import {Icon} from "@iconify/react";
 
 export default function PrintLabelExtraOptions({showColor = true, showYear = true, isPrintingEnabled}: { showColor?: boolean, showYear?: boolean, isPrintingEnabled?: boolean })
 {
@@ -32,7 +32,7 @@ export default function PrintLabelExtraOptions({showColor = true, showYear = tru
 
     return (
 
-        <div className={"ml-auto mr-8 w-1/2 flex flex-row items-center justify-end gap-3"}>
+        <div className={"flex flex-row items-center justify-end gap-3"}>
             {showColor &&
                 <Select
                     key={"page-color-selector"}
@@ -41,6 +41,7 @@ export default function PrintLabelExtraOptions({showColor = true, showYear = tru
                     radius={"full"}
                     selectedKeys={[color || ""]}
                     onSelectionChange={(value) => setColor([...value][0] as string)}
+                    className={"w-auto min-w-[200px]"}
                 >
                     {
                         PrintLabelColors.map(
@@ -61,16 +62,29 @@ export default function PrintLabelExtraOptions({showColor = true, showYear = tru
                     value={year}
                     onValueChange={(value) => setYear(value.replace(/[^0-9]/g, ""))}
                     maxLength={2}
+                    className={"w-[170px] min-w-[170px]"}
                 />
             }
 
             {isPrintingEnabled &&
-                <ExtendedSwitch
-                    label={"Auto Print"}
-                    description={"Automatically print labels when scanning a barcode."}
-                    isSelected={autoPrintLabel}
-                    onValueChange={setAutoPrintLabel}
-                />
+                <Tooltip content={`${autoPrintLabel ? "Disable" : "Enable"} Auto Print Label`}>
+                    <Button
+                        radius={"full"}
+                        color={autoPrintLabel ? "primary" : "default"}
+                        className={"h-12 w-12 aspect-square p-0 min-w-12 text-[1rem]"}
+                        onPress={() => setAutoPrintLabel(prev => !prev)}
+                    >
+                        <Icon icon={"mage:printer-fill"}/>
+                    </Button>
+                </Tooltip>
+                // <ExtendedSwitch
+                //     label={"Auto Print"}
+                //     isSelected={autoPrintLabel}
+                //     onValueChange={setAutoPrintLabel}
+                //     classNames={{
+                //         base: "rounded-full h-14"
+                //     }}
+                // />
             }
         </div>
 
