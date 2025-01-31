@@ -2,8 +2,15 @@ import {Departments} from "../../../ts/printer.ts";
 import $ from "jquery";
 import {Select, SelectItem} from "@heroui/react";
 
-export default function DepartmentDropdown({id}: { id: string })
+import {memo, useMemo} from "react";
+
+export const DepartmentDropdown = memo(function DepartmentDropdown({id}: { id: string })
 {
+    const filteredDepartments = useMemo(() =>
+            Departments.filter(i => i.id > 0),
+        [Departments]
+    );
+
     return (
         <Select
             key={`${id}-dept-selector`}
@@ -22,19 +29,18 @@ export default function DepartmentDropdown({id}: { id: string })
             }}
         >
             {
-                Departments
-                    .filter(i => i.id > 0)
-                    .map(
-                        dept =>
-                            <SelectItem
-                                key={`${id}-${dept.id}`}
-                                value={dept.name}
-                                textValue={dept.name}
-                            >
-                                {dept.id} - {dept.name}
-                            </SelectItem>
-                    )
+                filteredDepartments.map(
+                    dept =>
+                        <SelectItem
+                            key={`${id}-${dept.id}`}
+                            value={dept.name}
+                            textValue={dept.name}
+                        >
+                            {dept.id} - {dept.name}
+                        </SelectItem>
+                )
             }
         </Select>
     );
-}
+});
+
