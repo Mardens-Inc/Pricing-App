@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS `inventory_options`
 	"#,
     )
     .await?;
-    
+
     print_options_db::initialize(&pool).await?;
 
     Ok(())
@@ -85,10 +85,14 @@ impl InventoryOptions {
         .await?
         {
             Ok(Some(InventoryOptions {
-                inventorying: Some(Inventorying {
-                    add_if_missing: row.try_get::<bool, _>("inventorying_add_if_missing")?,
-                    remove_if_zero: row.try_get::<bool, _>("inventorying_remove_if_zero")?,
-                    allow_additions: row.try_get::<bool, _>("inventorying_allow_additions")?,
+                inventorying: row.try_get::<bool, _>("inventorying_enabled")?.then(|| {
+                    Inventorying {
+                        add_if_missing: row.try_get("inventorying_add_if_missing").unwrap_or(false),
+                        remove_if_zero: row.try_get("inventorying_remove_if_zero").unwrap_or(false),
+                        allow_additions: row
+                            .try_get("inventorying_allow_additions")
+                            .unwrap_or(false),
+                    }
                 }),
                 print_form: print_options_db::get(&data, database_id).await?,
                 show_color_dropdown: row.try_get("show_color_dropdown")?,
