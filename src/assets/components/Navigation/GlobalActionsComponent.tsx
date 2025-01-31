@@ -53,21 +53,21 @@ export default function GlobalActionsComponent()
                                     <>
                                         <NavbarItem>
                                             <Tooltip content={"Edit database"}>
-                                                <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} as={Link} href={`/${id}/edit`}>
+                                                <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem]"} as={Link} href={`/${id}/edit`}>
                                                     <Icon icon="mage:edit-pen-fill"/>
                                                 </Button>
                                             </Tooltip>
                                         </NavbarItem>
                                         <NavbarItem>
                                             <Tooltip content={"Export database"}>
-                                                <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0"} isLoading={isLoadingExport} onPress={async () =>
+                                                <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem]"} isLoading={isLoadingExport} onPress={async () =>
                                                 {
                                                     setIsLoadingExport(true);
                                                     // await DatabaseRecords.export(id);
                                                     setIsLoadingExport(false);
                                                 }}>
                                                     {!isLoadingExport && (
-                                                        <Icon icon="humbleicons:download"/>
+                                                        <Icon icon="mage:save-floppy-fill"/>
                                                     )}
                                                 </Button>
                                             </Tooltip>
@@ -77,7 +77,7 @@ export default function GlobalActionsComponent()
                                     <NavbarItem>
                                         <Tooltip content={"Add new database"}>
                                             <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem]"} as={Link} href={"/new"}>
-                                                <Icon icon="ic:round-plus"/>
+                                                <Icon icon="mage:plus"/>
                                             </Button>
                                         </Tooltip>
                                     </NavbarItem>
@@ -87,7 +87,7 @@ export default function GlobalActionsComponent()
                         <NavbarItem>
                             <Tooltip content={"Logout"}>
                                 <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem]"} onPress={() => setIsLogoutAlertOpen(true)}>
-                                    <Icon icon="mage:logout"/>
+                                    <Icon icon="humbleicons:logout"/>
                                 </Button>
                             </Tooltip>
                         </NavbarItem>
