@@ -54,7 +54,7 @@ export default function GlobalActionsComponent()
                                         <NavbarItem>
                                             <Tooltip content={"Edit database"}>
                                                 <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem]"} as={Link} href={`/${id}/edit`}>
-                                                    <Icon icon="mage:edit-pen-fill"/>
+                                                    <Icon icon="mage:edit-fill"/>
                                                 </Button>
                                             </Tooltip>
                                         </NavbarItem>
