@@ -4,12 +4,11 @@ use pricing_app_lib::data_database_connection::DatabaseConnectionData;
 use pricing_app_lib::options_data::{InventoryOptions, Inventorying};
 use pricing_app_lib::{options_db, print_options_data};
 use serde::de::{Error, Visitor};
-use serde::{de, Deserializer};
+use serde::Deserializer;
 use serde_derive::Deserialize;
 use sqlx::{MySqlPool, Row};
 use std::collections::HashMap;
 use std::fmt;
-use std::fmt::Write;
 
 #[derive(Deserialize)]
 struct OldOptions {
@@ -154,6 +153,7 @@ async fn main() -> Result<()> {
             }),
             show_year_input: option.print_form.show_year_input.unwrap_or(false),
             show_color_dropdown: option.print_form.show_color_dropdown.unwrap_or(false),
+            show_department_dropdown: false,
         };
         new_option.insert(&data, id).await?;
     }
