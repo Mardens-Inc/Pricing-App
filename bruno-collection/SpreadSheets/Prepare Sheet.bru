@@ -1,0 +1,15 @@
+meta {
+  name: Prepare Sheet
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/spreadsheet/prepare
+  body: none
+  auth: none
+}
+
+headers {
+  Content-Type: application/vnd.ms-excel
+}
