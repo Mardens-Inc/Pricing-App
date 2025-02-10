@@ -73,23 +73,15 @@ export const PrintLabelSize: PrintLabelSize[] = [
     {width: 1.25, height: 1, name: "Large"}
 ];
 
-export function OpenPrintWindow(databaseId: string, values: RowValue[], printOptions: PrintForm, department?: number, mardensPrice?: number)
+export function OpenPrintWindow(databaseId: string, values: RowValue[], printOptions: PrintForm)
 {
     const uri: URL = new URL("https://pricetagger.mardens.com/api/");
 
     let price = values.find(v => v.attributes.includes("price"));
     if (price) uri.searchParams.append("price", price.value.replace(/[^0-9.]/g, ""));
 
-    if (mardensPrice)
-        uri.searchParams.append("mp", mardensPrice.toString());
-    else
-    {
-        let mp = values.find(v => v.attributes.includes("mp"));
-        if (mp && mp.value) uri.searchParams.append("mp", mp.value.replace(/[^0-9.]/g, ""));
-    }
-
-    if (printOptions.department !== undefined && printOptions.department > 0) uri.searchParams.append("department", printOptions.department.toString());
-    if (department && department > 0) uri.searchParams.append("department", department.toString());
+    let mp = values.find(v => v.attributes.includes("mp"));
+    if (mp && mp.value) uri.searchParams.append("mp", mp.value.replace(/[^0-9.]/g, ""));
     if (printOptions.label) uri.searchParams.append("label", printOptions.label);
     if (printOptions.year) uri.searchParams.append("year", printOptions.year.toString());
     if (printOptions.showPriceLabel) uri.searchParams.append("showPriceLabel", "");
@@ -97,8 +89,19 @@ export function OpenPrintWindow(databaseId: string, values: RowValue[], printOpt
 
     const databasePrintYear = localStorage.getItem(`print-year-${databaseId}`);
     const databasePrintColor = localStorage.getItem(`print-color-${databaseId}`);
+    const databaseDepartment = localStorage.getItem(`print-department-${databaseId}`);
     if (databasePrintYear) uri.searchParams.append("year", databasePrintYear);
     if (databasePrintColor) uri.searchParams.append("color", databasePrintColor);
+
+    // Departments
+    if (databaseDepartment) uri.searchParams.append("department", databaseDepartment);
+    else if (printOptions.department !== undefined && printOptions.department > 0) uri.searchParams.append("department", printOptions.department.toString());
+    else
+    {
+        const department = values.find(i => i.attributes.includes("department"));
+        if (department) uri.searchParams.append("department", department.value);
+    }
+
 
     uri.searchParams.append("v", Date.now().toString()); // Add a version to prevent caching
 
