@@ -13,6 +13,8 @@ import DatabaseViewPage from "./assets/pages/DatabaseViewPage.tsx";
 import {SearchProvider} from "./assets/providers/SearchProvider.tsx";
 import {DatabaseViewProvider} from "./assets/providers/DatabaseViewProvider.tsx";
 import {HeroUIProvider} from "@heroui/react";
+import {ToastProvider} from "./assets/providers/ToastProvider.tsx";
+import {NewRecordModalProvider} from "./assets/providers/NewRecordModalProvider.tsx";
 
 export const isProduction = window.location.hostname === "pricing-new.mardens.com";
 export const baseUrl = "https://pricing-new.mardens.com";//isProduction ? "" : "http://pricing.local";
@@ -22,13 +24,17 @@ export const setTitle = (title?: string) => document.title = `${title ? `${title
 ReactDOM.createRoot($("#root")[0]!).render(
     <React.StrictMode>
         <BrowserRouter>
-            <AuthProvider>
-                <SearchProvider>
-                    <DatabaseViewProvider>
-                        <MainContentRenderer/>
-                    </DatabaseViewProvider>
-                </SearchProvider>
-            </AuthProvider>
+            <ToastProvider>
+                <AuthProvider>
+                    <SearchProvider>
+                        <DatabaseViewProvider>
+                            <NewRecordModalProvider>
+                                <MainContentRenderer/>
+                            </NewRecordModalProvider>
+                        </DatabaseViewProvider>
+                    </SearchProvider>
+                </AuthProvider>
+            </ToastProvider>
         </BrowserRouter>
     </React.StrictMode>
 );
