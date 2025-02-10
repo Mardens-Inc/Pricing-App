@@ -1,6 +1,6 @@
 use crate::constants::UPLOAD_FOLDER;
 use crate::http_error::Result;
-use actix_web::{post, web, HttpRequest, HttpResponse, Responder};
+use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use log::*;
 use serde_json::json;
 use std::io::Write;
@@ -35,10 +35,43 @@ pub async fn upload_sheet(data: web::Bytes, http_request: HttpRequest) -> Result
     }
 }
 
+#[get("/{identifier}")]
+pub async fn get_sheets(identifier: web::Path<String>) -> Result<impl Responder> {
+    let identifier = identifier.into_inner();
+    let path = Path::new(UPLOAD_FOLDER).join(&identifier);
+    let sheets = crate::excel::get_sheets(path)?;
+    Ok(HttpResponse::Ok().json(json!(sheets)))
+}
+
+#[get("/{identifier}/{sheet_name}")]
+pub async fn get_column_headers(
+    path_params: web::Path<(String, String)>,
+) -> Result<impl Responder> {
+    let (identifier, sheet_name) = path_params.into_inner();
+    let path = Path::new(UPLOAD_FOLDER).join(&identifier);
+    let headers = crate::excel::get_column_headers(path, &sheet_name)?;
+    Ok(HttpResponse::Ok().json(json!(headers)))
+}
+
+#[get("/{identifier}/{sheet_name}/duplicates")]
+pub async fn find_duplicate_rows(
+    path_params: web::Path<(String, String)>,
+    columns: web::Query<String>,
+) -> Result<impl Responder> {
+    let (identifier, sheet_name) = path_params.into_inner();
+    let columns = columns.into_inner().split(',').map(String::from).collect();
+    let path = Path::new(UPLOAD_FOLDER).join(&identifier);
+    let duplicates = crate::excel::find_duplicate_rows(path, &sheet_name, columns)?;
+    Ok(HttpResponse::Ok().json(json!(duplicates)))
+}
+
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/spreadsheet")
             .service(upload_sheet)
+            .service(get_column_headers)
+            .service(get_sheets)
+            .service(find_duplicate_rows)
             .default_service(web::to(|| async {
                 // Handle unmatched API endpoints
                 HttpResponse::NotFound().json(json!({"error": "API endpoint not found"}))
