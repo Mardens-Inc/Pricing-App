@@ -1,20 +1,27 @@
-import {Button, Input, Select, SelectItem, Tooltip} from "@heroui/react";
+import {Input, Select, SelectItem, Tab, Tabs} from "@heroui/react";
 import {useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
 import {PrintLabelColors} from "../../ts/printer.ts";
-import {Icon} from "@iconify/react";
+import {DepartmentDropdown} from "./TableComponents/DepartmentDropdown.tsx";
+import {PrintForm} from "../../ts/data/Options.ts";
+import AutoPrintButton from "../Extends/AutoPrintButton.tsx";
 
-export default function PrintLabelExtraOptions({showColor = true, showYear = true, isPrintingEnabled}: { showColor?: boolean, showYear?: boolean, isPrintingEnabled?: boolean })
+type PrintLabelExtraOptionsProps = {
+    showColor?: boolean,
+    showYear?: boolean,
+    showDepartment?: boolean,
+    isPrintingEnabled?: boolean,
+    printOptions?: PrintForm[]
+};
+
+export default function PrintLabelExtraOptions(props: PrintLabelExtraOptionsProps)
 {
+    const {showColor, showYear, showDepartment, isPrintingEnabled, printOptions} = props;
     const id = useParams().id ?? "";
     const [year, setYear] = useState<string>(localStorage.getItem(`print-year-${id}`) || "");
     const [color, setColor] = useState<string | null>(localStorage.getItem(`print-color-${id}`));
-    const [autoPrintLabel, setAutoPrintLabel] = useState(localStorage.getItem(`print-auto-print-${id}`) === "true" || false);
+    const [selectedPrintOption, setSelectedPrintOption] = useState<string>(localStorage.getItem(`print-option-${id}`) || printOptions?.[0].hint || "");
 
-    useEffect(() =>
-    {
-        localStorage.setItem(`print-auto-print-${id}`, autoPrintLabel.toString());
-    }, [autoPrintLabel]);
 
     useEffect(() =>
     {
@@ -33,6 +40,25 @@ export default function PrintLabelExtraOptions({showColor = true, showYear = tru
     return (
 
         <div className={"flex flex-row items-center justify-end gap-3"}>
+            {printOptions && printOptions?.length > 1 &&
+                <div className={"flex flex-col gap-1"}>
+                    <p>Print Option</p>
+                    <Tabs
+                        selectedKey={selectedPrintOption}
+                        onSelectionChange={key =>
+                        {
+                            setSelectedPrintOption(key as string);
+                            localStorage.setItem(`print-option-${id}`, key as string);
+                        }}
+                    >
+                        {printOptions.map(option => (
+                            <Tab key={option.hint} title={option.hint}/>
+                        ))}
+                    </Tabs>
+                    <p className={"text-tiny italic opacity-50"}>This controls the print button.</p>
+                </div>
+            }
+            {showDepartment && <DepartmentDropdown id={id}/>}
             {showColor &&
                 <Select
                     key={"page-color-selector"}
@@ -66,26 +92,7 @@ export default function PrintLabelExtraOptions({showColor = true, showYear = tru
                 />
             }
 
-            {isPrintingEnabled &&
-                <Tooltip content={`${autoPrintLabel ? "Disable" : "Enable"} Auto Print Label`}>
-                    <Button
-                        radius={"full"}
-                        color={autoPrintLabel ? "primary" : "default"}
-                        className={"h-12 w-12 aspect-square p-0 min-w-12 text-[1rem]"}
-                        onPress={() => setAutoPrintLabel(prev => !prev)}
-                    >
-                        <Icon icon={"mage:printer-fill"}/>
-                    </Button>
-                </Tooltip>
-                // <ExtendedSwitch
-                //     label={"Auto Print"}
-                //     isSelected={autoPrintLabel}
-                //     onValueChange={setAutoPrintLabel}
-                //     classNames={{
-                //         base: "rounded-full h-14"
-                //     }}
-                // />
-            }
+            {isPrintingEnabled && <AutoPrintButton id={id}/>}
         </div>
 
 
