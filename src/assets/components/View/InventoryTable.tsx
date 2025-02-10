@@ -1,15 +1,14 @@
+import {useEffect, useMemo, useState} from "react";
 import {Button, cn, getKeyValue, SortDescriptor, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from "@heroui/react";
-import {useSearch} from "../../providers/SearchProvider.tsx";
-import {useEffect, useState} from "react";
+import {useSearch} from "../../providers/SearchProvider";
 import {useNavigate, useParams} from "react-router-dom";
-import {DepartmentDropdown} from "./TableComponents/DepartmentDropdown.tsx";
-import PrintButton from "./TableComponents/PrintButton.tsx";
+import PrintButton from "./TableComponents/PrintButton";
 import $ from "jquery";
 import {Icon} from "@iconify/react";
-import Column from "../../ts/data/Column.ts";
-import Options from "../../ts/data/Options.ts";
-import Location, {InventoryRecord} from "../../ts/data/Location.ts";
-import PrintDropdown from "./TableComponents/PrintDropdown.tsx";
+import Column from "../../ts/data/Column";
+import Options from "../../ts/data/Options";
+import Location, {InventoryRecord} from "../../ts/data/Location";
+import {useNewRecordModal} from "../../providers/NewRecordModalProvider";
 
 interface InventoryTableProps
 {
@@ -20,7 +19,7 @@ interface InventoryTableProps
 export type RowValue = {
     value: string;
     attributes: string[];
-}
+};
 
 export default function InventoryTable(props: InventoryTableProps)
 {
@@ -34,10 +33,14 @@ export default function InventoryTable(props: InventoryTableProps)
     const [searchColumns, setSearchColumns] = useState<string[]>([]);
     const [_primaryKey, setPrimaryKey] = useState<string>("");
     const [isLoading, setIsLoading] = useState(true);
-    const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({column: "last_modified_date", direction: "ascending"});
+    const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
+        column: "last_modified_date",
+        direction: "ascending"
+    });
+
+    const {edit} = useNewRecordModal();
 
     let abortController = new AbortController();
-
 
     useEffect(() =>
     {
@@ -56,18 +59,32 @@ export default function InventoryTable(props: InventoryTableProps)
         {
             if (!search)
             {
-                Column.all(id).then(columns =>
+                Column.all(id).then((columns) =>
                 {
-                    setColumns(columns.filter(i => i.visible));
-                    setSearchColumns(columns.filter(i => i.attributes.includes("search")).flatMap(i => i.name));
-                    setPrimaryKey(columns.find(i => i.attributes.includes("primary"))?.name ?? "id");
+                    setColumns(columns.filter((i) => i.visible));
+                    setSearchColumns(
+                        columns
+                            .filter((i) => i.attributes.includes("search"))
+                            .flatMap((i) => i.name)
+                    );
+                    setPrimaryKey(
+                        columns.find((i) => i.attributes.includes("primary"))?.name ?? "id"
+                    );
                 });
 
                 abortController.abort();
                 abortController = new AbortController();
                 location
-                    .records({limit: 10, sort: sortDescriptor.column.toString(), ascending: sortDescriptor.direction === "ascending", offset: 0}, abortController.signal)
-                    .then(i => i.data)
+                    .records(
+                        {
+                            limit: 20,
+                            sort: sortDescriptor.column.toString(),
+                            ascending: sortDescriptor.direction === "ascending",
+                            offset: 0
+                        },
+                        abortController.signal
+                    )
+                    .then((i) => i.data)
                     .then(setItems)
                     .finally(() => setIsLoading(false));
             } else
@@ -75,8 +92,18 @@ export default function InventoryTable(props: InventoryTableProps)
                 abortController.abort();
                 abortController = new AbortController();
                 location
-                    .search({limit: 10, sort: sortDescriptor.column.toString(), ascending: sortDescriptor.direction === "ascending", offset: 0, search: search, columns: searchColumns}, abortController.signal)
-                    .then(i => i.data)
+                    .search(
+                        {
+                            limit: 20,
+                            sort: sortDescriptor.column.toString(),
+                            ascending: sortDescriptor.direction === "ascending",
+                            offset: 0,
+                            search: search,
+                            columns: searchColumns
+                        },
+                        abortController.signal
+                    )
+                    .then((i) => i.data)
                     .then(setItems)
                     .finally(() => setIsLoading(false));
             }
@@ -91,8 +118,10 @@ export default function InventoryTable(props: InventoryTableProps)
 
     useEffect(() =>
     {
-
-        if (localStorage.getItem(`print-auto-print-${id}`) === "true" && items?.length === 1)
+        if (
+            localStorage.getItem(`print-auto-print-${id}`) === "true" &&
+            items?.length === 1
+        )
         {
             const firstPrintButton = $(`button[data-print-form]`)[0] as HTMLButtonElement;
             console.log("Auto Printing", firstPrintButton);
@@ -103,6 +132,84 @@ export default function InventoryTable(props: InventoryTableProps)
         }
     }, [items]);
 
+
+    // Memoized Table Rows
+    const rows = useMemo(() =>
+    {
+        if (!items || !items.length) return null;
+        return items.map((row: InventoryRecord) => (
+            <TableRow key={row.id} id={row.id} aria-labelledby={`row-${row.id}`}>
+                {[
+                    ...columns
+                        .filter((c) => c.visible)
+                        .map((column) =>
+                        {
+                            let value = getKeyValue(row, column.name);
+                            if (!value)
+                            {
+                                value = "-";
+                            } else
+                            {
+                                if (
+                                    column.attributes.includes("price") ||
+                                    column.attributes.includes("mp")
+                                )
+                                {
+                                    value = `$${(+value.replace(/[^0-9.]/g, "")).toFixed(2)}`;
+                                }
+                            }
+
+                            return (
+                                <TableCell
+                                    key={column.name}
+                                    {...column.attributes.reduce(
+                                        (acc, attr) => ({...acc, [`data-${attr}`]: true}),
+                                        {}
+                                    )}
+                                    aria-label={column.displayName}
+                                >
+                                    {value}
+                                </TableCell>
+                            );
+                        }),
+                    <TableCell key={`${row.id}-actions`}>
+                        <div className={"flex flex-row gap-2"}>
+                            <Button
+                                radius={"full"}
+                                className={
+                                    "h-12 w-12 aspect-square p-0 min-w-0 text-[1rem] my-auto"
+                                }
+                                onPress={() =>
+                                {
+                                    edit(row, (item) =>
+                                    {
+                                        console.log(item);
+                                    });
+                                }}
+                            >
+                                <Icon icon={"mage:edit-fill"}/>
+                            </Button>
+                            {(() =>
+                            {
+                                if (props.options.printForm && props.options.isPrintingEnabled())
+                                {
+                                    return (
+                                        <PrintButton
+                                            databaseId={id}
+                                            row={row}
+                                            columns={columns}
+                                            printOptions={props.options.printForm.find(form => form.hint === localStorage.getItem(`print-option-${id}`)) ?? props.options.printForm[0]}
+                                        />
+                                    );
+                                }
+                                return <></>;
+                            })()}
+                        </div>
+                    </TableCell>
+                ]}
+            </TableRow>
+        ));
+    }, [items, columns, edit, props.options, id]);
     if (!id)
     {
         console.error("No id provided for DatabaseViewPage");
@@ -114,9 +221,7 @@ export default function InventoryTable(props: InventoryTableProps)
     {
         return <></>;
     }
-
-
-    // console.log(props.options);
+    // Render Table
     return (
         <Table
             removeWrapper
@@ -134,7 +239,7 @@ export default function InventoryTable(props: InventoryTableProps)
                     "dark:data-[odd=true]:bg-default-100/10 dark:data-[hover=true]:hover:bg-default-100/50"
                 ),
                 th: "dark:bg-background/50 backdrop-blur-md saturation-150 dark:brightness-150 mx-2",
-                base: "max-h-[calc(100dvh_-_250px)] overflow-y-auto min-h-[250px]"
+                base: "max-h-[calc(100dvh_-_260px)] overflow-y-auto min-h-[250px]"
             }}
             sortDescriptor={sortDescriptor}
             onSortChange={(descriptor) =>
@@ -154,70 +259,31 @@ export default function InventoryTable(props: InventoryTableProps)
                     props.onItemSelected(null);
                 }
             }}
+            aria-label="Inventory Table"
         >
-
             <TableHeader>
-                {[...columns.filter(c => c.visible).map((column) =>
-                    <TableColumn key={column.name} allowsSorting>{column.displayName}</TableColumn>
-                ), (<TableColumn key="actions" className={"min-w-0 w-0"}>Actions</TableColumn>)]}
-
+                {[
+                    ...columns
+                        .filter((c) => c.visible)
+                        .map((column) => (
+                            <TableColumn key={column.name} allowsSorting>
+                                {column.displayName}
+                            </TableColumn>
+                        )),
+                    <TableColumn key="actions" className={"min-w-0 w-0"}>
+                        Actions
+                    </TableColumn>
+                ]}
             </TableHeader>
-
-            <TableBody emptyContent={<p>No Results Found!</p>} isLoading={isLoading} loadingContent={<Spinner size={"lg"}/>} items={items}>
-                {isLoading ? <></> :
-                    (items ?? []).map((row: InventoryRecord) =>
-                        <TableRow key={row.id} id={row.id}>
-                            {
-                                [...columns
-                                    .filter(c => c.visible)
-                                    .map((column) =>
-                                    {
-                                        let value = getKeyValue(row, column.name);
-                                        if (!value)
-                                        {
-                                            value = "-";
-                                        } else
-                                        {
-                                            if (column.attributes.includes("price") || column.attributes.includes("mp"))
-                                            {
-                                                value = `$${(+value.replace(/[^0-9.]/g, "")).toFixed(2)}`;
-                                            }
-                                        }
-
-                                        if (column.attributes.includes("department"))
-                                        {
-                                            value = <DepartmentDropdown id={row.id}/>;
-                                        }
-
-                                        return <TableCell key={column.name} {...column.attributes.reduce((acc, attr) => ({...acc, [`data-${attr}`]: true}), {})}>{value}</TableCell>;
-                                    }),
-                                    (
-                                        <TableCell key={`${row.id}-actions`}>
-                                            <div className={"flex flex-row gap-2"}>
-                                                {(() =>
-                                                {
-                                                    if (props.options.printForm && props.options.isPrintingEnabled())
-                                                    {
-                                                        if (props.options.printForm?.length === 1)
-                                                        {
-                                                            return <PrintButton databaseId={id} row={row} columns={columns} printOptions={props.options.printForm[0]}/>;
-                                                        } else
-                                                        {
-                                                            return <PrintDropdown databaseId={id} row={row} columns={columns} printOptions={props.options.printForm}/>;
-                                                        }
-                                                    }
-                                                    return <></>;
-                                                })()}
-                                                <Button radius={"full"} className={"min-w-0 w-12 h-12"}><Icon icon="mage:dots"/></Button>
-                                            </div>
-                                        </TableCell>
-                                    )
-                                ]
-                            }
-                        </TableRow>
-                    )}
+            <TableBody
+                emptyContent={<p>No Results Found!</p>}
+                isLoading={isLoading}
+                loadingContent={<Spinner size={"lg"}/>}
+                items={items}
+                aria-label="Inventory Table Body"
+            >
+                {rows as any}
             </TableBody>
-
         </Table>
     );
 }
