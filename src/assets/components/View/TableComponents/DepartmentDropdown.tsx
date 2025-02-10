@@ -1,11 +1,11 @@
 import {Departments} from "../../../ts/printer.ts";
-import $ from "jquery";
 import {Select, SelectItem} from "@heroui/react";
 
-import {memo, useMemo} from "react";
+import {memo, useMemo, useState} from "react";
 
 export const DepartmentDropdown = memo(function DepartmentDropdown({id}: { id: string })
 {
+    const [selectedDepartment, setSelectedDepartment] = useState<string | null>(localStorage.getItem(`print-department-${id}`));
     const filteredDepartments = useMemo(() =>
             Departments.filter(i => i.id > 0),
         [Departments]
@@ -17,28 +17,56 @@ export const DepartmentDropdown = memo(function DepartmentDropdown({id}: { id: s
             label={"Department"}
             placeholder={"Select a department to print"}
             radius={"full"}
-            classNames={{}}
+            className={"w-40"}
+            selectionMode={"single"}
+            selectedKeys={[selectedDepartment ?? ""]}
             onSelectionChange={selection =>
             {
-                const dept = Departments.find(i => i.id === +(
-                    ([...selection][0] as string)
-                        .replace(`${id}-`, "")
-                        .trim()
-                ))?.id ?? -1;
-                $(`tr#${id}`).attr("data-department", dept);
+                const keys = [...selection] as string[];
+                console.log(keys);
+                if (keys.length === 0)
+                {
+                    localStorage.removeItem(`print-department-${id}`);
+                    setSelectedDepartment(null);
+
+                } else
+                {
+                    if (keys[0] === "-1")
+                    {
+                        localStorage.removeItem(`print-department-${id}`);
+                        setSelectedDepartment(null);
+                        return;
+                    }
+
+                    const dept = Departments.find(i => i.id === +(
+                        (keys[0] as string)
+                            .replace(`${id}-`, "")
+                            .trim()
+                    ))?.id ?? -1;
+                    localStorage.setItem(`print-department-${id}`, dept.toString());
+                    setSelectedDepartment(dept.toString());
+                }
             }}
         >
             {
-                filteredDepartments.map(
+                [...[
+                    <SelectItem
+                        key={"-1"}
+                        value={"None"}
+                        textValue={"None"}
+                    >
+                        None
+                    </SelectItem>
+                ], ...filteredDepartments.map(
                     dept =>
                         <SelectItem
-                            key={`${id}-${dept.id}`}
+                            key={dept.id.toString()}
                             value={dept.name}
                             textValue={dept.name}
                         >
                             {dept.id} - {dept.name}
                         </SelectItem>
-                )
+                )]
             }
         </Select>
     );
