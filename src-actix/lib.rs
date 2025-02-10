@@ -35,6 +35,11 @@ mod mysql_row_wrapper;
 
 // Inventory Options Modules
 mod asset_endpoint;
+pub mod constants;
+#[path = "excel/csv.rs"]
+pub mod csv;
+#[path = "excel/excel.rs"]
+pub mod excel;
 mod http_error;
 #[path = "inventory/options/options_data.rs"]
 pub mod options_data;
@@ -46,17 +51,17 @@ mod options_endpoint;
 pub mod print_options_data;
 #[path = "inventory/options/print_options/print_options_db.rs"]
 pub mod print_options_db;
+#[path = "excel/spreadsheet_endpoint.rs"]
+pub mod spreadsheet_endpoint;
 
 use crate::asset_endpoint::AssetsAppConfig;
+use crate::constants::{initialize_asset_directories, DEBUG, PORT};
 use crate::data_database_connection::{create_pool, DatabaseConnectionData};
 use crate::server_information_endpoint::get_server_version;
 use actix_web::{middleware, web, App, HttpResponse, HttpServer};
 use anyhow::Result;
 use log::*;
 use serde_json::json;
-
-pub static DEBUG: bool = cfg!(debug_assertions);
-const PORT: u16 = 1421;
 
 pub async fn run() -> Result<()> {
     // Set the logging level and initialize the logger
@@ -73,6 +78,9 @@ pub async fn run() -> Result<()> {
     pool.close().await;
 
     let connection_data_mutex = web::Data::new(std::sync::Arc::new(data));
+
+    // This will create the needed asset directories.
+    initialize_asset_directories()?;
 
     let server = HttpServer::new(move || {
         App::new()
@@ -97,6 +105,7 @@ pub async fn run() -> Result<()> {
                     .configure(list_endpoint::configure)
                     .configure(columns_endpoint::configure)
                     .configure(options_endpoint::configure)
+                    .configure(spreadsheet_endpoint::configure)
                     .configure(inventory_endpoint::configure)
                     .default_service(web::to(|| async {
                         // Handle unmatched API endpoints
