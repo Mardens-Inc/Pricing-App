@@ -10,6 +10,7 @@ import Location from "../ts/data/Location.ts";
 import Options from "../ts/data/Options.ts";
 import IconData from "../ts/data/Icon.ts";
 import {Icon} from "@iconify/react";
+import {useNewRecordModal} from "../providers/NewRecordModalProvider.tsx";
 
 export default function DatabaseViewPage()
 {
@@ -20,6 +21,8 @@ export default function DatabaseViewPage()
     const [isLoading, setIsLoading] = useState(true);
     const databaseView = useDatabaseView();
     const {isLoggedIn} = useAuth();
+    const {create} = useNewRecordModal();
+
 
     if (!id)
     {
@@ -47,41 +50,55 @@ export default function DatabaseViewPage()
     }, [id, databaseView]);
 
 
-    return isLoading ? (<div className={"w-full h-[calc(100dvh_/_2)] min-h-40 flex justify-center items-center"}><Spinner label={"Loading database"} size={"lg"}/></div>)
-        : (
-            <div className={"flex flex-col gap-3"}>
-                <div className={"flex flex-row mt-5 ml-8"}>
-                    <LocationIcon location={location!}/>
-                    <div className={"flex flex-col gap-2 m-4"}>
-                        <h1 className={"text-4xl"}>{location?.name}</h1>
-                        <div className={"flex flex-row gap-3 italic opacity-50"}>
-                            <p>Location: <span className={"font-bold"}>{location?.location || "Unknown"}</span></p>
-                            <p>PO#: <span className={"font-bold"}>{location?.po || "Unknown"}</span></p>
-                        </div>
-                    </div>
-                    <div className={"flex flex-row gap-3 ml-auto mr-4"}>
-                        <PrintLabelExtraOptions
-                            showYear={options?.showYearInput ?? false}
-                            showColor={options?.showColorDropdown ?? false}
-                            isPrintingEnabled={options?.isPrintingEnabled() ?? false}
-                        />
-                        {isLoggedIn && options?.inventorying?.allowAdditions && (
-                            <Tooltip content={"Add record"}>
-                                <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem] my-auto"}>
-                                    <Icon icon="mage:plus"/>
-                                </Button>
-                            </Tooltip>
-                        )}
-                    </div>
-                </div>
-                <div className={"flex flex-row"}>
+    return (
+        <>
+            {
+                isLoading ? (<div className={"w-full h-[calc(100dvh_/_2)] min-h-40 flex justify-center items-center"}><Spinner label={"Loading database"} size={"lg"}/></div>)
+                    : (
+                        <div className={"flex flex-col gap-3"}>
+                            <div className={"flex flex-row mt-5 ml-8"}>
+                                <LocationIcon location={location!}/>
+                                <div className={"flex flex-col gap-2 m-4"}>
+                                    <h1 className={"text-4xl"}>{location?.name}</h1>
+                                    <div className={"flex flex-row gap-3 italic opacity-50"}>
+                                        <p>Location: <span className={"font-bold"}>{location?.location || "Unknown"}</span></p>
+                                        <p>PO#: <span className={"font-bold"}>{location?.po || "Unknown"}</span></p>
+                                    </div>
+                                </div>
+                                <div className={"flex flex-row gap-3 ml-auto mr-4"}>
+                                    <PrintLabelExtraOptions
+                                        printOptions={options?.printForm}
+                                        showDepartment={options?.showDepartmentDropdown ?? false}
+                                        showYear={options?.showYearInput ?? false}
+                                        showColor={options?.showColorDropdown ?? false}
+                                        isPrintingEnabled={options?.isPrintingEnabled() ?? false}
+                                    />
+                                    {isLoggedIn && options?.inventorying?.allowAdditions && (
+                                        <Tooltip content={"Add record"}>
+                                            <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem] my-auto"} onPress={() =>
+                                            {
+                                                create(record =>
+                                                {
+                                                    console.log(record);
+                                                });
+                                            }}>
+                                                <Icon icon="mage:plus"/>
+                                            </Button>
+                                        </Tooltip>
+                                    )}
+                                </div>
+                            </div>
+                            <div className={"flex flex-row"}>
 
-                    {options &&
-                        <InventoryTable onItemSelected={console.log} options={options}/>
-                    }
-                </div>
-            </div>
-        );
+                                {options &&
+                                    <InventoryTable onItemSelected={console.log} options={options}/>
+                                }
+                            </div>
+                        </div>
+                    )
+            }
+        </>
+    );
 }
 
 function LocationIcon(props: { location: Location })
