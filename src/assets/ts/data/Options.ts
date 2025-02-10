@@ -31,14 +31,17 @@ export default class Options
     public readonly inventorying?: Inventorying;
     public readonly showYearInput: boolean;
     public readonly showColorDropdown: boolean;
+    public readonly showDepartmentDropdown: boolean = true;
 
 
-    constructor(printForm?: PrintForm[], inventorying?: Inventorying, showYearInput: boolean = true, showColorDropdown: boolean = true)
+    constructor(printForm?: PrintForm[], inventorying?: Inventorying, showYearInput: boolean = false, showColorDropdown: boolean = false, showDepartmentDropdown: boolean = false)
     {
         this.printForm = printForm;
         this.inventorying = inventorying;
         this.showYearInput = showYearInput;
         this.showColorDropdown = showColorDropdown;
+        this.showDepartmentDropdown = showDepartmentDropdown;
+
     }
 
     static async get(databaseId: string): Promise<Options | null>
@@ -69,7 +72,8 @@ export default class Options
             obj.printForm,
             obj.inventorying,
             obj.showYearInput,
-            obj.showColorDropdown
+            obj.showColorDropdown,
+            obj.showDepartmentDropdown,
         );
         response.databaseId = id;
         return response;
