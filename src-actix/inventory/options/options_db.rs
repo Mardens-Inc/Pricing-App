@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS `inventory_options`
     inventorying_allow_additions BOOLEAN NOT NULL DEFAULT FALSE,
     show_color_dropdown          BOOLEAN NOT NULL DEFAULT FALSE,
     show_year_input              BOOLEAN NOT NULL DEFAULT FALSE,
+    show_database_dropdown       BOOLEAN NOT NULL DEFAULT FALSE,
     database_id                  BIGINT UNSIGNED
 );
 	"#,
@@ -40,8 +41,9 @@ impl InventoryOptions {
                 inventorying_allow_additions,
                 show_color_dropdown,
                 show_year_input,
+                show_database_dropdown,
                 database_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             "#,
         )
         .bind(self.inventorying.is_some()) // inventorying_enabled
@@ -62,6 +64,7 @@ impl InventoryOptions {
         ) // inventorying_allow_additions
         .bind(self.show_color_dropdown) // show_color_dropdown
         .bind(self.show_year_input) // show_year_input
+        .bind(self.show_department_dropdown)
         .bind(database_id) // database_id
         .execute(&pool)
         .await?;
@@ -97,6 +100,7 @@ impl InventoryOptions {
                 print_form: print_options_db::get(&data, database_id).await?,
                 show_color_dropdown: row.try_get("show_color_dropdown")?,
                 show_year_input: row.try_get("show_year_input")?,
+                show_department_dropdown: row.try_get("show_database_dropdown")?,
             }))
         } else {
             Ok(None)
@@ -115,7 +119,8 @@ impl InventoryOptions {
                 inventorying_remove_if_zero = ?,
                 inventorying_allow_additions = ?,
                 show_color_dropdown = ?,
-                show_year_input = ?
+                show_year_input = ?,
+                show_database_dropdown = ?
             WHERE database_id = ?
             "#,
         )
@@ -137,6 +142,7 @@ impl InventoryOptions {
         ) // inventorying_allow_additions
         .bind(self.show_color_dropdown) // show_color_dropdown
         .bind(self.show_year_input) // show_year_input
+        .bind(self.show_department_dropdown)
         .bind(database_id) // database_id
         .execute(&pool)
         .await?;
