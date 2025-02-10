@@ -8,6 +8,7 @@ pub struct InventoryOptions {
     pub inventorying: Option<Inventorying>,
     pub show_year_input: bool,
     pub show_color_dropdown: bool,
+    pub show_department_dropdown: bool,
 }
 #[derive(Serialize, Deserialize)]
 pub struct Inventorying {
