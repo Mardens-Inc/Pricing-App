@@ -32,8 +32,18 @@ mod tests {
 
         // Execute request and verify response
         let resp = test::call_service(&app, req).await;
-        debug!("Prepare response: {:#?}", resp);
-        assert_eq!(resp.status(), 200);
+        let status = resp.status();
+        let body = test::read_body(resp).await.to_vec();
+        let body = body.as_slice();
+        let body = from_utf8(body).unwrap();
+        if status != 200 {
+            error!(
+                "Prepare excel sheet response failed with status: {} and body: {:?}",
+                status, body
+            );
+        }
+        debug!("Prepare excel sheet response body: {}", body);
+        assert_eq!(status, 200);
     }
 
     #[actix_web::test]
@@ -60,8 +70,18 @@ mod tests {
 
         // Execute request and verify response
         let resp = test::call_service(&app, req).await;
-        debug!("Prepare response: {:#?}", resp);
-        assert_eq!(resp.status(), 200);
+        let status = resp.status();
+        let body = test::read_body(resp).await.to_vec();
+        let body = body.as_slice();
+        let body = from_utf8(body).unwrap();
+        if status != 200 {
+            error!(
+                "Prepare CSV sheet response failed with status: {} and body: {:?}",
+                status, body
+            );
+        }
+        debug!("Prepare CSV sheet response body: {}", body);
+        assert_eq!(status, 200);
     }
 
     #[actix_web::test]
@@ -87,13 +107,23 @@ mod tests {
             .to_request();
 
         let upload_resp = test::call_service(&app, upload_req).await;
-        debug!("Upload response: {:#?}", upload_resp);
-        assert_eq!(upload_resp.status(), 200);
+        let upload_status = upload_resp.status();
+        let upload_body = test::read_body(upload_resp).await.to_vec();
+        let upload_body = upload_body.as_slice();
+        let upload_body_str = from_utf8(upload_body).unwrap();
+        if upload_status != 200 {
+            error!(
+                "Upload response failed with status: {} and body: {:?}",
+                upload_status, upload_body_str
+            );
+        }
+        debug!("Upload response body: {}", upload_body_str);
+        assert_eq!(upload_status, 200);
 
         // Extract identifier from response
-        let body: Value = test::read_body_json(upload_resp).await;
-        debug!("Body: {:#?}", body);
+        let body: Value = serde_json::from_str(upload_body_str).unwrap();
         let identifier = body["identifier"].as_str().unwrap();
+        debug!("Identifier: {}", identifier);
 
         // Test get_sheets endpoint
         let req = test::TestRequest::get()
@@ -101,11 +131,21 @@ mod tests {
             .to_request();
 
         let resp = test::call_service(&app, req).await;
-        debug!("Get sheets response: {:#?}", resp);
-        assert_eq!(resp.status(), 200);
+        let status = resp.status();
+        let body = test::read_body(resp).await.to_vec();
+        let body = body.as_slice();
+        let body = from_utf8(body).unwrap();
+        if status != 200 {
+            error!(
+                "Get sheets response failed with status: {} and body: {:?}",
+                status, body
+            );
+        }
+        debug!("Get sheets response body: {}", body);
+        assert_eq!(status, 200);
 
         // Verify response contains sheet names
-        let body: Value = test::read_body_json(resp).await;
+        let body: Value = serde_json::from_str(body).unwrap();
         debug!("Sheets: {:#?}", body);
         assert!(!body.as_array().unwrap().is_empty());
     }
@@ -133,11 +173,21 @@ mod tests {
             .to_request();
 
         let upload_resp = test::call_service(&app, upload_req).await;
-        debug!("Upload response: {:#?}", upload_resp);
-        assert_eq!(upload_resp.status(), 200);
+        let upload_status = upload_resp.status();
+        let upload_body = test::read_body(upload_resp).await.to_vec();
+        let upload_body = upload_body.as_slice();
+        let upload_body_str = from_utf8(upload_body).unwrap();
+        if upload_status != 200 {
+            error!(
+                "Upload response failed with status: {} and body: {:?}",
+                upload_status, upload_body_str
+            );
+        }
+        debug!("Upload response body: {}", upload_body_str);
+        assert_eq!(upload_status, 200);
 
         // Extract identifier from response
-        let body: Value = test::read_body_json(upload_resp).await;
+        let body: Value = serde_json::from_str(upload_body_str).unwrap();
         let identifier = body["identifier"].as_str().unwrap();
         debug!("Identifier: {}", identifier);
 
@@ -147,7 +197,20 @@ mod tests {
             .to_request();
 
         let sheets_resp = test::call_service(&app, sheets_req).await;
-        let sheets: Value = test::read_body_json(sheets_resp).await;
+        let sheets_status = sheets_resp.status();
+        let sheets_body = test::read_body(sheets_resp).await.to_vec();
+        let sheets_body = sheets_body.as_slice();
+        let sheets_body_str = from_utf8(sheets_body).unwrap();
+        if sheets_status != 200 {
+            error!(
+                "Sheets response failed with status: {} and body: {:?}",
+                sheets_status, sheets_body_str
+            );
+        }
+        debug!("Sheets response body: {}", sheets_body_str);
+        assert_eq!(sheets_status, 200);
+
+        let sheets: Value = serde_json::from_str(sheets_body_str).unwrap();
         debug!("Sheets: {:#?}", sheets);
         let sheet_name = sheets[0].as_str().unwrap();
 
@@ -161,11 +224,21 @@ mod tests {
             .to_request();
 
         let resp = test::call_service(&app, req).await;
-        debug!("Get headers response: {:#?}", resp);
-        assert_eq!(resp.status(), 200);
+        let status = resp.status();
+        let body = test::read_body(resp).await.to_vec();
+        let body = body.as_slice();
+        let body = from_utf8(body).unwrap();
+        if status != 200 {
+            error!(
+                "Get column headers response failed with status: {} and body: {:?}",
+                status, body
+            );
+        }
+        debug!("Get column headers response body: {}", body);
+        assert_eq!(status, 200);
 
         // Verify response contains headers
-        let body: Value = test::read_body_json(resp).await;
+        let body: Value = serde_json::from_str(body).unwrap();
         debug!("Headers: {:#?}", body);
         assert!(!body.as_array().unwrap().is_empty());
     }
@@ -193,18 +266,28 @@ mod tests {
             .to_request();
 
         let upload_resp = test::call_service(&app, upload_req).await;
-        debug!("Upload response: {:#?}", upload_resp);
-        assert_eq!(upload_resp.status(), 200);
+        let upload_status = upload_resp.status();
+        let upload_body = test::read_body(upload_resp).await.to_vec();
+        let upload_body = upload_body.as_slice();
+        let upload_body_str = from_utf8(upload_body).unwrap();
+        if upload_status != 200 {
+            error!(
+                "Upload response failed with status: {} and body: {:?}",
+                upload_status, upload_body_str
+            );
+        }
+        debug!("Upload response body: {}", upload_body_str);
+        assert_eq!(upload_status, 200);
 
         // Extract identifier from response
-        let body: Value = test::read_body_json(upload_resp).await;
+        let body: Value = serde_json::from_str(upload_body_str).unwrap();
         let identifier = body["identifier"].as_str().unwrap();
 
-        // Test find_duplicate_rows endpoint
         let req = test::TestRequest::get()
             .uri(&format!(
-                "/spreadsheet/{}/2904%20Inventory/duplicates?columns=UPC%20Nbr,Description",
-                identifier
+                "/spreadsheet/{}/2904%20Inventory/duplicates?columns={}",
+                identifier,
+                urlencoding::encode("UPC Nbr,Description"),
             ))
             .to_request();
 
@@ -219,11 +302,14 @@ mod tests {
                 status, body
             );
         }
+        debug!("Find duplicates response body: {}", body);
         assert_eq!(status, 200);
 
         // Verify response structure
         let body: Value = serde_json::from_str(body).unwrap();
-        debug!("Body: {:#?}", body);
-        assert!(body.is_array());
+        assert!(body["count"].is_u64());
+        assert_eq!(body["count"].as_u64().unwrap(), 70);
+        assert!(body["rows"].is_array());
+        assert!(body["row_indexes"].is_array());
     }
 }
