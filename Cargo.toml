@@ -49,6 +49,7 @@ thiserror = "2.0.11"
 vite-actix = { git = "https://github.com/Drew-Chase/vite-actix.git" }
 regex = { version = "1.11.1", features = ["logging"] }
 uuid = { version = "1.13.1", features = ["fast-rng", "serde", "v4"] }
+serde_with = "3.12.0"
 
 
 [dev-dependencies]
