@@ -1,6 +1,8 @@
+use actix_web::error::HttpError;
 use actix_web::http::header::ToStrError;
 use actix_web::http::StatusCode;
 use actix_web::{HttpResponse, ResponseError};
+use anyhow::anyhow;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -44,6 +46,26 @@ impl From<ToStrError> for Error {
 impl From<std::io::Error> for Error {
     fn from(err: std::io::Error) -> Self {
         Error::Anyhow(anyhow::Error::new(err))
+    }
+}
+
+impl From<sqlx::Error> for Error {
+    fn from(err: sqlx::Error) -> Self {
+        Error::Anyhow(anyhow::Error::new(err))
+    }
+}
+impl From<HttpError> for Error {
+    fn from(err: HttpError) -> Self {
+        Error::Anyhow(anyhow::Error::new(err))
+    }
+}
+
+impl From<HttpResponse> for Error {
+    fn from(err: HttpResponse) -> Self {
+        Error::Anyhow(anyhow!(
+            "HTTP response error: {}",
+            err.status().canonical_reason().unwrap_or("")
+        ))
     }
 }
 
