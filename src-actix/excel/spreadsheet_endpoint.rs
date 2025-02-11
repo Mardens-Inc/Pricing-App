@@ -1,8 +1,12 @@
 use crate::constants::UPLOAD_FOLDER;
 use crate::http_error::Result;
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
+use anyhow::anyhow;
 use log::*;
+use serde_derive::Deserialize;
 use serde_json::json;
+use serde_with::serde_as;
+use serde_with::{formats::CommaSeparator, StringWithSeparator};
 use std::io::Write;
 use std::path::Path;
 
@@ -53,15 +57,26 @@ pub async fn get_column_headers(
     Ok(HttpResponse::Ok().json(json!(headers)))
 }
 
+#[serde_as]
+#[derive(Deserialize)]
+struct FindDuplicateRowsQuery {
+    #[serde_as(as = "Option<StringWithSeparator::<CommaSeparator, String>>")]
+    columns: Option<Vec<String>>,
+}
+
 #[get("/{identifier}/{sheet_name}/duplicates")]
 pub async fn find_duplicate_rows(
     path_params: web::Path<(String, String)>,
-    columns: web::Query<String>,
+    columns: web::Query<FindDuplicateRowsQuery>,
 ) -> Result<impl Responder> {
     let (identifier, sheet_name) = path_params.into_inner();
-    let columns = columns.into_inner().split(',').map(String::from).collect();
+    let columns = columns.into_inner().columns;
     let path = Path::new(UPLOAD_FOLDER).join(&identifier);
-    let duplicates = crate::excel::find_duplicate_rows(path, &sheet_name, columns)?;
+    let duplicates =
+        crate::excel::find_duplicate_rows(path, &sheet_name, columns).map_err(|e| {
+            error!("Error finding duplicate rows: {}", e);
+            anyhow!("Error finding duplicate rows: {}", e)
+        })?;
     Ok(HttpResponse::Ok().json(json!(duplicates)))
 }
 
