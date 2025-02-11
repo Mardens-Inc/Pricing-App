@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Test Prepare Excel Spreadsheets" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="Tests">
+  <configuration default="false" name="Run All Tests" type="CargoCommandRunConfiguration" factoryName="Cargo Command" folderName="Tests">
     <option name="buildProfileId" value="test" />
-    <option name="command" value="test prepare_excel_sheet" />
+    <option name="command" value="test" />
     <option name="workingDirectory" value="file://$PROJECT_DIR$" />
     <envs />
     <option name="emulateTerminal" value="true" />
