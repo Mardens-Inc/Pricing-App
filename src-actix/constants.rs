@@ -2,6 +2,7 @@ pub static DEBUG: bool = cfg!(debug_assertions);
 pub const PORT: u16 = 1421;
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const UPLOAD_FOLDER: &str = "uploads";
+pub const ICONS_FOLDER: &str = "icons";
 
 /// Creates necessary asset directories for the application
 ///
@@ -20,6 +21,7 @@ pub const UPLOAD_FOLDER: &str = "uploads";
 /// - Other filesystem-related errors occur
 pub fn initialize_asset_directories() -> anyhow::Result<()> {
     std::fs::create_dir_all(UPLOAD_FOLDER)?;
+    std::fs::create_dir_all(ICONS_FOLDER)?;
 
     Ok(())
 }
