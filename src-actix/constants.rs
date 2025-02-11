@@ -1,3 +1,5 @@
+use std::path::Path;
+
 pub static DEBUG: bool = cfg!(debug_assertions);
 pub const PORT: u16 = 1421;
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -20,6 +22,12 @@ pub const ICONS_FOLDER: &str = "icons";
 /// - The path already exists but is not a directory
 /// - Other filesystem-related errors occur
 pub fn initialize_asset_directories() -> anyhow::Result<()> {
+    if DEBUG {
+        std::fs::create_dir_all("target/dev-env")?;
+        std::env::set_current_dir(Path::new("target/dev-env"))
+            .expect("Failed to set current directory");
+    }
+
     std::fs::create_dir_all(UPLOAD_FOLDER)?;
     std::fs::create_dir_all(ICONS_FOLDER)?;
 

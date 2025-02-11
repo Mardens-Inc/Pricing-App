@@ -4,14 +4,11 @@ mod tests {
     use log::{error, info};
     use pricing_app_lib::constants::initialize_asset_directories;
     use pricing_app_lib::icons_endpoint::configure;
-    use std::path::Path;
 
     #[actix_web::test]
     async fn test_get_missing_icon() {
         std::env::set_var("RUST_LOG", "debug");
         _ = env_logger::try_init();
-        std::env::set_current_dir(Path::new("target/dev-env"))
-            .expect("Failed to set current directory");
         initialize_asset_directories().unwrap();
         let app = test::init_service(
             App::new().configure(|cfg| configure(cfg.service(web::scope("/api")))),
@@ -28,8 +25,6 @@ mod tests {
     async fn test_upload_icon() {
         std::env::set_var("RUST_LOG", "debug");
         _ = env_logger::try_init();
-        std::env::set_current_dir(Path::new("target/dev-env"))
-            .expect("Failed to set current directory");
         initialize_asset_directories().unwrap();
         let app = test::init_service(
             App::new().configure(|cfg| configure(cfg.service(web::scope("/api")))),
@@ -61,8 +56,6 @@ mod tests {
     async fn test_upload_no_overwrite_icon() {
         std::env::set_var("RUST_LOG", "debug");
         _ = env_logger::try_init();
-        std::env::set_current_dir(Path::new("target/dev-env"))
-            .expect("Failed to set current directory");
         initialize_asset_directories().unwrap();
         let app = test::init_service(
             App::new().configure(|cfg| configure(cfg.service(web::scope("/api")))),
@@ -94,8 +87,6 @@ mod tests {
     async fn test_upload_missing_filename_icon() {
         std::env::set_var("RUST_LOG", "debug");
         _ = env_logger::try_init();
-        std::env::set_current_dir(Path::new("target/dev-env"))
-            .expect("Failed to set current directory");
         initialize_asset_directories().unwrap();
         let app = test::init_service(
             App::new().configure(|cfg| configure(cfg.service(web::scope("/api")))),
@@ -124,8 +115,6 @@ mod tests {
     async fn test_get_icons() {
         std::env::set_var("RUST_LOG", "debug");
         _ = env_logger::try_init();
-        std::env::set_current_dir(Path::new("target/dev-env"))
-            .expect("Failed to set current directory");
         initialize_asset_directories().unwrap();
 
         let app = test::init_service(
@@ -161,8 +150,6 @@ mod tests {
     async fn test_get_icon() {
         std::env::set_var("RUST_LOG", "debug");
         _ = env_logger::try_init();
-        std::env::set_current_dir(Path::new("target/dev-env"))
-            .expect("Failed to set current directory");
         initialize_asset_directories().unwrap();
         let app = test::init_service(
             App::new().configure(|cfg| configure(cfg.service(web::scope("/api")))),
@@ -178,7 +165,7 @@ mod tests {
             .insert_header(("content-disposition", "attachment; filename=test_cat.jpg"))
             .to_request();
         _ = test::call_service(&app, req).await;
-        
+
         let req = test::TestRequest::get()
             .uri("/icons/test_cat.jpg")
             .to_request();
