@@ -5,8 +5,8 @@
 // -------------
 use vite_actix::start_vite_server;
 pub mod data_database_connection;
-mod icons_endpoint;
-mod server_information_endpoint;
+pub mod icons_endpoint;
+pub mod server_information_endpoint;
 
 // Inventory Modules
 #[path = "inventory/inventory_data.rs"]
@@ -14,7 +14,7 @@ pub mod inventory_data;
 #[path = "inventory/inventory_db.rs"]
 pub mod inventory_db;
 #[path = "inventory/inventory_endpoint.rs"]
-mod inventory_endpoint;
+pub mod inventory_endpoint;
 
 // Inventory Column Modules
 #[path = "inventory/columns/columns_data.rs"]
@@ -22,7 +22,7 @@ pub mod columns_data;
 #[path = "inventory/columns/columns_db.rs"]
 pub mod columns_db;
 #[path = "inventory/columns/columns_endpoint.rs"]
-mod columns_endpoint;
+pub mod columns_endpoint;
 
 // Inventory List Modules
 #[path = "list/list_data.rs"]
@@ -30,7 +30,7 @@ pub mod list_data;
 #[path = "list/list_db.rs"]
 pub mod list_db;
 #[path = "list/list_endpoint.rs"]
-mod list_endpoint;
+pub mod list_endpoint;
 mod mysql_row_wrapper;
 
 // Inventory Options Modules
