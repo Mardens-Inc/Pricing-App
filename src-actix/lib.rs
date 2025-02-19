@@ -67,6 +67,9 @@ pub async fn run() -> Result<()> {
     // Set the logging level and initialize the logger
     std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
+    
+    // This will create the needed asset directories.
+    initialize_asset_directories()?;
 
     // Fetch database connection data
     let data = DatabaseConnectionData::get().await?;
@@ -79,8 +82,6 @@ pub async fn run() -> Result<()> {
 
     let connection_data_mutex = web::Data::new(std::sync::Arc::new(data));
 
-    // This will create the needed asset directories.
-    initialize_asset_directories()?;
 
     let server = HttpServer::new(move || {
         App::new()
