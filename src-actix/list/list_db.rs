@@ -55,7 +55,7 @@ pub async fn single(
 pub async fn insert(
     location: &LocationListItem,
     data: &DatabaseConnectionData,
-) -> Result<(), Box<dyn Error>> {
+) -> Result<() , Box<dyn Error>> {
     let pool = create_pool(data).await?;
     sqlx::query(
         r#"
