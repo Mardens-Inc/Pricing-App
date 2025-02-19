@@ -1,10 +1,11 @@
-import ColumnItem from "./ColumnItem.tsx";
 import {useEffect, useState} from "react";
 import {closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors} from "@dnd-kit/core";
 import {arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy} from "@dnd-kit/sortable";
 import {enforceAttributesSingleSelectionMode} from "./ColumnAttributes.tsx";
 import {Button, Tooltip} from "@heroui/react";
 import {Icon} from "@iconify/react";
+import Column from "../../ts/data/Column.ts";
+import ColumnItem from "./ColumnItem.tsx";
 
 export interface IndexedColumnItem extends Column
 {
