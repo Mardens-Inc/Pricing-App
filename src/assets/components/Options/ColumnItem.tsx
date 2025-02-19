@@ -4,6 +4,7 @@ import ColumnAttributes from "./ColumnAttributes.tsx";
 import $ from "jquery";
 import {IndexedColumnItem} from "./ColumnsList.tsx";
 import {Button, cn, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Tooltip} from "@heroui/react";
+import {Icon} from "@iconify/react";
 
 interface ColumnItemProps extends React.HTMLAttributes<HTMLDivElement>
 {
@@ -50,8 +51,16 @@ export default function ColumnItem(props: ColumnItemProps)
     }, [isEditingDisplayName]);
 
     return (
-        <div ref={setNodeRef} style={style} {...attributes} {...listeners}
-             className={cn("rounded-md h-16 bg-foreground/10 backdrop-blur-lg p-4 flex flex-row items-center aria-[pressed]:z-10", props.className)}
+        <div
+            ref={setNodeRef} style={style}
+            {...attributes}
+            {...listeners}
+             className={cn(
+                 "rounded-md h-16 bg-foreground/10 backdrop-blur-lg p-4 flex flex-row items-center aria-[pressed]:z-10",
+                 "data-[visible=false]:!opacity-25",
+                 props.className
+             )}
+            data-visible={column.visible}
         >
             {isEditingDisplayName ? (
                 <Input
