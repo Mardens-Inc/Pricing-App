@@ -1,9 +1,9 @@
-use crate::data_database_connection::{create_pool, DatabaseConnectionData};
 use crate::mysql_row_wrapper::MySqlRowWrapper;
 use anyhow::Result;
 use csv::WriterBuilder;
+use database_common_lib::database_connection::{create_pool, DatabaseConnectionData};
 use serde_derive::{Deserialize, Serialize};
-use sqlx::{Column, Executor, Row};
+use sqlx::{Column, Executor, MySqlPool, Row};
 
 #[derive(Deserialize)]
 pub struct InventoryFilterOptions {
@@ -101,6 +101,148 @@ pub async fn get_inventory(
     })
 }
 
+
+/// Adds a new record to the specified table.
+///
+/// # Arguments
+///
+/// - `id`: The ID of the table where the record will be added.
+/// - `record`: A JSON object representing the data to insert.
+/// - `data`: The database connection data.
+///
+/// # Returns
+///
+/// A `Result` wrapping the ID of the newly inserted record.
+pub async fn add_record(
+    id: u64,
+    record: &serde_json::Value,
+    data: &DatabaseConnectionData,
+) -> Result<u64> {
+    let pool = create_pool(data).await?;
+
+    // Build the base insert query
+    let mut query = format!("INSERT INTO `{}` ", id);
+    let mut columns = Vec::new();
+    let mut values_placeholders = Vec::new();
+    let mut params = Vec::new();
+
+    // Dynamically construct the columns and values for the insert
+    if let Some(obj) = record.as_object() {
+        for (column, value) in obj {
+            columns.push(format!("`{}`", column));
+            values_placeholders.push("?");
+            if let Some(str_value) = value.as_str() {
+                params.push(str_value.to_string());
+            } else {
+                params.push(value.to_string());
+            }
+        }
+    }
+
+    // Combine the query parts
+    query.push_str(&format!(
+        "({}) VALUES ({})",
+        columns.join(", "),
+        values_placeholders.join(", ")
+    ));
+
+    // Prepare the query
+    let mut sql_query = sqlx::query(&query);
+
+    // Bind all parameters dynamically
+    for param in params {
+        sql_query = sql_query.bind(param);
+    }
+
+    // Execute the query
+    let result = sql_query.execute(&pool).await?;
+
+    // Return the ID of the newly inserted record
+    Ok(result.last_insert_id())
+}
+
+
+pub async fn get_record(
+    id: u64,
+    record_id: u64,
+    data: &DatabaseConnectionData,
+) -> Result<Option<serde_json::Value>> {
+    let pool = create_pool(data).await?;
+
+    // Prepare the query to fetch a single record by its ID
+    let query = format!("SELECT * FROM `{}` WHERE id = ?", id);
+
+    // Execute the query and fetch the record
+    let row = sqlx::query(&query)
+        .bind(record_id)
+        .fetch_optional(&pool)
+        .await?;
+
+    // If a record is found, transform it into a JSON value and return
+    if let Some(row) = row {
+        let record: serde_json::Value = serde_json::json!(MySqlRowWrapper(row));
+        Ok(Some(record))
+    } else {
+        // If no record is found, return None
+        Ok(None)
+    }
+}
+
+
+pub async fn update_record(
+    id: u64,
+    record_id: u64,
+    updates: &serde_json::Value,
+    data: &DatabaseConnectionData,
+) -> Result<()> {
+    let pool = create_pool(data).await?;
+
+    // Build the base update query
+    let mut query = format!("UPDATE `{}` SET ", id);
+    let mut params = Vec::new();
+
+    // Dynamically construct the columns and their values for the update
+    if let Some(obj) = updates.as_object() {
+        for (column, value) in obj {
+            query.push_str(&format!("`{}` = ?, ", column));
+            if let Some(str_value) = value.as_str() {
+                params.push(str_value.to_string());
+            } else {
+                params.push(value.to_string());
+            }
+        }
+    }
+
+    // Remove the last comma and space, and add the WHERE clause
+    query.pop();
+    query.pop();
+    query.push_str(" WHERE id = ?");
+    params.push(record_id.to_string());
+
+    // Prepare the query
+    let mut sql_query = sqlx::query(&query);
+
+    // Bind all parameters dynamically
+    for param in params {
+        sql_query = sql_query.bind(param);
+    }
+
+    // Execute the query
+    sql_query.execute(&pool).await?;
+    Ok(())
+}
+
+pub async fn delete(id: u64, data: &DatabaseConnectionData) -> Result<()> {
+    let pool = create_pool(data).await?;
+    delete_with_connection(id, &pool).await
+}
+
+pub async fn delete_with_connection(id: u64, pool: &MySqlPool) -> Result<()> {
+    pool.execute(format!("DROP TABLE FROM {}", id).as_str())
+        .await?;
+    Ok(())
+}
+
 pub async fn export_csv(id: u64, data: &DatabaseConnectionData) -> Result<String> {
     let pool = create_pool(data).await?;
 
@@ -109,7 +251,7 @@ pub async fn export_csv(id: u64, data: &DatabaseConnectionData) -> Result<String
 
     // Query the database and fetch all rows
     let rows = pool
-        .fetch_all(format!("SELECT * FROM {}", id).as_str())
+        .fetch_all(format!("SELECT * FROM `{}`", id).as_str())
         .await?;
 
     if let Some(first_row) = rows.first() {
