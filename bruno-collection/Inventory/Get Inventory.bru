@@ -5,22 +5,22 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/inventory/:id/?limit=10&offset=0&sort_by=last_modified_date&sort_order=DESC&query=631444011170
+  url: {{baseUrl}}/inventory/:id/?limit=1
   body: none
   auth: none
 }
 
 params:query {
-  limit: 10
-  offset: 0
-  sort_by: last_modified_date
-  sort_order: DESC
-  query: 631444011170
+  limit: 1
+  ~offset: 0
+  ~sort_by: last_modified_date
+  ~sort_order: DESC
+  ~query: 631444011170
   ~query_columns: Material,Description
 }
 
 params:path {
-  id: N9KWBgy2xp6Gkebv
+  id: aXJd0BwRJwG8z1WQ
 }
 
 body:xml {
