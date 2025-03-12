@@ -145,13 +145,13 @@ export default function RegisterForm({onClose}: { onClose: () => void })
 
             </ModalBody>
             <ModalFooter>
+                <Button color="primary" onPress={register} isDisabled={!isValid} radius={"full"}>
+                    Register
+                </Button>
                 <Button color="danger" variant="flat" onPress={onClose} radius={"full"}>
                     Close
                 </Button>
 
-                <Button color="primary" onPress={register} isDisabled={!isValid} radius={"full"}>
-                    Register
-                </Button>
             </ModalFooter>
         </>
     );
