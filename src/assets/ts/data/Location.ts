@@ -164,7 +164,7 @@ export default class Location
                 url: `/api/inventory/${this.id}/`,
                 method: "POST",
                 contentType: "application/json",
-                data: JSON.stringify([record])
+                data: JSON.stringify(record)
             });
 
             // Return the first ID from the inserted IDs array
@@ -189,6 +189,18 @@ export default class Location
         } catch (error)
         {
             console.error("Failed to update record", error);
+            return false;
+        }
+    }
+
+    async deleteRecord(recordId: string): Promise<boolean> {
+        try {
+            await $.ajax(`/api/inventory/${this.id}/${recordId}`, {
+                method: "DELETE"
+            });
+            return true;
+        } catch (e) {
+            console.error("Failed to delete record", e);
             return false;
         }
     }
