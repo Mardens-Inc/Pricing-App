@@ -372,7 +372,9 @@ export default class DatabaseList {
                     if (printForm["show-year-dropdown"] && getSelectedYear() !== "") {
                         url.searchParams.append("year", getSelectedYear());
                     }
-                    if (printForm.department !== undefined && printForm.department !== null && printForm.department !== "") {
+                    if (dept !== null && dept !== undefined && dept !== "") {
+                        url.searchParams.append("department", dept);
+                    } else if (printForm.department !== undefined && printForm.department !== null && printForm.department !== "") {
                         url.searchParams.append("department", printForm.department.id);
                     }
                     if (printForm.color !== undefined && printForm.color !== null && printForm.color !== "") {
@@ -380,9 +382,6 @@ export default class DatabaseList {
                     } else if (printForm["show-color-dropdown"] && getSelectedColor() !== "") {
                         url.searchParams.append("color", getSelectedColor());
 
-                    }
-                    if (dept !== null) {
-                        url.searchParams.append("department", dept);
                     }
 
                     if (printForm["show-price-label"]) {
@@ -399,7 +398,7 @@ export default class DatabaseList {
 
                     const departmentDropdown = tr.find(`#department-dropdown-button-${item.id}`);
                     const deptartmentColumn = $(`#${item.id} td.department`);
-                    if (dept !== null || (deptartmentColumn && departmentDropdown.length === 0)) {
+                    if ((dept !== null || (deptartmentColumn && departmentDropdown.length === 0)) && url.searchParams.has("department") === false) {
                         dept = deptartmentColumn.text();
                         console.log(deptartmentColumn.text())
                         url.searchParams.append("department", dept);
@@ -407,7 +406,7 @@ export default class DatabaseList {
 
                     if (departmentDropdown && departmentDropdown.length > 0) {
                         const departmentId = departmentDropdown.attr('data-dept');
-                        if (departmentId !== undefined && departmentId !== null)
+                        if (departmentId !== undefined && departmentId !== null && url.searchParams.has("department") === false)
                             url.searchParams.append("department", departmentId);
                     }
 
@@ -415,8 +414,7 @@ export default class DatabaseList {
                 });
 
                 console.log(this.items.length)
-                if(this.items.length === 1 && localStorage.getItem(`autoPrint-${this.id}`) === "true")
-                {
+                if (this.items.length === 1 && localStorage.getItem(`autoPrint-${this.id}`) === "true") {
                     printButton.click();
                 }
             }
