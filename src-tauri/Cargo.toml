@@ -1,6 +1,6 @@
 [package]
 name = "pricing-app"
-version = "0.2.7"
+version = "0.2.9"
 description = "A pricing and inventory app for Mardens Inc"
 authors = ["Drew Chase"]
 edition = "2021"
@@ -15,10 +15,7 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = [ "devtools"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-printers = "2.0.0"
-winapi = { version = "0.3.9", features = ["ntdef", "winspool"] }
 reqwest = "0.12.2"
-zip = "0.6.6"
 tauri-plugin-shell = "2"
 
 [features]
