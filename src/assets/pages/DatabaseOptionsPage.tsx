@@ -117,7 +117,7 @@ export default function DatabaseOptionsPage() {
             </div>
             <div className={"flex flex-row items-center justify-end gap-2 fixed bottom-0 h-20 w-full pr-4 z-10 backdrop-blur-lg backdrop-saturate-150 bg-background/70"}>
                 <Button radius={"full"} color={"primary"} onPress={handleSave}>Save</Button>
-                <Button radius={"full"} as={Link} href={`/view/${id}`}>Cancel</Button>
+                <Button radius={"full"} as={Link} href={`/inv/${id}`}>Cancel</Button>
             </div>
         </div>
     );
