@@ -161,6 +161,7 @@ export default function InventoryTable(props: InventoryTableProps)
 
                             return (
                                 <TableCell
+                                    id={`${row.id}-${column.name.replace(/\s/g, "").toLowerCase()}`}
                                     key={column.name}
                                     {...column.attributes.reduce(
                                         (acc, attr) => ({...acc, [`data-${attr}`]: true}),
@@ -179,12 +180,26 @@ export default function InventoryTable(props: InventoryTableProps)
                                 className={
                                     "h-12 w-12 aspect-square p-0 min-w-0 text-[1rem] my-auto"
                                 }
-                                onPress={() =>
+                                onPress={async () =>
                                 {
-                                    edit(row, (item) =>
+                                    const record = await location?.single(row.id);
+                                    if (record)
                                     {
-                                        console.log(item);
-                                    });
+                                        edit(record, (item) =>
+                                        {
+                                            for (const c of Object.keys(row) as (keyof InventoryRecord)[])
+                                            {
+                                                const column = c as string;
+                                                const new_record = item[column];
+                                                const old_record = row[column];
+                                                const columnElement = $(`#${row.id}-${column.replace(/\s/g, "").toLowerCase()}`);
+                                                if (columnElement.length > 0 && new_record !== old_record)
+                                                {
+                                                    columnElement.html(`<span>${new_record}</span>`);
+                                                }
+                                            }
+                                        });
+                                    }
                                 }}
                             >
                                 <Icon icon={"mage:edit-fill"}/>

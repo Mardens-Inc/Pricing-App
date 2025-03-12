@@ -155,6 +155,81 @@ export default class Location
             throw error;
         }
     }
+
+    async addRecord(record: InventoryRecord): Promise<number | null>
+    {
+        try
+        {
+            const result = await $.ajax({
+                url: `/api/inventory/${this.id}/`,
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify([record])
+            });
+
+            // Return the first ID from the inserted IDs array
+            return result.ids && result.ids.length > 0 ? result.ids[0] : null;
+        } catch (e)
+        {
+            console.error("Failed to add record", e);
+            return null;
+        }
+    }
+
+    async editRecord(recordId: string, updates: Record<string, any>): Promise<boolean>
+    {
+        try
+        {
+            await $.ajax(`/api/inventory/${this.id}/${recordId}`, {
+                method: "PATCH",
+                contentType: "application/json",
+                data: JSON.stringify(updates)
+            });
+            return true;
+        } catch (error)
+        {
+            console.error("Failed to update record", error);
+            return false;
+        }
+    }
+
+    async single(recordId: string): Promise<InventoryRecord | undefined>
+    {
+        try
+        {
+            return await $.get(`/api/inventory/${this.id}/${recordId}`);
+        } catch (e)
+        {
+            console.error("Failed to fetch record", e);
+        }
+        return undefined;
+    }
+
+    static async export(id: string)
+    {
+        const url = `/api/inventory/${id}/download`;
+        try
+        {
+            const response = await fetch(url, {
+                method: "GET"
+            });
+
+            if (!response.ok) throw new Error(`Failed to export data: ${response.status} - ${response.statusText}`);
+
+            const blob = await response.blob();
+            const downloadUrl = URL.createObjectURL(blob);
+
+            const anchor = document.createElement("a");
+            anchor.href = downloadUrl;
+            anchor.download = `inventory_${id}.csv`;
+            anchor.click();
+
+            URL.revokeObjectURL(downloadUrl);
+        } catch (error)
+        {
+            console.error("Failed to export inventory data", error);
+        }
+    }
 }
 
 function optionsToUrl(id: string, options: RecordOptions | RecordSearchOptions): URL
