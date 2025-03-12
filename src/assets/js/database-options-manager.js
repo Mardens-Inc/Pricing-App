@@ -818,7 +818,8 @@ async function buildPrintSection(html) {
     const labels = ["Catalog Site Price", "Internet Site Price", "Office Store", "Big Box Price",
         "Drug Store Price", "Book Store Price", "Holiday Stock", "Supply Store Price",
         "Rug Store Price", "Garden Center Price", "Club Price", "Gift Shop Price",
-        "Sporting Goods Store"];
+        "Sporting Goods Store",
+        "Pet Shop Retail"];
 
 
     const stickers = [{width: 1, height: 0.75, name: "Colored"},
