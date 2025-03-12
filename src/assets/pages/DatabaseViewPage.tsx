@@ -2,15 +2,16 @@ import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {useDatabaseView} from "../providers/DatabaseViewProvider.tsx";
 import {setTitle} from "../../main.tsx";
-import {Button, Image, Spinner, Tooltip} from "@heroui/react";
+import {Image, Spinner, Tooltip} from "@heroui/react";
 import InventoryTable from "../components/View/InventoryTable.tsx";
 import PrintLabelExtraOptions from "../components/View/PrintLabelExtraOptions.tsx";
 import {useAuth} from "../providers/AuthProvider.tsx";
 import Location from "../ts/data/Location.ts";
 import Options from "../ts/data/Options.ts";
 import IconData from "../ts/data/Icon.ts";
-import {Icon} from "@iconify/react";
 import {useNewRecordModal} from "../providers/NewRecordModalProvider.tsx";
+import ExpandableButton from "../components/Extends/ExpandableButton.tsx";
+import {Icon} from "@iconify/react";
 
 export default function DatabaseViewPage()
 {
@@ -22,7 +23,6 @@ export default function DatabaseViewPage()
     const databaseView = useDatabaseView();
     const {isLoggedIn} = useAuth();
     const {create} = useNewRecordModal();
-
 
     if (!id)
     {
@@ -75,15 +75,20 @@ export default function DatabaseViewPage()
                                     />
                                     {isLoggedIn && options?.inventorying?.allowAdditions && (
                                         <Tooltip content={"Add record"}>
-                                            <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem] my-auto"} onPress={() =>
-                                            {
-                                                create(record =>
+                                            <ExpandableButton
+                                                radius={"full"}
+                                                className={"h-12 my-auto"}
+                                                startContent={<Icon icon="mage:plus"/>}
+                                                onPress={() =>
                                                 {
-                                                    console.log(record);
-                                                });
-                                            }}>
-                                                <Icon icon="mage:plus"/>
-                                            </Button>
+                                                    create(record =>
+                                                    {
+                                                        console.log(record);
+                                                    });
+                                                }}
+                                            >
+                                                New Record
+                                            </ExpandableButton>
                                         </Tooltip>
                                     )}
                                 </div>

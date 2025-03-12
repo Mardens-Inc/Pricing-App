@@ -1,4 +1,4 @@
-import {Button, Link, NavbarContent, NavbarItem, Tooltip} from "@heroui/react";
+import {Button, Link, NavbarContent, NavbarItem} from "@heroui/react";
 import LoginModal from "../LoginModal/LoginModal.tsx";
 import AlertModal from "../AlertModal.tsx";
 import {useAuth} from "../../providers/AuthProvider.tsx";
@@ -7,6 +7,7 @@ import {applyTheme, getCurrentTheme, Theme} from "../../ts/Theme.ts";
 import {useDatabaseView} from "../../providers/DatabaseViewProvider.tsx";
 import {Icon} from "@iconify/react";
 import Location from "../../ts/data/Location.ts";
+import ExpandableButton from "../Extends/ExpandableButton.tsx";
 
 export default function GlobalActionsComponent()
 {
@@ -53,65 +54,81 @@ export default function GlobalActionsComponent()
                                 {id != undefined ? (
                                     <>
                                         <NavbarItem>
-                                            <Tooltip content={"Edit database"}>
-                                                <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem]"} as={Link} href={`/inv/${id}/edit`}>
-                                                    <Icon icon="mage:edit-fill"/>
-                                                </Button>
-                                            </Tooltip>
+                                            <ExpandableButton
+                                                radius={"full"}
+                                                className={"h-12"}
+                                                as={Link}
+                                                href={`/inv/${id}/edit`}
+                                                startContent={<Icon icon="mage:edit-fill"/>}
+                                            >
+                                                Edit Database
+                                            </ExpandableButton>
                                         </NavbarItem>
                                         <NavbarItem>
-                                            <Tooltip content={"Export database"}>
-                                                <Button
-                                                    radius={"full"}
-                                                    className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem]"}
-                                                    isLoading={isLoadingExport}
-                                                    onPress={async () =>
-                                                    {
-                                                        setIsLoadingExport(true);
-                                                        await Location.export(id);
-                                                        setIsLoadingExport(false);
-                                                    }}>
-                                                    {!isLoadingExport && (
-                                                        <Icon icon="mage:save-floppy-fill"/>
-                                                    )}
-                                                </Button>
-                                            </Tooltip>
+                                            <ExpandableButton
+                                                radius={"full"}
+                                                className={"h-12"}
+                                                isLoading={isLoadingExport}
+                                                onPress={async () =>
+                                                {
+                                                    setIsLoadingExport(true);
+                                                    await Location.export(id);
+                                                    setIsLoadingExport(false);
+                                                }}
+                                                startContent={<Icon icon="mage:save-floppy-fill"/>}
+                                            >
+                                                Export Database
+                                            </ExpandableButton>
                                         </NavbarItem>
                                     </>
                                 ) : (
                                     <NavbarItem>
-                                        <Tooltip content={"Add new database"}>
-                                            <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem]"} as={Link} href={"/new"}>
-                                                <Icon icon="mage:plus"/>
-                                            </Button>
-                                        </Tooltip>
+                                        <ExpandableButton
+                                            radius={"full"}
+                                            className={"h-12"}
+                                            as={Link}
+                                            href={"/new"}
+                                            startContent={<Icon icon="mage:plus"/>}
+                                        >
+                                            New Database
+                                        </ExpandableButton>
                                     </NavbarItem>
                                 )}
                             </>
                         )}
                         <NavbarItem>
-                            <Tooltip content={"Logout"}>
-                                <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem]"} onPress={() => setIsLogoutAlertOpen(true)}>
-                                    <Icon icon="humbleicons:logout"/>
-                                </Button>
-                            </Tooltip>
+                            <ExpandableButton
+                                radius={"full"}
+                                className={"h-12"}
+                                onPress={() => setIsLogoutAlertOpen(true)}
+                                startContent={<Icon icon="humbleicons:logout"/>}
+                            >
+                                Logout
+                            </ExpandableButton>
                         </NavbarItem>
                     </div>
                 ) : (
                     <NavbarItem>
-                        <Tooltip content={"Login"}>
-                            <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem]"} onPress={() => setIsLoginModalOpen(true)}>
-                                <Icon icon="mage:lock-fill"/>
-                            </Button>
-                        </Tooltip>
+                        <ExpandableButton
+                            radius={"full"}
+                            className={"h-12"}
+                            onPress={() => setIsLoginModalOpen(true)}
+                            startContent={<Icon icon="mage:lock-fill"/>}
+                        >
+                            Login
+                        </ExpandableButton>
                     </NavbarItem>
                 )}
                 <NavbarItem>
-                    <Tooltip content={`Toggle ${darkMode ? "Light" : "Dark"} Mode`}>
-                        <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem]"} onPress={() => setDarkMode(prev => !prev)} color={"primary"}>
-                            <Icon icon={darkMode ? "mage:moon-fill" : "mage:sun-fill"}/>
-                        </Button>
-                    </Tooltip>
+                    <ExpandableButton
+                        radius={"full"}
+                        className={"h-12"}
+                        onPress={() => setDarkMode(prev => !prev)}
+                        startContent={<Icon icon={darkMode ? "mage:moon-fill" : "mage:sun-fill"}/>}
+                        color={"primary"}
+                    >
+                        Toggle {darkMode ? "Light" : "Dark"} Mode
+                    </ExpandableButton>
                 </NavbarItem>
             </NavbarContent>
         </>
