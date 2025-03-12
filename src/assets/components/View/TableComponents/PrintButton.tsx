@@ -16,7 +16,7 @@ export interface PrintButtonProps
 export default function PrintButton(props: PrintButtonProps)
 {
     return (
-        <Tooltip content={"Print"} classNames={{base: "pointer-events-none"}} closeDelay={0}>
+        <Tooltip content={"Print"} classNames={{base: "pointer-events-none"}} shouldCloseOnBlur shouldCloseOnInteractOutside={() => true}>
             <Button id={`print-button-${props.databaseId}-${props.row.id}`} radius={"full"} className={"min-w-0 w-12 h-12"} data-print-form onPress={() =>
             {
                 const rowData = props.columns.map(c => ({value: getKeyValue(props.row, c.name), attributes: c.attributes})) as RowValue[];
