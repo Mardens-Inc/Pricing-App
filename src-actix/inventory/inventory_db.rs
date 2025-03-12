@@ -1,5 +1,5 @@
 use crate::mysql_row_wrapper::MySqlRowWrapper;
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use csv::WriterBuilder;
 use database_common_lib::database_connection::{create_pool, DatabaseConnectionData};
 use serde_derive::{Deserialize, Serialize};
@@ -159,6 +159,24 @@ pub async fn add_record(
 
     // Return the ID of the newly inserted record
     Ok(result.last_insert_id())
+}
+
+pub async fn delete_record(
+    id: u64,
+    record_id: u64,
+    data: &DatabaseConnectionData,
+) -> Result<()> {
+    let pool = create_pool(data).await?;
+
+    // Execute the delete query
+    sqlx::query("DELETE FROM inventory_records WHERE inventory_id = ? AND id = ?")
+        .bind(id)
+        .bind(record_id)
+        .execute(&pool)
+        .await
+        .map_err(|e| anyhow!("Failed to delete record: {}", e))?;
+
+    Ok(())
 }
 
 

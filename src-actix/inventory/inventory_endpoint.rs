@@ -1,12 +1,13 @@
 use crate::inventory_db;
 use crate::inventory_db::{export_csv, update_record};
-use actix_web::{get, head, options, patch, post, web, HttpResponse, Responder};
+use actix_web::{delete, get, head, options, patch, post, web, HttpResponse, Responder};
 use crypto::hashids::decode_single;
 use database_common_lib::database_connection::DatabaseConnectionData;
 use database_common_lib::http_error::Result;
 use serde_json::json;
 use std::ops::Deref;
 use std::sync::Arc;
+use anyhow::anyhow;
 
 #[get("/")]
 pub async fn get_inventory(
@@ -46,25 +47,16 @@ pub async fn get_inventory_options(
 #[post("/")]
 pub async fn insert_record(
     id: web::Path<String>,
-    body: web::Json<Vec<serde_json::Value>>,
+    body: web::Json<serde_json::Value>,
     data: web::Data<Arc<DatabaseConnectionData>>,
 ) -> Result<impl Responder> {
     let data = data.as_ref();
     let data = data.deref();
     let id = decode_single(id.as_ref())?;
+    let body = body.0;
+    inventory_db::add_record(id, &body, data).await?;
 
-    let mut inserted_ids = Vec::new();
-
-    // Process each record in the body
-    for record in body.into_inner() {
-        let record_id = inventory_db::add_record(id, &record, data).await?;
-        inserted_ids.push(record_id);
-    }
-
-    Ok(HttpResponse::Created().json(json!({
-        "success": true,
-        "ids": inserted_ids
-    })))
+    Ok(HttpResponse::Created())
 }
 
 #[post("/upload")]
@@ -124,6 +116,28 @@ pub async fn edit_record(
     Ok(HttpResponse::Ok())
 }
 
+#[delete("/{record}")]
+pub async fn delete_record(
+    path: web::Path<(String, u64)>,
+    data: web::Data<Arc<DatabaseConnectionData>>,
+) -> Result<impl Responder> {
+    let (id_str, record_id) = path.into_inner();
+    let id = id_str.parse::<u64>()
+                   .map_err(|_| anyhow!("Invalid inventory ID format"))?;
+
+    // Check if the record exists before attempting to delete
+    let record = inventory_db::get_record(id, record_id, &data).await?;
+
+    if record.is_none() {
+        return Ok(HttpResponse::NotFound().finish());
+    }
+
+    // Delete the record
+    inventory_db::delete_record(id, record_id, &data).await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/inventory/{id}")
@@ -135,6 +149,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
             .service(download_inventory)
             .service(edit_record)
             .service(get_record)
+            .service(delete_record)
             .default_service(web::to(|| async {
                 // Handle unmatched API endpoints
                 HttpResponse::NotFound().json(json!({"error": "API endpoint not found"}))
