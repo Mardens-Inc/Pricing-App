@@ -6,6 +6,7 @@ import {useEffect, useState} from "react";
 import {applyTheme, getCurrentTheme, Theme} from "../../ts/Theme.ts";
 import {useDatabaseView} from "../../providers/DatabaseViewProvider.tsx";
 import {Icon} from "@iconify/react";
+import Location from "../../ts/data/Location.ts";
 
 export default function GlobalActionsComponent()
 {
@@ -60,12 +61,16 @@ export default function GlobalActionsComponent()
                                         </NavbarItem>
                                         <NavbarItem>
                                             <Tooltip content={"Export database"}>
-                                                <Button radius={"full"} className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem]"} isLoading={isLoadingExport} onPress={async () =>
-                                                {
-                                                    setIsLoadingExport(true);
-                                                    // await DatabaseRecords.export(id);
-                                                    setIsLoadingExport(false);
-                                                }}>
+                                                <Button
+                                                    radius={"full"}
+                                                    className={"h-12 w-12 aspect-square p-0 min-w-0 text-[1rem]"}
+                                                    isLoading={isLoadingExport}
+                                                    onPress={async () =>
+                                                    {
+                                                        setIsLoadingExport(true);
+                                                        await Location.export(id);
+                                                        setIsLoadingExport(false);
+                                                    }}>
                                                     {!isLoadingExport && (
                                                         <Icon icon="mage:save-floppy-fill"/>
                                                     )}
