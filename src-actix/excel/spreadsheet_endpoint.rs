@@ -1,7 +1,7 @@
 use crate::constants::UPLOAD_FOLDER;
-use crate::http_error::Result;
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use anyhow::anyhow;
+use database_common_lib::http_error::Result;
 use log::*;
 use serde_derive::Deserialize;
 use serde_json::json;

@@ -1,8 +1,8 @@
-use crate::data_database_connection::DatabaseConnectionData;
-use crate::http_error::Result;
 use crate::options_data::InventoryOptions;
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
 use crypto::hashids::decode;
+use database_common_lib::database_connection::DatabaseConnectionData;
+use database_common_lib::http_error::Result;
 use log::debug;
 use serde_json::json;
 use std::sync::Arc;
@@ -22,7 +22,7 @@ pub async fn get_options(
 
     debug!("Fetching options for database_id: {}", database_id);
 
-    if let Some(options) = InventoryOptions::get(connection_data, *database_id).await? {
+    if let Some(options) = InventoryOptions::get(*database_id, connection_data).await? {
         Ok(HttpResponse::Ok().json(options))
     } else {
         Ok(HttpResponse::NotFound().json(json!({ "error": "No options found" })))
@@ -45,7 +45,7 @@ pub async fn create_options(
     let options = options.into_inner();
 
     debug!("Inserting new options for database_id: {}", database_id);
-    options.insert(connection_data, *database_id).await?;
+    options.insert(*database_id, connection_data).await?;
 
     Ok(HttpResponse::Created().json(json!({ "success": true })))
 }
@@ -67,7 +67,7 @@ pub async fn update_options(
 
     debug!("Updating options for database_id: {}", database_id);
 
-    options.update(connection_data, *database_id).await?;
+    options.update(*database_id, connection_data).await?;
 
     Ok(HttpResponse::Ok().finish())
 }
@@ -87,7 +87,7 @@ pub async fn delete_options(
 
     debug!("Deleting options for database_id: {}", database_id);
 
-    InventoryOptions::delete(connection_data, *database_id).await?;
+    InventoryOptions::delete(*database_id, connection_data).await?;
 
     Ok(HttpResponse::NoContent().finish())
 }

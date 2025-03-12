@@ -1,6 +1,6 @@
-use crate::data_database_connection::{create_pool, DatabaseConnectionData};
 use crate::print_options_data::PrintForm;
 use anyhow::{anyhow, Context, Result};
+use database_common_lib::database_connection::{create_pool, DatabaseConnectionData};
 use log::{debug, error};
 use sqlx::{Executor, MySqlPool, Row};
 
@@ -88,7 +88,7 @@ pub async fn set(pool: &MySqlPool, database_id: u64, items: &Option<Vec<PrintFor
             }
         }
     } else {
-        delete_all(&pool, database_id).await?;
+        delete_all_with_connection(database_id, &pool).await?;
     }
 
     Ok(())
@@ -218,7 +218,12 @@ async fn clean_unused_items(
     Ok(())
 }
 
-pub async fn delete_all(pool: &MySqlPool, database_id: u64) -> Result<()> {
+pub async fn delete_all(database_id: u64, data: &DatabaseConnectionData) -> Result<()> {
+    let pool = create_pool(data).await?;
+    delete_all_with_connection(database_id, &pool).await
+}
+
+pub async fn delete_all_with_connection(database_id: u64, pool: &MySqlPool) -> Result<()> {
     sqlx::query(r#"delete from inventory_print_options where database_id = ?"#)
         .bind(database_id)
         .execute(pool)

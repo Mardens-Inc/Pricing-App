@@ -1,12 +1,12 @@
 use crate::columns_data::InventoryColumn;
-use crate::data_database_connection::DatabaseConnectionData;
-use crate::http_error::Result;
 use actix_web::{get, patch, web, HttpResponse, Responder};
 use crypto::hashids::decode_single;
 use log::debug;
 use serde_json::json;
 use std::collections::HashMap;
 use std::sync::Arc;
+use database_common_lib::database_connection::DatabaseConnectionData;
+use database_common_lib::http_error::Result;
 
 #[get("/")]
 pub async fn get_columns(

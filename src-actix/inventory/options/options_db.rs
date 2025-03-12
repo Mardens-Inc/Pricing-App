@@ -1,7 +1,7 @@
-use crate::data_database_connection::{create_pool, DatabaseConnectionData};
 use crate::options_data::{InventoryOptions, Inventorying};
 use crate::print_options_db;
-use anyhow::Result;
+use database_common_lib::database_connection::{create_pool, DatabaseConnectionData};
+use database_common_lib::http_error::Result;
 use sqlx::{Executor, MySqlPool, Row};
 
 pub async fn initialize(pool: &MySqlPool) -> Result<()> {
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `inventory_options`
 
 impl InventoryOptions {
     /// Inserts a new `InventoryOptions` record into the database.
-    pub async fn insert(&self, data: &DatabaseConnectionData, database_id: u64) -> Result<u64> {
+    pub async fn insert(&self, database_id: u64, data: &DatabaseConnectionData) -> Result<u64> {
         let pool = create_pool(data).await?;
         let result = sqlx::query(
             r#"
@@ -75,7 +75,7 @@ impl InventoryOptions {
     }
 
     /// Retrieves an `InventoryOptions` record by `database_id`.
-    pub async fn get(data: &DatabaseConnectionData, database_id: u64) -> Result<Option<Self>> {
+    pub async fn get(database_id: u64, data: &DatabaseConnectionData) -> Result<Option<Self>> {
         let pool = create_pool(data).await?;
         if let Some(row) = sqlx::query(
             r#"
@@ -108,7 +108,7 @@ impl InventoryOptions {
     }
 
     /// Updates an existing `InventoryOptions` record identified by `database_id`.
-    pub async fn update(&self, data: &DatabaseConnectionData, database_id: u64) -> Result<()> {
+    pub async fn update(&self, database_id: u64, data: &DatabaseConnectionData) -> Result<()> {
         let pool = create_pool(data).await?;
         sqlx::query(
             r#"
@@ -153,8 +153,14 @@ impl InventoryOptions {
     }
 
     /// Deletes an `InventoryOptions` record identified by `database_id`.
-    pub async fn delete(data: &DatabaseConnectionData, database_id: u64) -> Result<()> {
+    pub async fn delete(database_id: u64, data: &DatabaseConnectionData) -> Result<()> {
         let pool = create_pool(data).await?;
+        Self::delete_with_connection(database_id, &pool).await?;
+
+        Ok(())
+    }
+
+    pub async fn delete_with_connection(database_id: u64, pool: &MySqlPool) -> Result<()> {
         sqlx::query(
             r#"
             DELETE FROM inventory_options
@@ -162,11 +168,8 @@ impl InventoryOptions {
             "#,
         )
         .bind(database_id)
-        .execute(&pool)
+        .execute(pool)
         .await?;
-
-        print_options_db::delete_all(&pool, database_id).await?;
-
         Ok(())
     }
 }

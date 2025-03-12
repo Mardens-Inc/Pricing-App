@@ -1,6 +1,6 @@
 use crate::columns_data::InventoryColumn;
-use crate::data_database_connection::{create_pool, DatabaseConnectionData};
 use anyhow::Result;
+use database_common_lib::database_connection::{create_pool, DatabaseConnectionData};
 use sqlx::Executor;
 
 pub async fn initialize(data: &DatabaseConnectionData) -> Result<()> {

@@ -1,7 +1,7 @@
 use crate::constants::ICONS_FOLDER;
-use crate::http_error::Result;
 use actix_files::file_extension_to_mime;
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
+use database_common_lib::http_error::Result;
 use log::error;
 use serde_json::json;
 use std::ffi::OsStr;
@@ -119,9 +119,8 @@ pub async fn get_icon(path: web::Path<String>) -> Result<impl Responder> {
         .body(bytes))
 }
 
-
 #[derive(serde::Deserialize)]
-struct UploadIconOptions{
+struct UploadIconOptions {
     overwrite: Option<bool>,
 }
 

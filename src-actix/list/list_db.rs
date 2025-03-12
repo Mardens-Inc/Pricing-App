@@ -1,8 +1,7 @@
-use crate::data_database_connection::{create_pool, DatabaseConnectionData};
 use crate::list_data::LocationListItem;
 use anyhow::Result;
+use database_common_lib::database_connection::{create_pool, DatabaseConnectionData};
 use sqlx::{Executor, MySqlPool};
-use std::error::Error;
 
 pub async fn initialize(pool: &MySqlPool) -> Result<()> {
     pool.execute(
@@ -23,9 +22,7 @@ CREATE TABLE if NOT EXISTS locations
     Ok(())
 }
 
-pub async fn get_all(
-    data: &DatabaseConnectionData,
-) -> Result<Vec<LocationListItem>, Box<dyn Error>> {
+pub async fn get_all(data: &DatabaseConnectionData) -> Result<Vec<LocationListItem>> {
     let pool = create_pool(data).await?;
     let locations = sqlx::query_as::<_, LocationListItem>(
         r#"
@@ -38,10 +35,7 @@ pub async fn get_all(
     Ok(locations)
 }
 
-pub async fn single(
-    id: u64,
-    data: &DatabaseConnectionData,
-) -> Result<LocationListItem, Box<dyn Error>> {
+pub async fn single(id: u64, data: &DatabaseConnectionData) -> Result<LocationListItem> {
     let pool = create_pool(data).await?;
     let location =
         sqlx::query_as::<_, LocationListItem>(r#"SELECT * FROM locations WHERE id = ? limit 1"#)
@@ -52,10 +46,7 @@ pub async fn single(
     Ok(location)
 }
 
-pub async fn insert(
-    location: &LocationListItem,
-    data: &DatabaseConnectionData,
-) -> Result<() , Box<dyn Error>> {
+pub async fn insert(location: &LocationListItem, data: &DatabaseConnectionData) -> Result<()> {
     let pool = create_pool(data).await?;
     sqlx::query(
         r#"
@@ -73,7 +64,10 @@ pub async fn insert(
 }
 
 pub async fn delete(id: u64, data: &DatabaseConnectionData) -> Result<()> {
-    let pool = create_pool(data).await?;
+    delete_with_connection(id, &create_pool(data).await?).await
+}
+
+pub async fn delete_with_connection(id: u64, pool: &MySqlPool) -> Result<()> {
     sqlx::query(
         r#"
 		DELETE FROM locations
@@ -81,7 +75,7 @@ pub async fn delete(id: u64, data: &DatabaseConnectionData) -> Result<()> {
 		"#,
     )
     .bind(id)
-    .execute(&pool)
+    .execute(pool)
     .await?;
     Ok(())
 }

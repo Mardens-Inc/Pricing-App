@@ -1,15 +1,16 @@
-use crate::data_database_connection::DatabaseConnectionData;
-use crate::{list_data, list_db};
+use crate::options_data::InventoryOptions;
+use crate::{inventory_db, list_data, list_db, print_options_db};
 use actix_web::{delete, get, patch, post, web, HttpResponse, Responder};
 use crypto::hashids::decode_single;
 use serde_json::json;
-use std::error::Error;
 use std::sync::Arc;
+use database_common_lib::database_connection::{create_pool, DatabaseConnectionData};
+use database_common_lib::http_error::Result;
 
 #[get("/")]
 pub async fn get_all_locations(
     data: web::Data<Arc<DatabaseConnectionData>>,
-) -> Result<impl Responder, Box<dyn Error>> {
+) -> Result<impl Responder> {
     let data = data.get_ref().as_ref();
     let locations = list_db::get_all(data).await?;
     Ok(HttpResponse::Ok().json(locations))
@@ -19,7 +20,7 @@ pub async fn get_all_locations(
 pub async fn get_location(
     id: web::Path<String>,
     data: web::Data<Arc<DatabaseConnectionData>>,
-) -> Result<impl Responder, Box<dyn Error>> {
+) -> Result<impl Responder> {
     let data = data.get_ref().as_ref();
     let id = id.as_ref();
     let id = decode_single(id)?;
@@ -33,7 +34,7 @@ pub async fn update_location(
     id: web::Path<String>,
     data: web::Data<Arc<DatabaseConnectionData>>,
     body: web::Json<list_data::LocationListItem>,
-) -> Result<impl Responder, Box<dyn Error>> {
+) -> Result<impl Responder> {
     let data = data.get_ref().as_ref();
     let id = id.as_ref();
     let id = decode_single(id)?;
@@ -45,7 +46,7 @@ pub async fn update_location(
 pub async fn create_location(
     data: web::Data<Arc<DatabaseConnectionData>>,
     body: web::Json<list_data::LocationListItem>,
-) -> Result<impl Responder, Box<dyn Error>> {
+) -> Result<impl Responder> {
     let data = data.get_ref().as_ref();
     list_db::insert(&body, data).await?;
     Ok(HttpResponse::Ok().finish())
@@ -55,16 +56,24 @@ pub async fn create_location(
 pub async fn delete_location(
     data: web::Data<Arc<DatabaseConnectionData>>,
     id: web::Path<String>,
-) -> Result<impl Responder, Box<dyn Error>> {
+) -> Result<impl Responder> {
     let data = data.get_ref().as_ref();
     let id = id.as_ref();
     let id = decode_single(id)?;
 
+    let pool = create_pool(data).await?;
+
     // Delete from the locations list
-    list_db::delete(id, data).await?;
+    list_db::delete_with_connection(id, &pool).await?;
 
     // Delete the database table
-    // TODO: Implement this
+    inventory_db::delete_with_connection(id, &pool).await?;
+
+    // Delete the inventory options items
+    InventoryOptions::delete_with_connection(id, &pool).await?;
+
+    // Delete the print options
+    print_options_db::delete_all_with_connection(id, &pool).await?;
 
     Ok(HttpResponse::Ok().finish())
 }
