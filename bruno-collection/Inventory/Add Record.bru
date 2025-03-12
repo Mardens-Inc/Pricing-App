@@ -1,0 +1,25 @@
+meta {
+  name: Add Record
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/inventory/:id/
+  body: json
+  auth: none
+}
+
+params:path {
+  id: aXJd0BwRJwG8z1WQ
+}
+
+body:json {
+  {
+    "PRODALTKEY": "999999999999",
+    "PRODDESC": "Remove Me... Please for the love of god, remove me.",
+    "Retail": "49.99",
+    "MP": "8.99",
+    "Quantity": "50"
+  }
+}
