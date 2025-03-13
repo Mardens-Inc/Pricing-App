@@ -1,8 +1,7 @@
-import {Button, ButtonGroup, cn, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader} from "@heroui/react";
+import {addToast, Button, ButtonGroup, cn, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader} from "@heroui/react";
 import Location, {InventoryRecord} from "../../ts/data/Location.ts";
 import {useDatabaseView} from "../../providers/DatabaseViewProvider.tsx";
 import {useEffect, useState} from "react";
-import {useToast} from "../../providers/ToastProvider.tsx";
 import Column from "../../ts/data/Column.ts";
 import ExtendedSwitch from "../Extends/ExtendedSwitch.tsx";
 import {Icon} from "@iconify/react";
@@ -20,7 +19,6 @@ export default function NewRecordModal(props: NewRecordProperties)
     const [columns, setColumns] = useState<Column[]>([]);
     const [showInvisible, setShowInvisible] = useState(false);
     const [loading, setLoading] = useState(false);
-    const {toast} = useToast();
     const [database, setDatabase] = useState<Location | undefined>(undefined);
     // Track modified fields
     const [modifiedFields, setModifiedFields] = useState<Record<string, any>>({});
@@ -34,10 +32,10 @@ export default function NewRecordModal(props: NewRecordProperties)
             {
                 props.onClose(inventory);
                 console.error("Database not found");
-                toast({
+                addToast({
                     title: "Database not found",
                     description: "Please create a database first",
-                    type: "error"
+                    color: "danger"
                 });
                 return;
             }
@@ -71,7 +69,7 @@ export default function NewRecordModal(props: NewRecordProperties)
         setLoading(true);
         try
         {
-            let success = false;
+            let success: boolean;
 
             if (props.editRecord && "id" in props.editRecord)
             {
@@ -79,10 +77,9 @@ export default function NewRecordModal(props: NewRecordProperties)
                 success = await database.editRecord(props.editRecord.id, modifiedFields);
                 if (success)
                 {
-                    toast({
+                    addToast({
                         title: "Record updated",
-                        description: "The record has been successfully updated",
-                        type: "success"
+                        description: "The record has been successfully updated"
                     });
                 }
             } else
@@ -99,10 +96,9 @@ export default function NewRecordModal(props: NewRecordProperties)
                         setInventory(prev => prev ? {...prev, id: recordId.toString()} : prev);
                     }
 
-                    toast({
+                    addToast({
                         title: "Record created",
-                        description: "The new record has been successfully added",
-                        type: "success"
+                        description: "The new record has been successfully added"
                     });
                 }
             }
@@ -112,19 +108,19 @@ export default function NewRecordModal(props: NewRecordProperties)
                 props.onClose(inventory);
             } else
             {
-                toast({
+                addToast({
                     title: "Error",
                     description: "Failed to save the record",
-                    type: "error"
+                    color: "danger"
                 });
             }
         } catch (error)
         {
             console.error("Error saving record:", error);
-            toast({
+            addToast({
                 title: "Error",
                 description: "An unexpected error occurred",
-                type: "error"
+                color: "danger"
             });
         } finally
         {
