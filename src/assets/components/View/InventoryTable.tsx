@@ -1,5 +1,5 @@
-import {useEffect, useMemo, useState} from "react";
-import {Button, cn, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, getKeyValue, SortDescriptor, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from "@heroui/react";
+import {Dispatch, SetStateAction, useEffect, useMemo, useState} from "react";
+import {addToast, Button, cn, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, getKeyValue, SortDescriptor, Spinner, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from "@heroui/react";
 import {useSearch} from "../../providers/SearchProvider";
 import {useNavigate, useParams} from "react-router-dom";
 import PrintButton from "./TableComponents/PrintButton";
@@ -15,6 +15,8 @@ interface InventoryTableProps
 {
     onItemSelected: (id: string | null) => void;
     options: Options;
+    shouldRefresh: boolean;
+    setShouldRefresh: Dispatch<SetStateAction<boolean>>;
 }
 
 export type RowValue = {
@@ -37,7 +39,7 @@ export default function InventoryTable(props: InventoryTableProps)
     const [isLoading, setIsLoading] = useState(true);
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
         column: "last_modified_date",
-        direction: "ascending"
+        direction: "descending"
     });
 
     const {edit} = useNewRecordModal();
@@ -116,7 +118,7 @@ export default function InventoryTable(props: InventoryTableProps)
             // Abort the fetch on component unmount or dependency change
             abortController.abort();
         };
-    }, [search, location, sortDescriptor, isLoggedIn]);
+    }, [search, location, sortDescriptor, isLoggedIn, props.shouldRefresh]);
 
     useEffect(() =>
     {
@@ -133,6 +135,11 @@ export default function InventoryTable(props: InventoryTableProps)
             }
         }
     }, [items]);
+
+    const refresh = () =>
+    {
+        props.setShouldRefresh(prev => !prev);
+    };
 
 
     // Memoized Table Rows
@@ -157,7 +164,11 @@ export default function InventoryTable(props: InventoryTableProps)
                                     column.attributes.includes("mp")
                                 )
                                 {
-                                    value = `$${(+value.replace(/[^0-9.]/g, "")).toFixed(2)}`;
+                                    value = `${(+value.replace(/[^0-9.]/g, "")).toLocaleString("en-US", {
+                                        style: "currency",
+                                        currency: "USD"
+                                    })
+                                    }`;
                                 }
                             }
 
@@ -195,10 +206,23 @@ export default function InventoryTable(props: InventoryTableProps)
                                                     const column = c as string;
                                                     const new_record = item[column];
                                                     const old_record = row[column];
+                                                    const columnItem = columns.find(i => i.name == column);
                                                     const columnElement = $(`#${row.id}-${column.replace(/\s/g, "").toLowerCase()}`);
                                                     if (columnElement.length > 0 && new_record !== old_record)
                                                     {
-                                                        columnElement.html(`<span>${new_record}</span>`);
+                                                        let value = new_record;
+                                                        if (columnItem)
+                                                        {
+                                                            let isCurrency = columnItem.attributes.includes("mp") || columnItem.attributes.includes("price");
+                                                            if (isCurrency)
+                                                            {
+                                                                value = (+value.replace(/[^0-9.]/g, "")).toLocaleString("en-US", {
+                                                                    style: "currency",
+                                                                    currency: "USD"
+                                                                });
+                                                            }
+                                                        }
+                                                        columnElement.html(`<span>${value}</span>`);
                                                     }
                                                 }
                                             });
@@ -247,7 +271,31 @@ export default function InventoryTable(props: InventoryTableProps)
 
                                         </DropdownSection>
                                         <DropdownSection title={"danger zone"} className={"text-danger"} key={"danger-zone"}>
-                                            <DropdownItem key={`delete-${id}-${row.id}`} endContent={<Icon icon="mage:trash-3-fill"/>} color={"danger"}>
+                                            <DropdownItem
+                                                key={`delete-${id}-${row.id}`}
+                                                endContent={<Icon icon="mage:trash-3-fill"/>}
+                                                color={"danger"}
+                                                onPress={async () =>
+                                                {
+                                                    const success = await location?.deleteRecord(row.id);
+                                                    if (success)
+                                                    {
+                                                        addToast({
+                                                            title: "Record deleted!",
+                                                            description: "The record was successfully deleted!"
+                                                        });
+                                                        refresh();
+                                                    } else
+                                                    {
+                                                        console.error("Failed to delete record", row);
+                                                        addToast({
+                                                            title: "Error",
+                                                            description: "Failed to delete record, see logs for more details or contact your administrator",
+                                                            color: "danger"
+                                                        });
+                                                    }
+                                                }}
+                                            >
                                                 Delete Record
                                             </DropdownItem>
                                         </DropdownSection>
