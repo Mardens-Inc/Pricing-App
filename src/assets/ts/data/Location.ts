@@ -156,10 +156,13 @@ export default class Location
         }
     }
 
-    async addRecord(record: InventoryRecord): Promise<number | null>
+    async addRecord(record: InventoryRecord): Promise<boolean>
     {
         try
         {
+            delete record["id"];
+            delete record["date"];
+            delete record["last_modified_date"];
             const result = await $.ajax({
                 url: `/api/inventory/${this.id}/`,
                 method: "POST",
@@ -168,12 +171,12 @@ export default class Location
             });
 
             // Return the first ID from the inserted IDs array
-            return result.ids && result.ids.length > 0 ? result.ids[0] : null;
+            return result.status === 201;
         } catch (e)
         {
             console.error("Failed to add record", e);
-            return null;
         }
+        return false;
     }
 
     async editRecord(recordId: string, updates: Record<string, any>): Promise<boolean>
@@ -193,16 +196,19 @@ export default class Location
         }
     }
 
-    async deleteRecord(recordId: string): Promise<boolean> {
-        try {
+    async deleteRecord(recordId: string): Promise<boolean>
+    {
+        try
+        {
             await $.ajax(`/api/inventory/${this.id}/${recordId}`, {
                 method: "DELETE"
             });
             return true;
-        } catch (e) {
+        } catch (e)
+        {
             console.error("Failed to delete record", e);
-            return false;
         }
+        return false;
     }
 
     async single(recordId: string): Promise<InventoryRecord | undefined>
