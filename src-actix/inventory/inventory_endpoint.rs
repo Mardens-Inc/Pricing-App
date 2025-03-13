@@ -7,7 +7,6 @@ use database_common_lib::http_error::Result;
 use serde_json::json;
 use std::ops::Deref;
 use std::sync::Arc;
-use anyhow::anyhow;
 
 #[get("/")]
 pub async fn get_inventory(
@@ -121,21 +120,13 @@ pub async fn delete_record(
     path: web::Path<(String, u64)>,
     data: web::Data<Arc<DatabaseConnectionData>>,
 ) -> Result<impl Responder> {
-    let (id_str, record_id) = path.into_inner();
-    let id = id_str.parse::<u64>()
-                   .map_err(|_| anyhow!("Invalid inventory ID format"))?;
-
-    // Check if the record exists before attempting to delete
-    let record = inventory_db::get_record(id, record_id, &data).await?;
-
-    if record.is_none() {
-        return Ok(HttpResponse::NotFound().finish());
-    }
+    let (id, record_id) = path.into_inner();
+    let id = decode_single(&id)?;
 
     // Delete the record
     inventory_db::delete_record(id, record_id, &data).await?;
 
-    Ok(HttpResponse::NoContent().finish())
+    Ok(HttpResponse::Ok().finish())
 }
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
