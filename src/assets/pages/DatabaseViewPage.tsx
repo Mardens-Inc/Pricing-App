@@ -17,6 +17,7 @@ export default function DatabaseViewPage()
 {
     const id = useParams().id;
     const navigate = useNavigate();
+    const [shouldRefresh, setShouldRefresh] = useState(false);
     const [location, setLocation] = useState<Location | null | undefined>(null);
     const [options, setOptions] = useState<Options | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -30,6 +31,12 @@ export default function DatabaseViewPage()
         navigate("/");
         return <></>;
     }
+
+
+    const refresh = () =>
+    {
+        setShouldRefresh(prev => !prev);
+    };
 
 
     setTitle(location?.name || "Database");
@@ -81,9 +88,9 @@ export default function DatabaseViewPage()
                                                 startContent={<Icon icon="mage:plus"/>}
                                                 onPress={() =>
                                                 {
-                                                    create(record =>
+                                                    create(() =>
                                                     {
-                                                        console.log(record);
+                                                        refresh();
                                                     });
                                                 }}
                                             >
@@ -96,7 +103,7 @@ export default function DatabaseViewPage()
                             <div className={"flex flex-row"}>
 
                                 {options &&
-                                    <InventoryTable onItemSelected={console.log} options={options}/>
+                                    <InventoryTable onItemSelected={console.log} options={options} shouldRefresh={shouldRefresh} setShouldRefresh={setShouldRefresh}/>
                                 }
                             </div>
                         </div>
