@@ -12,19 +12,16 @@ import DatabaseOptionsPage from "./assets/pages/DatabaseOptionsPage.tsx";
 import DatabaseViewPage from "./assets/pages/DatabaseViewPage.tsx";
 import {SearchProvider} from "./assets/providers/SearchProvider.tsx";
 import {DatabaseViewProvider} from "./assets/providers/DatabaseViewProvider.tsx";
-import {HeroUIProvider} from "@heroui/react";
-import {ToastProvider} from "./assets/providers/ToastProvider.tsx";
+import {HeroUIProvider, ToastProvider} from "@heroui/react";
 import {NewRecordModalProvider} from "./assets/providers/NewRecordModalProvider.tsx";
 
 export const isProduction = window.location.hostname === "pricing-new.mardens.com";
-export const baseUrl = "https://pricing-new.mardens.com";//isProduction ? "" : "http://pricing.local";
 
 export const setTitle = (title?: string) => document.title = `${title ? `${title} - ` : ""}New Pricing Database`;
 
 ReactDOM.createRoot($("#root")[0]!).render(
     <React.StrictMode>
         <BrowserRouter>
-            <ToastProvider>
                 <AuthProvider>
                     <SearchProvider>
                         <DatabaseViewProvider>
@@ -34,7 +31,6 @@ ReactDOM.createRoot($("#root")[0]!).render(
                         </DatabaseViewProvider>
                     </SearchProvider>
                 </AuthProvider>
-            </ToastProvider>
         </BrowserRouter>
     </React.StrictMode>
 );
@@ -45,6 +41,7 @@ export function MainContentRenderer()
     const navigate = useNavigate();
     return (
         <HeroUIProvider navigate={navigate}>
+            <ToastProvider />
             <Navigation/>
             <Routes>
                 <Route path="/" element={<DatabaseListPage/>}/>
