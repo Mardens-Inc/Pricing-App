@@ -38,7 +38,7 @@ export default function CanPrintLabel()
 
                         >
                             {Departments.map((department) => (
-                                <SelectItem key={department.id} value={department.id} description={`Department ${department.id}`}>{department.name}</SelectItem>
+                                <SelectItem key={department.id} textValue={department.id.toString()} description={`Department ${department.id}`}>{department.name}</SelectItem>
                             ))}
                         </Select>
 
@@ -51,7 +51,7 @@ export default function CanPrintLabel()
                             onSelectionChange={(e) => setLabel([...e][0] as string)}
                         >
                             {PrintLabels.map((label) => (
-                                <SelectItem key={label} value={label}>{label}</SelectItem>
+                                <SelectItem key={label} textValue={label}>{label}</SelectItem>
                             ))}
                         </Select>
                     </div>
@@ -67,7 +67,7 @@ export default function CanPrintLabel()
 
                         >
                             {PrintLabelColors.map((color) => (
-                                <SelectItem key={color} value={color}>{color}</SelectItem>
+                                <SelectItem key={color} textValue={color}>{color}</SelectItem>
                             ))}
                         </Select>
 
@@ -93,7 +93,7 @@ export default function CanPrintLabel()
 
                         >
                             {PrintLabelSize.map((size) => (
-                                <SelectItem key={size.name} value={size.name}>{size.name} ({size.width} x {size.height})</SelectItem>
+                                <SelectItem key={size.name} textValue={size.name}>{size.name} ({size.width} x {size.height})</SelectItem>
                             ))}
                         </Select>
 

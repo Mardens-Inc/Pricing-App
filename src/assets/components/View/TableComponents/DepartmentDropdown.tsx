@@ -52,7 +52,6 @@ export const DepartmentDropdown = memo(function DepartmentDropdown({id}: { id: s
                 [...[
                     <SelectItem
                         key={"-1"}
-                        value={"None"}
                         textValue={"None"}
                     >
                         None
@@ -61,7 +60,6 @@ export const DepartmentDropdown = memo(function DepartmentDropdown({id}: { id: s
                     dept =>
                         <SelectItem
                             key={dept.id.toString()}
-                            value={dept.name}
                             textValue={dept.name}
                         >
                             {dept.id} - {dept.name}

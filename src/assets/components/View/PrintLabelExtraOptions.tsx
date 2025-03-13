@@ -72,7 +72,7 @@ export default function PrintLabelExtraOptions(props: PrintLabelExtraOptionsProp
                     {
                         PrintLabelColors.map(
                             (color) => (
-                                <SelectItem key={color} textValue={color} value={color}>{color}</SelectItem>
+                                <SelectItem key={color} textValue={color}>{color}</SelectItem>
                             )
                         )
                     }
