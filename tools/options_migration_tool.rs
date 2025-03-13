@@ -1,6 +1,5 @@
 use anyhow::Result;
 use log::*;
-use pricing_app_lib::data_database_connection::DatabaseConnectionData;
 use pricing_app_lib::options_data::{InventoryOptions, Inventorying};
 use pricing_app_lib::{options_db, print_options_data};
 use serde::de::{Error, Visitor};
@@ -9,6 +8,7 @@ use serde_derive::Deserialize;
 use sqlx::{MySqlPool, Row};
 use std::collections::HashMap;
 use std::fmt;
+use database_common_lib::database_connection::{create_pool, DatabaseConnectionData};
 
 #[derive(Deserialize)]
 struct OldOptions {
@@ -155,7 +155,7 @@ async fn main() -> Result<()> {
             show_color_dropdown: option.print_form.show_color_dropdown.unwrap_or(false),
             show_department_dropdown: false,
         };
-        new_option.insert(&data, id).await?;
+        new_option.insert(id, &data).await?;
     }
 
     pool.close().await;
@@ -206,27 +206,6 @@ async fn get_location_options(pool: &MySqlPool) -> Result<HashMap<u64, OldOption
 
     info!("Done processing old options!");
     Ok(map)
-}
-
-/// Creates a MySQL connection pool for the specified database connection data.
-///
-/// # Arguments
-/// - `data` - The database connection data.
-///
-/// # Returns
-/// - `Ok(MySqlPool)` containing the database connection pool.
-/// - `Err(Box<dyn Error>)` if an error occurs.
-async fn create_pool(data: &DatabaseConnectionData) -> Result<MySqlPool> {
-    debug!("Creating MySQL production connection");
-
-    // Construct a formatted connection string and connect to the database.
-    let pool = MySqlPool::connect(&format!(
-        "mysql://{}:{}@{}/pricing",
-        data.user, data.password, data.host
-    ))
-    .await?;
-
-    Ok(pool)
 }
 
 fn deserialize_year<'de, D>(deserializer: D) -> Result<Option<u8>, D::Error>

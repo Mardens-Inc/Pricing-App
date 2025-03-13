@@ -1,8 +1,8 @@
-use log::{debug, info};
-use pricing_app_lib::data_database_connection::DatabaseConnectionData;
+use database_common_lib::database_connection::{create_pool, DatabaseConnectionData};
+use log::*;
 use serde_json::Value;
 use sqlx::MySqlPool;
-use std::error::Error;
+use anyhow::Result;
 
 #[derive(Debug)]
 struct HashIdMap {
@@ -30,7 +30,7 @@ struct HashIdMap {
 /// # Panics:
 /// This function does not handle panics explicitly, but will propagate any unexpected runtime errors.
 ///
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<()> {
     // Set the log level to "info" to control logging verbosity.
     std::env::set_var("RUST_LOG", "info");
 
@@ -84,36 +84,4 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Log the successful completion of the process.
     info!("Done!");
     Ok(())
-}
-
-/// Establishes a connection pool to the MySQL database using the provided connection data.
-///
-/// # Parameters:
-/// * `data`: A `DatabaseConnectionData` struct containing the database connection details:
-///   - `host`: Hostname of the database server.
-///   - `user`: Username for the database.
-///   - `password`: Password for the database.
-///
-/// # Returns:
-/// * Returns a `MySqlPool` object representing the connection pool on success.
-/// * Returns an `Err(Box<dyn Error>)` if the connection fails.
-///
-/// # Errors:
-/// * Fails if the database connection string is malformed.
-/// * Fails if the connection parameters are invalid or the server is unreachable.
-///
-/// # Logging:
-/// * Logs a debug message upon creating a connection.
-async fn create_pool(data: &DatabaseConnectionData) -> Result<MySqlPool, Box<dyn Error>> {
-    debug!("Creating MySQL production connection");
-
-    // Format the connection string and attempt to connect to the database.
-    let pool = MySqlPool::connect(&format!(
-        "mysql://{}:{}@{}/pricing",
-        data.user, data.password, data.host
-    ))
-    .await?;
-
-    // Return the connection pool.
-    Ok(pool)
 }
