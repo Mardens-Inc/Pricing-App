@@ -5,16 +5,16 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/inventory/:id/?limit=1
+  url: {{baseUrl}}/inventory/:id/?limit=1&sort_by=last_modified_date&sort_order=DESC
   body: none
   auth: none
 }
 
 params:query {
   limit: 1
+  sort_by: last_modified_date
+  sort_order: DESC
   ~offset: 0
-  ~sort_by: last_modified_date
-  ~sort_order: DESC
   ~query: 631444011170
   ~query_columns: Material,Description
 }
