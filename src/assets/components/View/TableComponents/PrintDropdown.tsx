@@ -4,7 +4,6 @@ import {Icon} from "@iconify/react";
 import Column from "../../../ts/data/Column.ts";
 import {PrintForm} from "../../../ts/data/Options.ts";
 import {OpenPrintWindow} from "../../../ts/printer.ts";
-import $ from "jquery";
 
 export interface PrintDropdownProps
 {
@@ -52,7 +51,7 @@ export default function PrintDropdown(props: PrintDropdownProps)
                         onPressStart={e => e.continuePropagation()}
                         onPress={() =>
                         {
-                            OpenPrintWindow(props.databaseId, rowData, form, +($(`tr#${props.row.id}`).attr("data-department") ?? -1), mp);
+                            OpenPrintWindow(props.databaseId, rowData, form);
                         }}
                     >
                         <div className={"flex flex-row items-center border-b-1 border-white/10"}>
